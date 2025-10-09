@@ -5,3 +5,4 @@ __pycache__/
 client/.dev.vars
 supabase/.env
 .cloudflare.secrets
+data-scraper/data/sentences.embeddings.npy
