@@ -15,6 +15,10 @@ import numpy as np
 import pandas as pd
 import torch
 from FlagEmbedding import BGEM3FlagModel
+try:
+    from scipy.stats import norm as _scipy_norm
+except ImportError:
+    _scipy_norm = None
 
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent / "data"
 DEFAULT_META_PATH = DEFAULT_DATA_DIR / "courses.meta.parquet"
@@ -35,6 +39,19 @@ DEFAULT_ALPHA = 0.60
 DEFAULT_TOPK_HITS = 5
 DEFAULT_HIT_THRESHOLD = 0.5
 IGNORED_ASPECTS = {"entrepreneurship_relevance"}
+MIN_STD = 1e-6
+Z_CDF_CLIP = 3.0
+_ERF_VECTOR = None
+if _scipy_norm is None:
+    _ERF_VECTOR = np.vectorize(math.erf, otypes=[float])
+
+
+def _gaussian_cdf_from_z(z: np.ndarray) -> np.ndarray:
+    clipped = np.clip(z, -Z_CDF_CLIP, Z_CDF_CLIP)
+    if _scipy_norm is not None:
+        return _scipy_norm.cdf(clipped)
+    scaled = clipped / math.sqrt(2.0)
+    return 0.5 * (1.0 + _ERF_VECTOR(scaled))
 
 
 @dataclass(frozen=True)
@@ -531,16 +548,14 @@ def main(argv: Iterable[str] | None = None) -> int:
         for column in ("coverage", "quality", "score"):
             col = df[column]
             mu = col.mean()
-            sd = col.std(ddof=0)
+            sd = float(col.std(ddof=0))
             if pd.isna(mu) or pd.isna(sd):
                 continue
-            if sd == 0 or np.isclose(sd, 0.0):
+            if sd < MIN_STD or np.isclose(sd, 0.0):
                 df[column] = 0.5
             else:
                 z = (col - mu) / sd
-                scaled = z.to_numpy(dtype=np.float64) / math.sqrt(2.0)
-                cdf = 0.5 * (1.0 + np.vectorize(math.erf, otypes=[float])(scaled))
-                df[column] = cdf
+                df[column] = _gaussian_cdf_from_z(z.to_numpy(dtype=np.float64))
     _ensure_parent(args.output_path)
     df.to_parquet(args.output_path, index=False)
     print(f"[done] Wrote per-aspect scores to {args.output_path}")

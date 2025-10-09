@@ -274,12 +274,16 @@ with normalized_programs as (
     (l.label || ' ' || p.name) as label,
     l.label as level_code,
     case
-      when l.label ~ '[0-9]' then (
+      when l.semester is not null then
         case
-          when mod((regexp_replace(l.label, '\\D', '', 'g'))::int, 2) = 0 then 'summer'
+          when mod(l.semester, 2) = 0 then 'summer'
           else 'winter'
         end
-      )
+      when l.label ~ '[0-9]' then
+        case
+          when mod((substring(l.label from '[0-9]+'))::int, 2) = 0 then 'summer'
+          else 'winter'
+        end
       when position('spring' in lower(l.label)) > 0 then 'summer'
       when position('autumn' in lower(l.label)) > 0 or position('fall' in lower(l.label)) > 0 then 'winter'
       else null
@@ -376,6 +380,9 @@ left join (
 left join program_agg on program_agg.course_id = c.id
 left join level_agg   on level_agg.course_id = c.id
 left join semester_agg on semester_agg.course_id = c.id;
+
+alter table if exists public.course_ratings
+  add column if not exists score_revelance numeric(6,5);
 
 -- Grant read on view to anon (keep base tables private)
 do $$ begin

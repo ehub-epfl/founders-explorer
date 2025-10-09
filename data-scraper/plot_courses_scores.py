@@ -1,9 +1,4 @@
-"""Generate histograms for course aspect scores stored in the CSV output of
-``compute_courses_scores.py``.
-
-Run with ``python plot_course_scores.py`` to produce one ``.png`` per score column
-under ``data/plots`` (created if missing).
-"""
+"""Plot coverage/quality/score histograms from Stage B parquet output."""
 
 from __future__ import annotations
 
@@ -14,7 +9,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-plt.style.use("seaborn-v0_8")  # pleasant defaults without extra deps
+plt.style.use("seaborn-v0_8")
 plt.rcParams.update({
     "figure.facecolor": "white",
     "axes.facecolor": "#f5f5f5",
@@ -22,18 +17,10 @@ plt.rcParams.update({
     "axes.titleweight": "bold",
 })
 
-CSV_PATH = os.path.join(os.path.dirname(__file__), "data", "courses_scores.csv")
-OUTPUT_DIR = os.path.join(os.path.dirname(CSV_PATH), "plots")
-SCORE_COLUMNS: List[str] = [
-    "score_skills_cos",
-    "score_skills_sigmoid",
-    "score_product_cos",
-    "score_product_sigmoid",
-    "score_venture_cos",
-    "score_venture_sigmoid",
-    "score_foundations_cos",
-    "score_foundations_sigmoid"
-]
+PARQUET_PATH = os.path.join(os.path.dirname(__file__), "data", "courses_scores.parquet")
+OUTPUT_DIR = os.path.join(os.path.dirname(PARQUET_PATH), "plots")
+REQUIRED_COLUMNS: List[str] = ["aspect", "coverage", "quality", "score"]
+METRICS: List[str] = ["coverage", "quality", "score"]
 BINS = 40
 BAR_COLOR = "#3C6997"
 MEAN_COLOR = "#D45087"
@@ -44,14 +31,14 @@ def _ensure_columns(df: pd.DataFrame, columns: Iterable[str]) -> List[str]:
     missing = [col for col in columns if col not in df.columns]
     if missing:
         joined = ", ".join(missing)
-        raise SystemExit(f"Missing column(s) in CSV: {joined}")
+        raise SystemExit(f"Missing column(s) in parquet: {joined}")
     return list(columns)
 
 
 def _plot_hist(series: pd.Series, title: str, out_path: str, bins: int) -> None:
     data = series.dropna().values.astype(float)
     if data.size == 0:
-        print(f"[warn] Column '{series.name}' has no numeric data after dropping NaNs; skipping")
+        print(f"[warn] Series '{series.name}' has no numeric data after dropping NaNs; skipping")
         return
 
     mean_val = float(np.mean(data))
@@ -67,11 +54,7 @@ def _plot_hist(series: pd.Series, title: str, out_path: str, bins: int) -> None:
     ax.set_xlabel(series.name)
     ax.set_ylabel("Course count")
 
-    stats_text = (
-        f"n={data.size}\n"
-        f"μ={mean_val:.3f}\n"
-        f"σ={std_val:.3f}"
-    )
+    stats_text = f"n={data.size}\nμ={mean_val:.3f}\nσ={std_val:.3f}"
     ax.text(
         0.98,
         0.95,
@@ -95,18 +78,27 @@ def _plot_hist(series: pd.Series, title: str, out_path: str, bins: int) -> None:
 
 
 def main() -> None:
-    csv_path = os.path.realpath(CSV_PATH)
-    if not os.path.exists(csv_path):
-        raise SystemExit(f"CSV file not found: {csv_path}")
+    parquet_path = os.path.realpath(PARQUET_PATH)
+    if not os.path.exists(parquet_path):
+        raise SystemExit(f"Parquet file not found: {parquet_path}")
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    df = pd.read_csv(csv_path)
-    columns = _ensure_columns(df, SCORE_COLUMNS)
+    df = pd.read_parquet(parquet_path)
+    _ensure_columns(df, REQUIRED_COLUMNS)
 
-    for col in columns:
-        out_path = os.path.join(OUTPUT_DIR, f"{col}.png")
-        _plot_hist(df[col], title=f"Distribution of {col}", out_path=out_path, bins=BINS)
+    aspects = sorted(df["aspect"].dropna().unique())
+    if not aspects:
+        raise SystemExit("No aspect values found in parquet.")
+
+    for aspect in aspects:
+        subset = df[df["aspect"] == aspect]
+        if subset.empty:
+            continue
+        for metric in METRICS:
+            out_path = os.path.join(OUTPUT_DIR, f"{aspect}_{metric}.png")
+            title = f"{aspect}: distribution of {metric}"
+            _plot_hist(subset[metric], title=title, out_path=out_path, bins=BINS)
 
 
 if __name__ == "__main__":
