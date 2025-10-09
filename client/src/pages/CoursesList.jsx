@@ -1,7 +1,7 @@
 // src/pages/CoursesList.jsx
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getCourses } from "../api/courses_api";
+import { getCourses, getLevelsByDegree } from "../api/courses_api";
 import submitCourseRating from "../api/submit_rating";
 import {
   MA_PROJECT_LEVELS,
@@ -13,13 +13,18 @@ import {
 const GRID_MIN_WIDTH = 220; // px
 
 const SCORE_FIELDS = [
+  { key: 'max_score_relevance_sigmoid', label: 'Relevance to Entrepreneurship' },
   { key: 'max_score_skills_sigmoid', label: 'Skills' },
   { key: 'max_score_product_sigmoid', label: 'Product' },
   { key: 'max_score_venture_sigmoid', label: 'Venture' },
   { key: 'max_score_foundations_sigmoid', label: 'Foundations' },
 ];
 
+const SCORE_STEP_VALUES = Object.freeze([0, 0.25, 0.5, 0.75, 1]);
+const SCORE_STEP_SIZE = SCORE_STEP_VALUES.length > 1 ? SCORE_STEP_VALUES[1] - SCORE_STEP_VALUES[0] : 1;
+
 const MIN_SCORE_SLIDERS = [
+  { key: 'minRelevance', label: 'Relevance to Entrepreneurship' },
   { key: 'minSkills', label: 'Skills' },
   { key: 'minProduct', label: 'Product' },
   { key: 'minVenture', label: 'Venture' },
@@ -30,6 +35,65 @@ const TAG_COLORS = [
   '#2563eb', '#059669', '#f97316', '#a855f7', '#ec4899',
   '#14b8a6', '#facc15', '#ef4444', '#6366f1', '#10b981',
 ];
+
+const THEME_VARS = Object.freeze({
+  surface: 'var(--color-surface)',
+  surfaceMuted: 'var(--color-surface-muted)',
+  surfaceActive: 'var(--color-surface-active)',
+  border: 'var(--color-border)',
+  borderSubtle: 'var(--color-border-subtle)',
+  text: 'var(--color-text)',
+  textMuted: 'var(--color-text-muted)',
+  primary: 'var(--color-primary)',
+  primaryContrast: 'var(--color-primary-contrast)',
+  disabledBg: 'var(--color-disabled-bg)',
+  disabledText: 'var(--color-disabled-text)',
+  success: 'var(--color-success)',
+  successBg: 'var(--color-success-bg)',
+  warning: 'var(--color-warning)',
+  warningBg: 'var(--color-warning-bg)',
+  danger: 'var(--color-danger)',
+  dangerBg: 'var(--color-danger-bg)',
+});
+
+const selectFieldStyle = (disabled = false) => ({
+  width: '100%',
+  padding: '6px 8px',
+  border: `1px solid ${THEME_VARS.border}`,
+  borderRadius: 4,
+  background: disabled ? THEME_VARS.disabledBg : THEME_VARS.surface,
+  color: disabled ? THEME_VARS.disabledText : THEME_VARS.text,
+});
+
+const chipButtonStyle = (active = false) => ({
+  padding: '4px 8px',
+  border: `1px solid ${THEME_VARS.border}`,
+  borderRadius: 6,
+  background: active ? THEME_VARS.surfaceActive : THEME_VARS.surface,
+  color: THEME_VARS.text,
+  cursor: 'pointer',
+});
+
+const primaryActionStyle = (enabled = true) => ({
+  padding: '8px 12px',
+  border: `1px solid ${enabled ? THEME_VARS.primary : THEME_VARS.border}`,
+  borderRadius: 6,
+  background: enabled ? THEME_VARS.primary : THEME_VARS.disabledBg,
+  color: enabled ? THEME_VARS.primaryContrast : THEME_VARS.disabledText,
+  cursor: enabled ? 'pointer' : 'not-allowed',
+  opacity: enabled ? 1 : 0.65,
+  width: '100%',
+});
+
+const fieldLabelStyle = { fontSize: 12, marginBottom: 4, color: THEME_VARS.textMuted };
+const filterPanelStyle = {
+  width: '100%',
+  boxSizing: 'border-box',
+  padding: '0 10px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.75rem',
+};
 
 function courseKeyOf(course, fallbackIndex = 0) {
   return (
@@ -60,6 +124,32 @@ function tagTextColor(hex) {
   const b = bigint & 255;
   const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
   return luminance > 170 ? '#111' : '#fff';
+}
+
+function clampScore(value) {
+  if (!Number.isFinite(value)) return SCORE_STEP_VALUES[0];
+  const min = SCORE_STEP_VALUES[0];
+  const max = SCORE_STEP_VALUES[SCORE_STEP_VALUES.length - 1];
+  return Math.min(max, Math.max(min, value));
+}
+
+function snapToScoreStep(value) {
+  const clamped = clampScore(value);
+  const steps = SCORE_STEP_VALUES.length - 1;
+  if (steps <= 0) return clamped;
+  const index = Math.round(clamped * steps);
+  return SCORE_STEP_VALUES[index] ?? SCORE_STEP_VALUES[0];
+}
+
+function getScoreStepIndex(value) {
+  const snapped = snapToScoreStep(value);
+  const index = SCORE_STEP_VALUES.findIndex((option) => option === snapped);
+  return index >= 0 ? index : Math.round(snapped * (SCORE_STEP_VALUES.length - 1));
+}
+
+function formatScoreLevelLabel(value) {
+  const index = getScoreStepIndex(value);
+  return `Level ${index + 1}`;
 }
 
 function renderLevelTags(levels) {
@@ -125,10 +215,11 @@ const createDefaultFilters = () => ({
   semester: "",
   creditsMin: "",
   creditsMax: "",
-  minSkills: 0,
-  minProduct: 0,
-  minVenture: 0,
-  minFoundations: 0,
+  minRelevance: SCORE_STEP_VALUES[0],
+  minSkills: SCORE_STEP_VALUES[0],
+  minProduct: SCORE_STEP_VALUES[0],
+  minVenture: SCORE_STEP_VALUES[0],
+  minFoundations: SCORE_STEP_VALUES[0],
   degree: "",
   level: "",
   major: "",
@@ -164,14 +255,16 @@ function parseFiltersFromSearch(search) {
     return Number.isFinite(num) ? num : undefined;
   };
 
+  const minRelevanceParam = parseScore(sp.get('minRelevance'));
+  if (minRelevanceParam !== undefined) base.minRelevance = snapToScoreStep(minRelevanceParam);
   const minSkillsParam = parseScore(sp.get('minSkills'));
-  if (minSkillsParam !== undefined) base.minSkills = minSkillsParam;
+  if (minSkillsParam !== undefined) base.minSkills = snapToScoreStep(minSkillsParam);
   const minProductParam = parseScore(sp.get('minProduct'));
-  if (minProductParam !== undefined) base.minProduct = minProductParam;
+  if (minProductParam !== undefined) base.minProduct = snapToScoreStep(minProductParam);
   const minVentureParam = parseScore(sp.get('minVenture'));
-  if (minVentureParam !== undefined) base.minVenture = minVentureParam;
+  if (minVentureParam !== undefined) base.minVenture = snapToScoreStep(minVentureParam);
   const minFoundationsParam = parseScore(sp.get('minFoundations'));
-  if (minFoundationsParam !== undefined) base.minFoundations = minFoundationsParam;
+  if (minFoundationsParam !== undefined) base.minFoundations = snapToScoreStep(minFoundationsParam);
   return base;
 }
 
@@ -213,15 +306,72 @@ function getLevelOptions(tree, degree) {
   return result;
 }
 
+function collectMajorsFromBucket(bucket) {
+  const result = new Set();
+  if (!bucket || typeof bucket !== 'object') return result;
+  for (const value of Object.values(bucket)) {
+    if (Array.isArray(value)) {
+      for (const name of value) {
+        if (typeof name === 'string' && name.trim()) {
+          result.add(name.trim());
+        }
+      }
+    }
+  }
+  return result;
+}
+
 function getMajorOptions(tree, degree, level) {
-  if (!tree || !degree || !level) return [];
+  if (!tree || typeof tree !== 'object') return [];
+  const majors = new Set();
+
   if (degree === 'PhD') {
     const list = Array.isArray(tree.PhD?.edoc) ? tree.PhD.edoc : [];
-    return list.slice().sort();
+    for (const name of list) {
+      if (typeof name === 'string' && name.trim()) {
+        majors.add(name.trim());
+      }
+    }
+    return Array.from(majors).sort();
   }
-  const bucket = tree[degree];
-  const list = Array.isArray(bucket?.[level]) ? bucket[level] : [];
-  return list.slice().sort();
+
+  if (degree && level) {
+    const bucket = tree[degree];
+    const list = Array.isArray(bucket?.[level]) ? bucket[level] : [];
+    for (const name of list) {
+      if (typeof name === 'string' && name.trim()) {
+        majors.add(name.trim());
+      }
+    }
+    if (majors.size > 0) {
+      return Array.from(majors).sort();
+    }
+  }
+
+  if (degree) {
+    const bucket = tree[degree];
+    for (const name of collectMajorsFromBucket(bucket)) {
+      majors.add(name);
+    }
+    return Array.from(majors).sort();
+  }
+
+  for (const [deg, bucket] of Object.entries(tree)) {
+    if (deg === 'PhD') {
+      const list = Array.isArray(bucket?.edoc) ? bucket.edoc : [];
+      for (const name of list) {
+        if (typeof name === 'string' && name.trim()) {
+          majors.add(name.trim());
+        }
+      }
+    } else {
+      for (const name of collectMajorsFromBucket(bucket)) {
+        majors.add(name);
+      }
+    }
+  }
+
+  return Array.from(majors).sort();
 }
 
 function withValueOption(options, value) {
@@ -295,20 +445,36 @@ function ScoreSummary({
   onValuesChange,
 }) {
   const base = {
+    relevance: normalizeScore(course?.max_score_relevance_sigmoid),
     skills: normalizeScore(course?.max_score_skills_sigmoid),
     product: normalizeScore(course?.max_score_product_sigmoid),
     venture: normalizeScore(course?.max_score_venture_sigmoid),
     foundations: normalizeScore(course?.max_score_foundations_sigmoid),
   };
 
-  const defaultValues = useMemo(() => ({
-    skills: base.skills ?? 0,
-    product: base.product ?? 0,
-    venture: base.venture ?? 0,
-    foundations: base.foundations ?? 0,
-  }), [base.skills, base.product, base.venture, base.foundations]);
+  const snapValueOrDefault = (value) => {
+    const numeric = Number(value);
+    return snapToScoreStep(Number.isFinite(numeric) ? numeric : SCORE_STEP_VALUES[0]);
+  };
 
-  const [values, setValues] = useState(savedValues ?? defaultValues);
+  const withSnappedValues = (candidate) => ({
+    relevance: snapValueOrDefault(candidate?.relevance),
+    skills: snapValueOrDefault(candidate?.skills),
+    product: snapValueOrDefault(candidate?.product),
+    venture: snapValueOrDefault(candidate?.venture),
+    foundations: snapValueOrDefault(candidate?.foundations),
+  });
+
+  const defaultValues = useMemo(() => ({
+    relevance: snapValueOrDefault(base.relevance),
+    skills: snapValueOrDefault(base.skills),
+    product: snapValueOrDefault(base.product),
+    venture: snapValueOrDefault(base.venture),
+    foundations: snapValueOrDefault(base.foundations),
+  }), [base.relevance, base.skills, base.product, base.venture, base.foundations]);
+
+  const pendingValuesRef = useRef(null);
+  const [values, setValues] = useState(withSnappedValues(savedValues ?? defaultValues));
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(Boolean(submissionState?.submitted));
   const [submitError, setSubmitError] = useState('');
@@ -318,7 +484,7 @@ function ScoreSummary({
   }, [submissionState]);
 
   useEffect(() => {
-    const nextValues = savedValues ?? defaultValues;
+    const nextValues = withSnappedValues(savedValues ?? defaultValues);
     setValues(nextValues);
     if (!savedValues && typeof onValuesChange === 'function') {
       onValuesChange(nextValues);
@@ -326,7 +492,19 @@ function ScoreSummary({
     setSubmitError('');
   }, [course?.id, course?.course_code, defaultValues, savedValues]);
 
+  useEffect(() => {
+    if (typeof onValuesChange !== 'function') {
+      pendingValuesRef.current = null;
+      return;
+    }
+    const next = pendingValuesRef.current;
+    if (!next) return;
+    pendingValuesRef.current = null;
+    onValuesChange(next);
+  }, [values, onValuesChange]);
+
   const rows = [
+    { key: 'relevance', label: 'Relevance to Entrepreneurship', color: '#0ea5e9', base: base.relevance },
     { key: 'skills', label: 'Skills', color: '#2563eb', base: base.skills },
     { key: 'product', label: 'Product', color: '#10b981', base: base.product },
     { key: 'venture', label: 'Venture', color: '#f59e0b', base: base.venture },
@@ -334,7 +512,8 @@ function ScoreSummary({
   ];
 
   const isDark = theme === 'dark';
-  const labelColor = isDark ? 'rgba(255,255,255,0.8)' : '#374151';
+  const labelColor = isDark ? 'rgba(255,255,255,0.85)' : THEME_VARS.textMuted;
+  const tickColor = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(15,23,42,0.25)';
 
   const broadcastState = (state) => {
     if (typeof onSubmissionStateChange === 'function') {
@@ -343,10 +522,14 @@ function ScoreSummary({
   };
 
   const handleValueChange = (key, nextValue) => {
+    const snapped = snapToScoreStep(nextValue);
     setValues((prev) => {
-      const updated = { ...prev, [key]: nextValue };
+      if (prev[key] === snapped) {
+        return prev;
+      }
+      const updated = { ...prev, [key]: snapped };
       if (typeof onValuesChange === 'function') {
-        onValuesChange(updated);
+        pendingValuesRef.current = updated;
       }
       return updated;
     });
@@ -367,6 +550,7 @@ function ScoreSummary({
       await submitCourseRating({
         course_id: course?.id ?? null,
         course_code: course?.course_code ?? null,
+        score_relevance: Math.max(0, Math.min(1, values.relevance ?? 0)),
         score_skills: Math.max(0, Math.min(1, values.skills ?? 0)),
         score_product: Math.max(0, Math.min(1, values.product ?? 0)),
         score_venture: Math.max(0, Math.min(1, values.venture ?? 0)),
@@ -385,15 +569,17 @@ function ScoreSummary({
   // status button color (right side)
   const status = submitError ? 'error' : (submitting ? 'submitting' : (submitted ? 'success' : 'idle'));
   const statusStyles = {
-    idle:   { bg: '#f3f4f6', border: '#d1d5db' },  // gray-100, gray-300
-    submitting: { bg: '#fde68a', border: '#f59e0b' }, // amber-200/500
-    success: { bg: '#dcfce7', border: '#10b981' },   // green-100/500
-    error:   { bg: '#fee2e2', border: '#ef4444' },   // red-100/500
+    idle:   { bg: THEME_VARS.surfaceMuted, border: THEME_VARS.border },
+    submitting: { bg: THEME_VARS.warningBg, border: THEME_VARS.warning },
+    success: { bg: THEME_VARS.successBg, border: THEME_VARS.success },
+    error:   { bg: THEME_VARS.dangerBg, border: THEME_VARS.danger },
   }[status];
 
   // Layout helpers
   const isListLayout = layout === 'list';
-  const gridColumns = isListLayout ? 4 : 2; // list: 4 in one row; grid: 2x2
+  const gridColumns = isListLayout
+    ? Math.min(rows.length, 5)
+    : Math.min(rows.length, 3);
 
   return (
     <div style={{
@@ -435,23 +621,51 @@ function ScoreSummary({
               <div
                 aria-hidden
                 style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '0 1px',
+                  pointerEvents: 'none',
+                  zIndex: 2,
+                }}
+              >
+                {SCORE_STEP_VALUES.map((_, idx) => (
+                  <span
+                    key={idx}
+                    style={{
+                      width: 1,
+                      height: 10,
+                      background: tickColor,
+                      opacity: idx === 0 || idx === SCORE_STEP_VALUES.length - 1 ? 0.45 : 0.35,
+                    }}
+                  />
+                ))}
+              </div>
+              <div
+                aria-hidden
+                style={{
                   position: 'absolute', left: 0, right: 0, top: '50%', transform: 'translateY(-50%)',
-                  height: 4, borderRadius: 9999, overflow: 'hidden', zIndex: 2, pointerEvents: 'none',
+                  height: 4, borderRadius: 9999, overflow: 'hidden', zIndex: 3, pointerEvents: 'none',
                 }}
               >
                 <div style={{ width: `${Math.round(values[r.key] * 100)}%`, height: '100%', background: r.color, opacity: 1 }} />
               </div>
               <input
                 type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={values[r.key]}
+                min={SCORE_STEP_VALUES[0]}
+                max={SCORE_STEP_VALUES[SCORE_STEP_VALUES.length - 1]}
+                step={SCORE_STEP_SIZE}
+                value={snapToScoreStep(values[r.key])}
                 onChange={(e) => handleValueChange(r.key, Number(e.target.value))}
                 className="score-slider"
                 style={{
                   position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
-                  width: '100%', background: 'transparent', color: r.color, zIndex: 3,
+                  width: '100%', background: 'transparent', color: r.color, zIndex: 4,
                 }}
               />
             </div>
@@ -570,6 +784,7 @@ function CoursesList() {
   const [totalResults, setTotalResults] = useState(0);
   const [showFilters, setShowFilters] = useState(true);
   const [programsTree, setProgramsTree] = useState(null);
+  const [levelsMap, setLevelsMap] = useState({});
   const [appliedFilters, setAppliedFilters] = useState(() => parseFiltersFromSearch(location.search));
   const [draftFilters, setDraftFilters] = useState(() => parseFiltersFromSearch(location.search));
   const [sortField, setSortField] = useState("");
@@ -634,6 +849,24 @@ function CoursesList() {
   }, []);
 
   useEffect(() => {
+    let active = true;
+    async function loadLevels() {
+      try {
+        const map = await getLevelsByDegree();
+        if (active) {
+          setLevelsMap(map);
+        }
+      } catch (err) {
+        console.warn('Failed to load degree levels from Supabase', err);
+      }
+    }
+    loadLevels();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
     const inferred = inferSemesterFromLevel(appliedFilters.level);
     const fallback = appliedFilters.semester || '';
     const finalSemester = inferred || fallback;
@@ -666,6 +899,7 @@ useEffect(() => {
     const setScoreParam = (key, value) => {
       if (Number(value) > 0) params.set(key, String(value));
     };
+    setScoreParam('minRelevance', appliedFilters.minRelevance);
     setScoreParam('minSkills', appliedFilters.minSkills);
     setScoreParam('minProduct', appliedFilters.minProduct);
     setScoreParam('minVenture', appliedFilters.minVenture);
@@ -689,8 +923,17 @@ useEffect(() => {
   );
 
   const levelOptions = useMemo(
-    () => withValueOption(getLevelOptions(programsTree, draftFilters.degree), draftFilters.level),
-    [programsTree, draftFilters.degree, draftFilters.level],
+    () => {
+      const degree = draftFilters.degree;
+      if (degree) {
+        const supaLevels = levelsMap[degree.toUpperCase()];
+        if (supaLevels && supaLevels.length) {
+          return withValueOption(supaLevels, draftFilters.level);
+        }
+      }
+      return withValueOption(getLevelOptions(programsTree, degree), draftFilters.level);
+    },
+    [levelsMap, programsTree, draftFilters.degree, draftFilters.level],
   );
 
   const majorOptions = useMemo(
@@ -704,9 +947,9 @@ useEffect(() => {
   );
 
   const levelDisabled = !draftFilters.degree || levelOptions.length === 0;
-  const majorDisabled = !draftFilters.degree || !draftFilters.level || majorOptions.length === 0;
+  const majorDisabled = majorOptions.length === 0;
   const skipMinorFilters = shouldSkipMinorQuestion(draftFilters.degree, draftFilters.level);
-  const minorDisabled = skipMinorFilters || !draftFilters.level || minorOptions.length === 0;
+  const minorDisabled = skipMinorFilters || !draftFilters.degree || minorOptions.length === 0;
 
   const handleApplyFilters = () => {
     setPage(1);
@@ -740,6 +983,7 @@ useEffect(() => {
           minor: appliedFilters.minor || undefined,
           sortField: sortField || undefined,
           sortOrder: sortField ? sortOrder : undefined,
+          minRelevance: appliedFilters.minRelevance > 0 ? appliedFilters.minRelevance : undefined,
           minSkills: appliedFilters.minSkills > 0 ? appliedFilters.minSkills : undefined,
           minProduct: appliedFilters.minProduct > 0 ? appliedFilters.minProduct : undefined,
           minVenture: appliedFilters.minVenture > 0 ? appliedFilters.minVenture : undefined,
@@ -780,137 +1024,118 @@ useEffect(() => {
           alignSelf: "flex-start",
           overflowY: showFilters ? "auto" : "hidden",
           overflowX: "hidden",
-          borderRight: "1px solid #eee",
+          borderRight: `1px solid ${THEME_VARS.borderSubtle}`,
           paddingRight: showFilters ? "1rem" : 0,
           marginRight: showFilters ? "1rem" : 0,
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h3 style={{ margin: 0 }}>Filters</h3>
-          <button onClick={() => setShowFilters(false)}>Hide</button>
-        </div>
-        <div style={{ display: "grid", gap: "0.5rem", marginTop: "0.75rem" }}>
-          <input
-            type="text"
-            placeholder="Search name/code/prof"
-            value={draftFilters.query}
-            onChange={(e) => setDraftFilters((f) => ({ ...f, query: e.target.value }))}
-          />
-          <button
-            type="button"
-            onClick={handleApplyFilters}
-            disabled={!filtersDirty}
-            style={{
-              padding: "8px 12px",
-              border: "1px solid #ccc",
-              background: filtersDirty ? "#2563eb" : "#e5e7eb",
-              color: filtersDirty ? "#fff" : "#6b7280",
-              cursor: filtersDirty ? "pointer" : "not-allowed",
-            }}
-          >
-            Search
-          </button>
-          <div>
-            <div style={{ fontSize: 12, marginBottom: 4 }}>Degree</div>
-            <select
-              value={draftFilters.degree}
-              onChange={(e) => {
-                const nextDegree = e.target.value;
-                setDraftFilters((prev) => ({
-                  ...prev,
-                  degree: nextDegree,
-                  level: '',
-                  major: '',
-                  minor: '',
-                }));
-                setAppliedFilters((prev) => ({
-                  ...prev,
-                  degree: nextDegree,
-                  level: '',
-                  major: '',
-                  minor: '',
-                }));
-              }}
-              style={{ width: '100%', padding: '6px 8px', border: '1px solid #ccc', borderRadius: 4 }}
-            >
-              <option value="">Any degree</option>
-              {degreeOptions.map((opt) => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
+        <div style={filterPanelStyle}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <h3 style={{ margin: 0 }}>Filters</h3>
+            <button onClick={() => setShowFilters(false)}>Hide</button>
           </div>
-          <div>
-            <div style={{ fontSize: 12, marginBottom: 4 }}>Level</div>
-            <select
-              value={draftFilters.level}
-              onChange={(e) => {
-                const nextLevel = e.target.value;
-                const inferredSemester = inferSemesterFromLevel(nextLevel);
-                setDraftFilters((prev) => ({
-                  ...prev,
-                  level: nextLevel,
-                  major: '',
-                  minor: '',
-                  semester: inferredSemester || prev.semester,
-                }));
-                setAppliedFilters((prev) => ({
-                  ...prev,
-                  level: nextLevel,
-                  major: '',
-                  minor: '',
-                  semester: inferredSemester || prev.semester,
-                }));
-              }}
-              disabled={levelDisabled}
-              style={{
-                width: '100%',
-                padding: '6px 8px',
-                border: '1px solid #ccc',
-                borderRadius: 4,
-                background: levelDisabled ? '#f3f4f6' : '#fff',
-                color: levelDisabled ? '#9ca3af' : '#111',
-              }}
+          <div style={{ display: "grid", gap: "0.75rem" }}>
+            <input
+              type="text"
+              placeholder="Search name/code/prof"
+              value={draftFilters.query}
+              onChange={(e) => setDraftFilters((f) => ({ ...f, query: e.target.value }))}
+              style={{ width: '100%' }}
+            />
+            <button
+              type="button"
+              onClick={handleApplyFilters}
+              disabled={!filtersDirty}
+              style={primaryActionStyle(filtersDirty)}
             >
-              <option value="">Any level</option>
-              {levelOptions.map((opt) => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <div style={{ fontSize: 12, marginBottom: 4 }}>Major</div>
-            <select
-              value={draftFilters.major}
-              onChange={(e) => {
-                const nextMajor = e.target.value;
-                setDraftFilters((prev) => ({
-                  ...prev,
-                  major: nextMajor,
-                }));
-                setAppliedFilters((prev) => ({
-                  ...prev,
-                  major: nextMajor,
-                }));
-              }}
-              disabled={majorDisabled}
-              style={{
-                width: '100%',
-                padding: '6px 8px',
-                border: '1px solid #ccc',
-                borderRadius: 4,
-                background: majorDisabled ? '#f3f4f6' : '#fff',
-                color: majorDisabled ? '#9ca3af' : '#111',
-              }}
-            >
-              <option value="">Any major</option>
-              {majorOptions.map((opt) => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-          </div>
-          {!skipMinorFilters && (
+              Search
+            </button>
             <div>
-              <div style={{ fontSize: 12, marginBottom: 4 }}>Minor</div>
+              <div style={fieldLabelStyle}>Degree</div>
+              <select
+                value={draftFilters.degree}
+                onChange={(e) => {
+                  const nextDegree = e.target.value;
+                  setDraftFilters((prev) => ({
+                    ...prev,
+                    degree: nextDegree,
+                    level: '',
+                    major: '',
+                    minor: '',
+                  }));
+                  setAppliedFilters((prev) => ({
+                    ...prev,
+                    degree: nextDegree,
+                    level: '',
+                    major: '',
+                    minor: '',
+                  }));
+                }}
+                style={selectFieldStyle(false)}
+              >
+                <option value="">Any degree</option>
+                {degreeOptions.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <div style={fieldLabelStyle}>Level</div>
+              <select
+                value={draftFilters.level}
+                onChange={(e) => {
+                  const nextLevel = e.target.value;
+                  const inferredSemester = inferSemesterFromLevel(nextLevel);
+                  setDraftFilters((prev) => ({
+                    ...prev,
+                    level: nextLevel,
+                    major: '',
+                    minor: '',
+                    semester: inferredSemester || prev.semester,
+                  }));
+                  setAppliedFilters((prev) => ({
+                    ...prev,
+                    level: nextLevel,
+                    major: '',
+                    minor: '',
+                    semester: inferredSemester || prev.semester,
+                  }));
+                }}
+                disabled={levelDisabled}
+                style={selectFieldStyle(levelDisabled)}
+              >
+                <option value="">Any level</option>
+                {levelOptions.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <div style={fieldLabelStyle}>Major</div>
+              <select
+                value={draftFilters.major}
+                onChange={(e) => {
+                  const nextMajor = e.target.value;
+                  setDraftFilters((prev) => ({
+                    ...prev,
+                    major: nextMajor,
+                  }));
+                  setAppliedFilters((prev) => ({
+                    ...prev,
+                    major: nextMajor,
+                  }));
+                }}
+                disabled={majorDisabled}
+                style={selectFieldStyle(majorDisabled)}
+              >
+                <option value="">Any major</option>
+                {majorOptions.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <div style={fieldLabelStyle}>Minor</div>
               <select
                 value={draftFilters.minor}
                 onChange={(e) => {
@@ -925,14 +1150,7 @@ useEffect(() => {
                   }));
                 }}
                 disabled={minorDisabled}
-                style={{
-                  width: '100%',
-                  padding: '6px 8px',
-                  border: '1px solid #ccc',
-                  borderRadius: 4,
-                  background: minorDisabled ? '#f3f4f6' : '#fff',
-                  color: minorDisabled ? '#9ca3af' : '#111',
-                }}
+                style={selectFieldStyle(minorDisabled)}
               >
                 <option value="">No minor preference</option>
                 {minorOptions.map((opt) => (
@@ -940,52 +1158,41 @@ useEffect(() => {
                 ))}
               </select>
             </div>
-          )}
-          <div>
-            <div style={{ fontSize: 12, marginBottom: 4 }}>Type</div>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setDraftFilters((prev) => {
-                    const nextType = prev.type === "optional" ? "" : "optional";
-                    const next = { ...prev, type: nextType };
-                    setAppliedFilters((applied) => ({ ...applied, type: nextType }));
-                    return next;
-                  });
-                }}
-                style={{
-                  padding: "6px 10px",
-                  border: "1px solid #ccc",
-                  background: draftFilters.type === "optional" ? "#eee" : "#fff",
-                  cursor: "pointer",
-                }}
-              >
-                Optional
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setDraftFilters((prev) => {
-                    const nextType = prev.type === "mandatory" ? "" : "mandatory";
-                    const next = { ...prev, type: nextType };
-                    setAppliedFilters((applied) => ({ ...applied, type: nextType }));
-                    return next;
-                  });
-                }}
-                style={{
-                  padding: "6px 10px",
-                  border: "1px solid #ccc",
-                  background: draftFilters.type === "mandatory" ? "#eee" : "#fff",
-                  cursor: "pointer",
-                }}
-              >
-                Mandatory
-              </button>
+            <div>
+              <div style={fieldLabelStyle}>Type</div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDraftFilters((prev) => {
+                      const nextType = prev.type === "optional" ? "" : "optional";
+                      const next = { ...prev, type: nextType };
+                      setAppliedFilters((applied) => ({ ...applied, type: nextType }));
+                      return next;
+                    });
+                  }}
+                  style={chipButtonStyle(draftFilters.type === "optional")}
+                >
+                  Optional
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDraftFilters((prev) => {
+                      const nextType = prev.type === "mandatory" ? "" : "mandatory";
+                      const next = { ...prev, type: nextType };
+                      setAppliedFilters((applied) => ({ ...applied, type: nextType }));
+                      return next;
+                    });
+                  }}
+                  style={chipButtonStyle(draftFilters.type === "mandatory")}
+                >
+                  Mandatory
+                </button>
+              </div>
             </div>
-          </div>
           <div>
-            <div style={{ fontSize: 12, marginBottom: 4 }}>Semester</div>
+            <div style={fieldLabelStyle}>Semester</div>
             <div style={{ display: "flex", gap: 8 }}>
               <button
                 type="button"
@@ -1001,12 +1208,7 @@ useEffect(() => {
                     return next;
                   });
                 }}
-                style={{
-                  padding: "6px 10px",
-                  border: "1px solid #ccc",
-                  background: draftFilters.semester === "winter" ? "#eee" : "#fff",
-                  cursor: "pointer",
-                }}
+                style={chipButtonStyle(draftFilters.semester === "winter")}
               >
                 Winter
               </button>
@@ -1024,71 +1226,90 @@ useEffect(() => {
                     return next;
                   });
                 }}
-                style={{
-                  padding: "6px 10px",
-                  border: "1px solid #ccc",
-                  background: draftFilters.semester === "summer" ? "#eee" : "#fff",
-                  cursor: "pointer",
-                }}
+                style={chipButtonStyle(draftFilters.semester === "summer")}
               >
                 Summer
               </button>
             </div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
-            <input
-              type="number"
-              placeholder="Min credits"
-              value={draftFilters.creditsMin}
-              onChange={(e) => {
-                const { value } = e.target;
-                setDraftFilters((prev) => ({ ...prev, creditsMin: value }));
-                setAppliedFilters((prev) => ({ ...prev, creditsMin: value }));
-              }}
-            />
-            <input
-              type="number"
-              placeholder="Max credits"
-              value={draftFilters.creditsMax}
-              onChange={(e) => {
-                const { value } = e.target;
-                setDraftFilters((prev) => ({ ...prev, creditsMax: value }));
-                setAppliedFilters((prev) => ({ ...prev, creditsMax: value }));
-              }}
-            />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "1rem" }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <label style={{ fontSize: 11, color: THEME_VARS.textMuted }}>Min credits</label>
+              <input
+                type="number"
+                placeholder="Min"
+                value={draftFilters.creditsMin}
+                onChange={(e) => {
+                  const { value } = e.target;
+                  setDraftFilters((prev) => ({ ...prev, creditsMin: value }));
+                  setAppliedFilters((prev) => ({ ...prev, creditsMin: value }));
+                }}
+                style={{ width: '100%' }}
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <label style={{ fontSize: 11, color: THEME_VARS.textMuted }}>Max credits</label>
+              <input
+                type="number"
+                placeholder="Max"
+                value={draftFilters.creditsMax}
+                onChange={(e) => {
+                  const { value } = e.target;
+                  setDraftFilters((prev) => ({ ...prev, creditsMax: value }));
+                  setAppliedFilters((prev) => ({ ...prev, creditsMax: value }));
+                }}
+                style={{ width: '100%' }}
+              />
+            </div>
           </div>
           <div style={{ display: 'grid', gap: 10 }}>
-            {MIN_SCORE_SLIDERS.map(({ key, label }) => (
-              <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-                  <span>{label} minimum</span>
-                  <span style={{ color: '#555' }}>≥ {draftFilters[key].toFixed(2)}</span>
+            {MIN_SCORE_SLIDERS.map(({ key, label }) => {
+              const levelIndex = getScoreStepIndex(draftFilters[key]);
+              return (
+                <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                    <span>{label} minimum</span>
+                    <span style={{ color: THEME_VARS.textMuted }}>
+                      ≥ {formatScoreLevelLabel(draftFilters[key])}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={SCORE_STEP_VALUES.length - 1}
+                    step={1}
+                    value={levelIndex}
+                    onChange={(e) => {
+                      const idx = Number(e.target.value);
+                      const snapped = SCORE_STEP_VALUES[idx] ?? SCORE_STEP_VALUES[0];
+                      setDraftFilters((prev) => ({ ...prev, [key]: snapped }));
+                      setAppliedFilters((prev) => ({ ...prev, [key]: snapped }));
+                    }}
+                  />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: THEME_VARS.textMuted }}>
+                    {SCORE_STEP_VALUES.map((_, idx) => (
+                      <span key={idx} style={{ flex: 1, textAlign: idx === 0 ? 'left' : idx === SCORE_STEP_VALUES.length - 1 ? 'right' : 'center' }}>
+                        {idx + 1}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  value={draftFilters[key]}
-                  onChange={(e) => {
-                    const value = Number(e.target.value);
-                    setDraftFilters((prev) => ({ ...prev, [key]: value }));
-                    setAppliedFilters((prev) => ({ ...prev, [key]: value }));
-                  }}
-                />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#888' }}>
-                  <span>0</span>
-                  <span>1</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <button
             type="button"
             onClick={handleClearFilters}
+            style={{
+              alignSelf: 'start',
+              background: THEME_VARS.surfaceMuted,
+              border: `1px solid ${THEME_VARS.border}`,
+              color: THEME_VARS.text,
+            }}
           >
             Clear filters
           </button>
+        </div>
         </div>
       </aside>
 
@@ -1101,33 +1322,43 @@ useEffect(() => {
           )}
         </div>
         {error && (
-          <div style={{ margin: '8px 0', padding: '8px 12px', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 6, color: '#991b1b' }}>
+          <div
+            style={{
+              margin: '8px 0',
+              padding: '8px 12px',
+              background: THEME_VARS.dangerBg,
+              border: `1px solid ${THEME_VARS.danger}`,
+              borderRadius: 6,
+              color: THEME_VARS.danger,
+            }}
+          >
             {error}
           </div>
         )}
         {loading && (
-          <div style={{ margin: '8px 0', fontSize: 12, color: '#4b5563' }}>Loading courses…</div>
+          <div style={{ margin: '8px 0', fontSize: 12, color: THEME_VARS.textMuted }}>Loading courses…</div>
         )}
         <div style={{ display: "flex", gap: 8, alignItems: "center", margin: "8px 0", flexWrap: 'wrap' }}>
           {viewMode === 'list' ? (
             <>
-              <span style={{ fontSize: 12, color: "#666" }}>Sort by</span>
+              <span style={{ fontSize: 12, color: THEME_VARS.textMuted }}>Sort by</span>
               <div style={{ display: "flex", gap: 4, flexWrap: 'wrap' }}>
                 <button
                   onClick={() => { setSortField("credits"); setSortOrder(sortField === "credits" && sortOrder === "asc" ? "desc" : "asc"); }}
-                  style={{ padding: "4px 8px", border: "1px solid #ccc", background: sortField === "credits" ? "#eee" : "#fff" }}
+                  style={chipButtonStyle(sortField === "credits")}
                   title="Toggle credits ascending/descending"
                 >
                   Credits {sortField === "credits" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
                 </button>
                 <button
                   onClick={() => { setSortField("workload"); setSortOrder(sortField === "workload" && sortOrder === "asc" ? "desc" : "asc"); }}
-                  style={{ padding: "4px 8px", border: "1px solid #ccc", background: sortField === "workload" ? "#eee" : "#fff" }}
+                  style={chipButtonStyle(sortField === "workload")}
                   title="Toggle workload ascending/descending"
                 >
                   Workload {sortField === "workload" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
                 </button>
                 {[
+                  { key: 'score_relevance', label: 'Relevance score' },
                   { key: 'score_skills', label: 'Skills score' },
                   { key: 'score_product', label: 'Product score' },
                   { key: 'score_venture', label: 'Venture score' },
@@ -1139,7 +1370,7 @@ useEffect(() => {
                       setSortField(key);
                       setSortOrder(sortField === key ? (sortOrder === "desc" ? "asc" : "desc") : "desc");
                     }}
-                    style={{ padding: "4px 8px", border: "1px solid #ccc", background: sortField === key ? "#eee" : "#fff" }}
+                    style={chipButtonStyle(sortField === key)}
                     title={`Toggle ${label} ascending/descending`}
                   >
                     {label} {sortField === key ? (sortOrder === "asc" ? "↑" : "↓") : ""}
@@ -1147,7 +1378,7 @@ useEffect(() => {
                 ))}
                 <button
                   onClick={() => { setSortField(""); setSortOrder("asc"); }}
-                  style={{ padding: "4px 8px", border: "1px solid #ccc" }}
+                  style={chipButtonStyle(false)}
                 >
                   Clear sort
                 </button>
@@ -1155,25 +1386,25 @@ useEffect(() => {
             </>
           ) : (
             <>
-              <span style={{ fontSize: 12, color: '#666' }}>Pareto sort</span>
+              <span style={{ fontSize: 12, color: THEME_VARS.textMuted }}>Pareto sort</span>
               <div style={{ display: 'flex', gap: 6 }}>
                 <button
                   onClick={() => setParetoPref(p => ({ ...p, credits: p.credits === 'max' ? 'min' : 'max' }))}
-                  style={{ padding: '4px 8px', border: '1px solid #ccc', background: '#fff' }}
+                  style={chipButtonStyle(paretoPref.credits === 'max')}
                   title="Toggle credits preference (max/min)"
                 >
                   Credits {paretoPref.credits === 'max' ? '↓' : '↑'}
                 </button>
                 <button
                   onClick={() => setParetoPref(p => ({ ...p, workload: p.workload === 'min' ? 'max' : 'min' }))}
-                  style={{ padding: '4px 8px', border: '1px solid #ccc', background: '#fff' }}
+                  style={chipButtonStyle(paretoPref.workload === 'min')}
                   title="Toggle workload preference (min/max)"
                 >
                   Workload {paretoPref.workload === 'min' ? '↑' : '↓'}
                 </button>
                 <button
                   onClick={() => setParetoPref({ credits: 'max', workload: 'min' })}
-                  style={{ padding: '4px 8px', border: '1px solid #ccc', background: '#eee' }}
+                  style={chipButtonStyle(false)}
                   title="Reset to default (credits max, workload min)"
                 >
                   Default
@@ -1182,18 +1413,18 @@ useEffect(() => {
             </>
           )}
 
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 12, color: '#666', alignSelf: 'center' }}>View</span>
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: 12, color: THEME_VARS.textMuted }}>View</span>
             <button
               onClick={() => setViewMode('list')}
-              style={{ padding: '4px 8px', border: '1px solid #ccc', background: viewMode === 'list' ? '#eee' : '#fff' }}
+              style={chipButtonStyle(viewMode === 'list')}
               title="List view"
             >
               List
             </button>
             <button
               onClick={() => setViewMode('grid')}
-              style={{ padding: '4px 8px', border: '1px solid #ccc', background: viewMode === 'grid' ? '#eee' : '#fff' }}
+              style={chipButtonStyle(viewMode === 'grid')}
               title="Grid view"
             >
               Grid
@@ -1204,7 +1435,7 @@ useEffect(() => {
           const totalPages = Math.max(1, Math.ceil(totalResults / pageSize));
           const shown = courses.length;
           return (
-            <p style={{ marginTop: 4, color: "#555" }}>
+            <p style={{ marginTop: 4, color: THEME_VARS.textMuted }}>
               Showing {shown} of {totalResults} results · Page {page} / {totalPages}
             </p>
           );
@@ -1218,15 +1449,16 @@ useEffect(() => {
                 <li key={courseKey}>
                   <article
                     style={{
-                      border: '1px solid #e5e7eb',
-                    borderRadius: 8,
-                    padding: '12px',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                    background: '#fff',
-                    display: 'flex',
-                    flexDirection: 'column'
-                  }}
-                >
+                      border: `1px solid ${THEME_VARS.border}`,
+                      borderRadius: 8,
+                      padding: '12px',
+                      boxShadow: 'var(--shadow-elevation)',
+                      background: THEME_VARS.surface,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 8,
+                    }}
+                  >
                   <h3 style={{ margin: 0 }}>
                     {c.url ? (
                       <a href={c.url} target="_blank" rel="noreferrer">{c.course_name}</a>

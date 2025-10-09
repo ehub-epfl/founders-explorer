@@ -2,26 +2,61 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Global page edge padding */
+  color-scheme: light dark;
+
+  /* layout */
   --page-padding: 16px;
+
+  /* palette */
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f5f9;
+  --color-surface-active: #e2e8f0;
+  --color-border: #d0d7de;
+  --color-border-subtle: #e5e7eb;
+  --color-text: #0f172a;
+  --color-text-muted: #475569;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-contrast: #f8fafc;
+  --color-disabled-bg: #e5e7eb;
+  --color-disabled-text: #94a3b8;
+  --shadow-elevation: 0 1px 3px rgba(15, 23, 42, 0.08);
+  --color-success: #15803d;
+  --color-success-bg: #dcfce7;
+  --color-warning: #d97706;
+  --color-warning-bg: #fef3c7;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fee2e2;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0f172a;
+    --color-surface: #1e293b;
+    --color-surface-muted: #243449;
+    --color-surface-active: #334155;
+    --color-border: rgba(148, 163, 184, 0.35);
+    --color-border-subtle: rgba(148, 163, 184, 0.22);
+    --color-text: #e2e8f0;
+    --color-text-muted: #94a3b8;
+    --color-primary: #60a5fa;
+    --color-primary-hover: #93c5fd;
+    --color-primary-contrast: #0b1120;
+    --color-disabled-bg: rgba(148, 163, 184, 0.16);
+    --color-disabled-text: rgba(148, 163, 184, 0.6);
+    --shadow-elevation: 0 1px 3px rgba(8, 11, 19, 0.6);
+    --color-success: #4ade80;
+    --color-success-bg: rgba(74, 222, 128, 0.18);
+    --color-warning: #fbbf24;
+    --color-warning-bg: rgba(251, 191, 36, 0.18);
+    --color-danger: #f87171;
+    --color-danger-bg: rgba(248, 113, 113, 0.18);
+  }
 }
 
 body {
@@ -29,6 +64,19 @@ body {
   min-width: 320px;
   min-height: 100vh;
   padding: var(--page-padding);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+a {
+  font-weight: 500;
+  color: var(--color-primary);
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: var(--color-primary-hover);
 }
 
 h1 {
@@ -43,29 +91,51 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--color-surface-muted);
+  color: var(--color-text);
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: border-color 0.25s ease, background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+button:hover {
+  border-color: var(--color-primary);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
+  outline-offset: 2px;
+}
+
+input:not([type="range"]),
+select,
+textarea {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+input:not([type="range"])::placeholder,
+textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+input:not([type="range"]):focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent);
+}
+
+table {
+  border-collapse: collapse;
 }
 
 /* Interactive per-course sliders: hide native track and draw custom bars */
@@ -77,6 +147,9 @@ button:focus-visible {
   height: 16px; /* match container height */
   outline: none;
   cursor: pointer;
+  border: none;
+  padding: 0;
+  margin: 0;
 }
 .score-slider::-webkit-slider-runnable-track {
   height: 4px;

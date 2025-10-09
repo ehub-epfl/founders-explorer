@@ -26,6 +26,7 @@ export async function getCourses(options = {}) {
     degree,
     sortField,
     sortOrder,
+    minRelevance,
     minSkills,
     minProduct,
     minVenture,
@@ -112,6 +113,11 @@ export async function getCourses(options = {}) {
     }
   }
 
+  const minRelevanceVal = normalizeScoreFilter(minRelevance);
+  if (minRelevanceVal != null) {
+    query = query.gte('max_score_relevance_sigmoid', minRelevanceVal);
+  }
+
   const minSkillsVal = normalizeScoreFilter(minSkills);
   if (minSkillsVal != null) {
     query = query.gte('max_score_skills_sigmoid', minSkillsVal);
@@ -174,6 +180,40 @@ export async function getCourses(options = {}) {
     page: resolvedPage,
     pageSize: resolvedPageSize,
   };
+}
+
+export async function getLevelsByDegree() {
+  const { supabaseUrl, supabaseAnonKey } = resolveSupabaseConfig();
+  const supabase = ensureSupabaseClient(supabaseUrl, supabaseAnonKey);
+
+  const { data, error } = await supabase
+    .from('levels')
+    .select('degree,label')
+    .order('degree', { ascending: true })
+    .order('label', { ascending: true });
+
+  if (error) {
+    throw new Error(`Supabase levels fetch failed: ${error.message}`);
+  }
+
+  const grouped = {};
+  for (const row of data || []) {
+    if (!row) continue;
+    const degreeRaw = typeof row.degree === 'string' ? row.degree.trim() : '';
+    const labelRaw = typeof row.label === 'string' ? row.label.trim() : '';
+    if (!degreeRaw || !labelRaw) continue;
+    const degree = degreeRaw.toUpperCase();
+    const list = grouped[degree] || (grouped[degree] = []);
+    if (!list.includes(labelRaw)) {
+      list.push(labelRaw);
+    }
+  }
+
+  for (const key of Object.keys(grouped)) {
+    grouped[key].sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+  }
+
+  return grouped;
 }
 
 function ensureSupabaseClient(url, anonKey) {
@@ -308,6 +348,8 @@ function mapSortField(field) {
       return 'credits';
     case 'workload':
       return 'workload';
+    case 'score_relevance':
+      return 'max_score_relevance_sigmoid';
     case 'score_skills':
       return 'max_score_skills_sigmoid';
     case 'score_product':

@@ -268,10 +268,41 @@ function Questionnaire() {
     }, [currentStep, programsTree, loadError]);
 
     if (!programsTree && !loadError) {
-        return <div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh',width:'100vw'}}><h2>Loading options…</h2></div>;
+        return (
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100vh',
+                    width: '100vw',
+                    background: 'var(--color-bg)',
+                    color: 'var(--color-text)',
+                }}
+            >
+                <h2>Loading options…</h2>
+            </div>
+        );
     }
     if (loadError) {
-        return <div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh',width:'100vw'}}><h2>Failed to load options</h2><p>{String(loadError)}</p></div>;
+        return (
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100vh',
+                    width: '100vw',
+                    background: 'var(--color-bg)',
+                    color: 'var(--color-text)',
+                    gap: '12px',
+                }}
+            >
+                <h2>Failed to load options</h2>
+                <p>{String(loadError)}</p>
+            </div>
+        );
     }
 
     const q = allQuestions[currentStep];
@@ -285,8 +316,20 @@ function Questionnaire() {
     // (auto-advance handled by the earlier effect to keep Hooks order stable)
 
     return (
-        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh',width: '100vw'}}>
-            <div style={{textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '20px'}}>
+        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100vw', padding: '16px'}}>
+            <div style={{
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '20px',
+                padding: '24px',
+                borderRadius: 12,
+                background: 'var(--color-surface)',
+                color: 'var(--color-text)',
+                border: '1px solid var(--color-border-subtle)',
+                boxShadow: 'var(--shadow-elevation)',
+                minWidth: 'min(90vw, 420px)',
+            }}>
                 <h2>{q.question}</h2>
                 {(q.key === 'major' || q.key === 'minor') ? (
                     <div style={{display: 'flex', flexDirection: 'row', gap: '10px', justifyContent: 'center', alignItems: 'center'}}>

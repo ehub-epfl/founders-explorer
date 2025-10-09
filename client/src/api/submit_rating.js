@@ -14,6 +14,7 @@
  *   await submitCourseRating({
  *     course_code: 'CS101',
  *     course_id: '12345',
+ *     score_relevance: 0.75,
  *     score_skills: 0.9,
  *     score_product: 0.74,
  *     score_venture: 1,
@@ -43,14 +44,15 @@ function round2(n) {
  * @param {object} params
  * @param {string} params.course_code
  * @param {string} params.course_id
+ * @param {number} params.score_relevance
  * @param {number} params.score_skills
  * @param {number} params.score_product
  * @param {number} params.score_venture
  * @param {number} params.score_foundations
  * @param {string} [params.turnstileToken]  // optional, if you enable Cloudflare Turnstile
- * @returns {{course_code:string, course_id:string, score_skills:number, score_product:number, score_venture:number, score_foundations:number, turnstileToken?:string}}
+ * @returns {{course_code:string, course_id:string, score_relevance:number, score_skills:number, score_product:number, score_venture:number, score_foundations:number, turnstileToken?:string}}
  */
-function buildPayload({ course_code, course_id, score_skills, score_product, score_venture, score_foundations, turnstileToken }) {
+function buildPayload({ course_code, course_id, score_relevance, score_skills, score_product, score_venture, score_foundations, turnstileToken }) {
   const normalizedCode = typeof course_code === 'string' ? course_code.trim() : String(course_code ?? '').trim()
   if (!normalizedCode) {
     throw new Error('course_code is required');
@@ -60,13 +62,14 @@ function buildPayload({ course_code, course_id, score_skills, score_product, sco
   if (!normalizedId) {
     throw new Error('course_id is required');
   }
-  const scores = [score_skills, score_product, score_venture, score_foundations];
+  const scores = [score_relevance, score_skills, score_product, score_venture, score_foundations];
   if (scores.some((s) => !inRange(s, 0, 1))) {
-    throw new Error('score_skills, score_product, score_venture, and score_foundations must be numbers between 0 and 1');
+    throw new Error('score_relevance, score_skills, score_product, score_venture, and score_foundations must be numbers between 0 and 1');
   }
   return {
     course_code: normalizedCode,
     course_id: normalizedId,
+    score_relevance: round2(score_relevance),
     score_skills: round2(score_skills),
     score_product: round2(score_product),
     score_venture: round2(score_venture),

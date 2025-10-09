@@ -18,12 +18,26 @@ export default defineConfig(async ({ mode }) => {
     await printSupabaseSnapshot(publicDevVars)
   }
 
+  const server =
+    mode === 'development'
+      ? {
+          proxy: {
+            // Proxy Cloudflare Pages Functions during local dev so POSTs hit wrangler
+            '/api/submit-rating': {
+              target: process.env.PAGES_DEV_ORIGIN || 'http://127.0.0.1:8788',
+              changeOrigin: true,
+            },
+          },
+        }
+      : undefined
+
   return {
     envPrefix: 'SUPABASE_',
     define: {
       __SUPABASE_DEV_VARS__: JSON.stringify(publicDevVars),
     },
     plugins: [react()],
+    ...(server ? { server } : {}),
   }
 })
 

@@ -5,6 +5,7 @@
 // {
 //   course_code: string,
 //   course_id: string,
+//   score_relevance: number (0..1),
 //   score_skills: number (0..1),
 //   score_product: number (0..1),
 //   score_venture: number (0..1),
@@ -65,6 +66,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     const {
       course_code,
       course_id,
+      score_relevance,
       score_skills,
       score_product,
       score_venture,
@@ -79,11 +81,11 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       return cors({ status: 400 }, JSON.stringify({ error: 'course_id is required (string)' }));
     }
 
-    const scores = [score_skills, score_product, score_venture, score_foundations];
+    const scores = [score_relevance, score_skills, score_product, score_venture, score_foundations];
     if (scores.some((s) => !inRange(s, 0, 1))) {
       return cors(
         { status: 400 },
-        JSON.stringify({ error: 'scores must be numbers between 0 and 1: score_skills, score_product, score_venture, score_foundations' })
+        JSON.stringify({ error: 'scores must be numbers between 0 and 1: score_relevance, score_skills, score_product, score_venture, score_foundations' })
       );
     }
 
@@ -117,6 +119,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       body: JSON.stringify({
         course_code: (course_code as string).trim(),
         course_id: String(course_id).trim(),
+        score_relevance: round2(score_relevance as number),
         score_skills: round2(score_skills as number),
         score_product: round2(score_product as number),
         score_venture: round2(score_venture as number),
