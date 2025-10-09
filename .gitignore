@@ -6,3 +6,5 @@ client/.dev.vars
 supabase/.env
 .cloudflare.secrets
 data-scraper/data/sentences.embeddings.npy
+data-scraper/data/
+data-scraper/data/
