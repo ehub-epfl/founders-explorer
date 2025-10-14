@@ -1,4 +1,4 @@
-const MA_PROJECT_LEVELS = ['MA Project Autumn', 'MA Project Spring'];
+const MA_PROJECT_LEVELS = ['MA Project Fall', 'MA Project Spring'];
 
 function normalizeLevelLabel(level) {
   return typeof level === 'string' ? level.trim() : '';
@@ -18,13 +18,13 @@ function inferSemesterFromLevel(level) {
   const label = normalizeLevelLabel(level);
   if (!label) return '';
   const lower = label.toLowerCase();
-  if (lower.includes('spring')) return 'summer';
-  if (lower.includes('autumn') || lower.includes('fall')) return 'winter';
+  if (lower.includes('spring')) return 'Spring';
+  if (lower.includes('autumn') || lower.includes('fall')) return 'Fall';
   const match = label.match(/(\d+)/);
   if (match) {
     const num = Number(match[1]);
     if (Number.isFinite(num)) {
-      return num % 2 === 0 ? 'summer' : 'winter';
+      return num % 2 === 0 ? 'Spring' : 'Fall';
     }
   }
   return '';

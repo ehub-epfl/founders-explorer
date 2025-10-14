@@ -1,2973 +1,391 @@
-<?xml version="1.0" encoding="iso-8859-15" standalone="no"?>
+<!DOCTYPE html>
+<html lang="en" class="tablesaw-enhanced">
 
-<?xml-stylesheet href="itffichecours.xsl?path=EPFL.Etu.FicheCours2013.FicheCours2013:fr" type="text/xsl" version="1.0" ?>
+<head>
+<meta name="isa_raw_url" content="http://isa.epfl.ch/imoniteur_ISAP/!itffichecours.htm?ww_i_matiere=2714475508&ww_x_anneeAcad=2025-2026&ww_i_section=942293&ww_i_niveau=6683111&ww_c_langue=en">        <meta name="description" content="Cet enseignement situe le dessin technique comme outil d'enquête spatiale, constructive et contextuelle. Il introduit la coupe itérative comme outil sociotechnique de l'architecte permettant de mesurer, comprendre et interpréter des situations construites.">
+        <link rel="canonical" href="https://edu.epfl.ch/coursebook/en/architectural-tomography-AR-129">
+<title>Architectural Tomography - AR-129 - EPFL</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- DIRECT -->
-<PAGE>
- <APPARENCE>
-  <HEIGHT>110</HEIGHT>
-  <helper libelle="Demande de support" url="https://support.epfl.ch/epfl?id=epfl_kb_article_view&amp;sysparm_article=KB0016651"></helper>
- </APPARENCE>
- <DATA>
-  <url-base>http://isa.epfl.ch/imoniteur_ISAP/</url-base>
-  <url-header>itffichecours.txt?path=EPFL.Etu.FicheCours.HeaderEN</url-header>
-  <url-js-nav>itffichecours.txt?path=EPFL.Etu.FicheCours.GlobalNav_js</url-js-nav>
-  <langue>en</langue>
-  <n_annee>2025</n_annee>
-  <i_section>1751774</i_section>
-  <i_niveau>6683117</i_niveau>
-  <i_uniteacad>1751774</i_uniteacad>
-  <i_periodeacad>2840683608</i_periodeacad>
-  <i_periodeacadcontenu>2840683608</i_periodeacadcontenu>
-  <b_edoc>0</b_edoc>
-  <b_mineur>0</b_mineur>
-  <x_section>Humanities and Social Sciences Program</x_section>
-  <c_section>SHS</c_section>
-  <c_faculte>CDH</c_faculte>
-  <x_facultefr>Collège des humanités</x_facultefr>
-  <x_faculteen>College of humanities</x_faculteen>
-  <url>!itffichecours.htm?ww_i_matiere=4478608290&amp;ww_x_anneeAcad=2840683608&amp;ww_i_section=1751774&amp;ww_i_niveau=6683117</url>
-  <fiche>
-   <report>1696552884</report>
-   <reportxsl>1696552963</reportxsl>
-   <fiche id="4478609634" langue="en">
-    <texte var="ENTETE_LOGO" type="header">
-<img src="/imoniteur_ISAP/!docsStockes.telecharger?ww_x_id=AEFD5406A6B4E872830CCF0D5E27EBC2" style="height:0.7cm; float: right;"/>
-    </texte>
-    <texte var="ITEMPLAN_PERIODE_ENTETE" type="header">
-2025-2026 COURSE BOOKLET
-    </texte>
-    <texte var="ITEMPLAN_CODE" type="header">
-HUM-289
-    </texte>
-    <texte var="ITEMPLAN_XMATIERE" type="header">
-Sustainable Management and Finance
-    </texte>
-    <texte var="ITEMPLAN_XMATIERE_EN" type="header">
-Sustainable Management and Finance
-    </texte>
-    <texte var="TITRE_ENSEIGNANTS" type="header">
-Lecturers
-    </texte>
-    <texte var="ITEMPLAN_ENSEIGNANTS" type="header">
-Danthine Jean-Pierre, Zeni Federica
-    </texte>
-    <texte var="TITRE_LANGUE" type="header">
-Language of teaching
-    </texte>
-    <texte var="ITEMPLAN_MATIERE_LANGUE" type="header">
-English
-    </texte>
-    <texte var="TITRE_SECTIONS" type="header">
-Cursus
-    </texte>
-    <texte var="ITEMPLAN_SECTIONS" type="header">
-Humanities and Social Sciences Program(2025-2026, SHS - 2024)
-    </texte>
-    <texte var="ITEMPLAN_SEMESTRES" type="header">
-<table><tbody><tr><td>Semester</td><td align="center">Mand.</td><td align="center">Option</td><td align="center">Filières</td></tr><tr><td>BA3</td><td align="center">x</td><td align="center"></td><td align="center"></td></tr></tbody></table>
-    </texte>
-    <texte var="TITRE_ECTS_OU_COEFFS" type="header">
-Credits
-    </texte>
-    <texte var="ITEMPLAN_ECTS_OU_COEFF" type="header">
-2
-    </texte>
-    <texte var="TITRE_SESSION_EXA" type="header">
-Session
-    </texte>
-    <texte var="ITEMPLAN_SESSION_EXA" type="header">
-Winter
-    </texte>
-    <texte var="TITRE_CHARGE_TOTALE" type="header">
-Workload
-    </texte>
-    <texte var="ITEMPLAN_CHARGE_TOTALE" type="header">
-60h
-    </texte>
-    <texte var="TITRE_FORME_EXA" type="header">
-Exam
-    </texte>
-    <texte var="ITEMPLAN_FORME_EXA" type="header">
-During the semester
-    </texte>
-    <texte var="TITRE_NBINSCRITS" type="header">
-Number of positions
-    </texte>
-    <texte var="ITEMPLAN_NBINSCRITS_MAX" type="header">
-120
-    </texte>
-    <texte var="ITEMPLAN_SANS_RETRAIT" type="header">
-    </texte>
-    <texte var="TITRE_SEMESTRE" type="header">
-Semester
-    </texte>
-    <texte var="ITEMPLAN_PERIODE_SEMESTRE" type="header">
-Fall
-    </texte>
-    <texte var="TITRE_SEMAINES" type="header">
-Weeks
-    </texte>
-    <texte var="ITEMPLAN_SEMAINES" type="header">
-14
-    </texte>
-    <texte var="TITRE_HEURECONTACT" type="header">
-Hours
-    </texte>
-    <texte var="ITEMPLAN_NBHEURES_SEMAINE" type="header">
-2 weekly
-    </texte>
-    <texte var="ITEMPLAN_NBHEURES_LIPS_2015" stl="table-heures" type="header">
+<link rel="shortcut icon" type="image/x-icon" href="https://web2018.epfl.ch/8.1.0/icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://web2018.epfl.ch/8.1.0/icons/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://web2018.epfl.ch/8.1.0/icons/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://web2018.epfl.ch/8.1.0/icons/apple-touch-icon.png">
 
-    <table style="width: 100%; border: none; color: #333; background: #f2f2f2; padding: 0 0.3cm 0.1cm;" border="0" cellspacing="0" cellpadding="5">
-      <tbody>
-        
-    <tr>
-      <td style="padding: 0cm 0px 0px 0.3cm; color: #646262; width: 83px;">Courses</td>
-      <td style="padding: 0cm 0 0; color: #333;">2 weekly</td>
-    </tr>
-    
-      </tbody>
-    </table>
-    </texte>
-    <texte var="ITEMPLAN_CURSUS" type="header">
-<table><tbody><tr><td valign="top">Study plan</td><td align="center" valign="top">Semester</td><td align="center" valign="top">Mand.</td><td align="center" valign="top">Option</td><td align="center" valign="top">Filières</td></tr><tr><td valign="top">Sciences humaines et sociales 2025-26</td><td valign="top">BA3</td><td align="center" valign="top">x</td><td align="center" valign="top"></td><td align="center" valign="top"></td></tr></tbody></table>
-    </texte>
-    <texte var="ITEMPLAN_CURSUS_2015" stl="table-html" type="header">
+<link rel="stylesheet" href="https://web2018.epfl.ch/8.1.0/css/elements.min.css">
 
-        <table style="width: 100%; border-collapse:collapse;">
-          <thead>
-          <tr>
-            <th style="background: none; color: #646262; font-weight: bold; border-bottom: 1px solid #e0dfde; width: 8cm;">Cursus</th>
-            <th style="background: none; color: #646262; font-weight: bold; border-bottom: 1px solid #e0dfde; width: 2cm;">Sem.</th>
-            <th style="background: none; color: #646262; font-weight: bold; border-bottom: 1px solid #e0dfde; width: 1cm;">Type</th>
-          </tr>
-          </thead>
-          <tbody>
-          
-        <tr>
-          <td style="border-bottom: 1px solid #e0dfde; padding: 1mm 0 0 1mm;">Humanities and Social Sciences</td>
-          <td style="border-bottom: 1px solid #e0dfde; padding: 1mm 0;">BA3</td>
-          <td style="border-bottom: 1px solid #e0dfde; padding: 1mm 0;">Obl.</td>
-        </tr>
-          </tbody>
-        </table>
-    </texte>
-    <texte var="LIB_RUBRIQUE_REMARQUE_PLAN" stl="title">
-Remark
-    </texte>
-    <texte var="RUBRIQUE_REMARQUE_PLAN" stl="text">
-Une seule inscription à un cours SHS+MGT autorisée. En cas d&apos;inscriptions multiples elles seront toutes supprimées sans notification.
-    </texte>
-    <texte var="LIB_RUBRIQUE_RESUME" stl="title">
-Summary
-    </texte>
-    <texte var="RUBRIQUE_RESUME" stl="text">
-This course provides the foundations of sustainable management and finance : reviewed concepts include market failures and externalities, CSR, green finance, ESG, climate risk pricing. Includes case studies, policy tools, and corporate strategies for sustainability and climate adaptation.
-    </texte>
-    <texte var="LIB_RUBRIQUE_CONTENU" stl="title">
-Content
-    </texte>
-    <texte var="RUBRIQUE_CONTENU" stl="text">
-<p><br />Session 1 Foundations of the Mixed Economic System<p>&#160;</p>* The Invisible Hand and the Welfare Theorems<br />* Liberalism and Competition<br />* Planetary Boundaries: A Major Economic Challenge<br />* Missing Markets and Externalities<br />* The Tragedy of the Commons<br />* GDP vs. GrDP<br />* Alternative Public Levers to Improve System Performance and Associated Challenges<p>&#160;</p>Session 2  The Firm and Sustainable Management<p>&#160;</p>* Shareholder Value Maximization vs. Corporate Social Responsibility (CSR)<br />* The Benefit Corporation Movement<br />* Diversity, Equity, and Inclusion (DEI)<br />* Public-Private Partnerships (PPP) in Regulation<br />* Environmental Backlash<br />* Key Reports and Perspectives:<br /> * The Draghi Report<br /> * IMD Competitiveness Report<p>&#160;</p><br />Session 3 Sustainable Finance &amp; Asset Pricing<p>&#160;</p>* Introduction to Asset Pricing<br />* Markowitz Portfolio Theory and the CAPM<br />* Integrating Climate Risks into Asset Pricing Models<br />* Market Equilibrium and the Cost of Capital Channel<br />* Divestment Strategies and Sustainability Impacts<p>&#160;</p>Session 4 Sustainable Finance &amp; Corporate Finance<p>&#160;</p>* Introduction to Capital Structure: Debt vs. Equity<br />* Sustainable Equity Investment:<br /> * Shareholder Activism<br /> * CEO Compensation and ESG Alignment<br />* ESG Integration in Corporate Strategy<br />* Sustainable Debt Instruments:<br /> * Green Bonds<br /> * Sustainability-Linked Bonds<br /> * Innovative Financing Frameworks<br />* Greenwashing: Challenges and Detection<p>&#160;</p>Session 5 Management: Selected Sustainability Topics<p>&#160;</p>* Growth vs. De-growth<br />* Resource Scarcity and Strategic Responses<br />* Rising Inequality<br />* The Circular Economy Objective<br />* Managing Natural Capital<br />* Case Studies: Corporate Sustainability Strategies (e.g., Holcim, NestlÃ©, LO)<br />* The Emission Trading System<br />* Externalities in Innovation and Industrial Policy<br />* Poster Topics and Group Discussions<p>&#160;</p>Session 6 Sustainable Finance: Advanced Topics &amp; Poster Projects<p>&#160;</p>* Carbon Offset Technologies:<br /> * CCUS vs. Nature-Based Solutions (Benefits &amp; Risks)<br />* Financing Green Innovation<br />* Climate Adaptation vs. Mitigation<br />* The Role of Insurance Markets in Sustainability<p>&#160;</p><br /></p>
-    </texte>
-    <texte var="LIB_RUBRIQUE_MOTS_CLES" stl="title">
-Keywords
-    </texte>
-    <texte var="RUBRIQUE_MOTS_CLES" stl="text">
-<ul>
-<li><strong>Sustainability</strong></li>
-<li>
-<p><strong>Externalities</strong></p>
-</li>
-<li>
-<p><strong>ESG (Environmental, Social, Governance)</strong></p>
-</li>
-<li>
-<p><strong>Climate Risk</strong></p>
-</li>
-<li>
-<p><strong>Green Finance</strong></p>
-</li>
-<li>
-<p><strong>Corporate Responsibility</strong></p>
-</li>
-<li>
-<p><strong>Public Policy</strong></p>
-</li>
-<li>
-<p><strong>Market Failures</strong></p>
-</li>
-<li>
-<p><strong>Circular Economy</strong></p>
-</li>
-<li>
-<p><strong>Carbon Pricing</strong></p>
-</li>
-<li>
-<p><strong>Innovation</strong></p>
-</li>
-<li>
-<p><strong>Capital Allocation</strong></p>
-</li>
-</ul>
-<p> </p>
-    </texte>
-    <texte var="TITRE_RUBRIQUE_COMPETENCES_REQUISES" stl="title">
-Learning Prerequisites
-    </texte>
-    <texte var="LIB_RUBRIQUE_COURS_PREREQUIS_OBLIGATOIRES" stl="subtitle">
-Required courses
-    </texte>
-    <texte var="RUBRIQUE_COURS_PREREQUIS_OBLIGATOIRES" stl="subtext">
-<p>None</p>
-    </texte>
-    <texte var="LIB_RUBRIQUE_COURS_PREREQUIS_INDICATIFS" stl="subtitle">
-Recommended courses 
-    </texte>
-    <texte var="RUBRIQUE_COURS_PREREQUIS_INDICATIFS" stl="subtext">
-<p>None</p>
-    </texte>
-    <texte var="LIB_RUBRIQUE_CONCEPTS_IMPORTANTS_A_MAITRISER" stl="subtitle">
-Important concepts to start the course
-    </texte>
-    <texte var="RUBRIQUE_CONCEPTS_IMPORTANTS_A_MAITRISER" stl="subtext">
-<p>Those reviewed in the Durabilité ENV-101 course, in particular the Political and Economic Levers covered by prof. Aklin</p>
-    </texte>
-    <texte var="LIB_RUBRIQUE_ACQUIS_FORMATION" stl="title">
-Learning Outcomes
-    </texte>
-    <texte var="TITRE_OBJECTIFS_APPRENTISSAGE" stl="text">
-By the end of the course, the student must be able to:<br/>
-    </texte>
-    <texte var="RUBRIQUE_ACQUIS_FORMATION" stl="text">
-<ul><li>Assess / Evaluate the nature of the environmental challenge for our economic system</li><li>Critique the sustainability strategies of corporates and SMEs</li><li>Contextualise the policy measures and corporate actions with regards sustainability objectives</li></ul>
-    </texte>
-    <texte var="TITRE_COMPETENCES_TRANSVERSALES" stl="title">
-Transversal skills
-    </texte>
-    <texte var="COMPETENCES_TRANS_ITEMPLAN" stl="text">
-<ul><li>Communicate effectively, being understood, including across different languages and cultures.</li><li>Evaluate one&apos;s own performance in the team, receive and respond appropriately to feedback.</li><li>Design and present a poster.</li><li>Make an oral presentation.</li><li>Use a work methodology appropriate to the task.</li><li>Assess progress against the plan, and adapt the plan as appropriate.</li></ul>
-    </texte>
-    <texte var="LIB_RUBRIQUE_METHODE_ENSEIGNEMENT" stl="title">
-Teaching methods
-    </texte>
-    <texte var="RUBRIQUE_METHODE_ENSEIGNEMENT" stl="text">
-<p>Ex Cathedra courses with preliminary readings</p>
-<p>Q&amp;A's forum and slides on Moodle</p>
-<p>Group work for creation and oral presentation of posters</p>
-    </texte>
-    <texte var="LIB_RUBRIQUE_TRAVAIL_ATTENDU" stl="title">
-Expected student activities
-    </texte>
-    <texte var="RUBRIQUE_TRAVAIL_ATTENDU" stl="text">
-<p>Intermediary report on poster preparation and poster</p>
-<p>Oral presentation of own poster and comments on other groups' posters</p>
-<p>Active participation in class</p>
-    </texte>
-    <texte var="LIB_RUBRIQUE_METHODE_EVALUATION" stl="title">
-Assessment methods
-    </texte>
-    <texte var="RUBRIQUE_METHODE_EVALUATION" stl="text">
-<p>QCM following the ex-cathedra presentations 30%</p>
-<p>Poster project management : 10%</p>
-<p>Summary and bibliography: 10%</p>
-<p>Poster: 40%</p>
-<p>Poster presentation: 10%</p>
-<p> </p>
-    </texte>
-    <texte var="TITRE_RUBRIQUE_ENCADREMENT" stl="title">
-Supervision
-    </texte>
-    <texte id="ENCADREMENT" stl="table">
-     <ligne>
-      <texte var="LIB_RUBRIQUE_OFFICE_HOURS" stl="text">
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PJGBG5R');</script>
+    <link rel="stylesheet" href="/assets/css/graph-search-widget.css">
+</head>
+
+
+<body>
+
+<div id="app" class="site">
+<header role="banner" class="header header-light">
+    <div class="header-light-content">
+        <a class="logo" href="//www.epfl.ch">
+            <img src="https://web2018.epfl.ch/8.1.0/icons/epfl-logo.svg"
+                 alt="Logo EPFL, École polytechnique fédérale de Lausanne"
+                 class="img-fluid">
+        </a>
+
+        <p class="site-title">
+            <a href="/studyplan/en">Study plans</a>
+        </p>
+
+        <!-- search -->
+        <form action="//search.epfl.ch" class="d-xl-none">
+            <a id="search-mobile-toggle" class="search-mobile-toggle searchform-controller" href="#">
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-search"></use>
+                </svg>
+                <span class="toggle-label sr-only">Show / hide the search form</span>
+            </a>
+            <div class="input-group search-mobile" role="search">
+
+                <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <svg class="icon" aria-hidden="true">
+                                <use xlink:href="#icon-search"></use>
+                            </svg>
+                        </span>
+                </div>
+                <label for="q-mobile" class="sr-only">Search</label>
+                <input type="text" class="form-control" id="q-mobile" name="q" placeholder="Search">
+                <div class="input-group-append">
+                    <a id="search-mobile-close" class="search-mobile-close searchform-controller" href="#">
+                        <svg class="icon" aria-hidden="true">
+                            <use xlink:href="#icon-close"></use>
+                        </svg>
+                        <span class="toggle-label sr-only">Hide the search form</span>
+                    </a>
+                </div>
+            </div>
+        </form>
+        <div class="dropdown dropright search d-none d-xl-block">
+            <a class="dropdown-toggle" href="#" data-toggle="dropdown" title="Search">
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-search"></use>
+                </svg>
+            </a>
+            <form action="//search.epfl.ch" class="dropdown-menu border-0 p-0">
+                <div class="search-form mt-1 input-group">
+                    <label for="q" class="sr-only">Search</label>
+                    <input type="text" class="form-control" id="q" name="q" placeholder="Search...">
+                    <button type="submit" class="d-none d-xl-block btn btn-primary input-group-append">Search
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <nav class="nav-lang nav-lang-short ml-auto">
+            <ul><li><a aria-label="Français" href="/studyplan/fr/propedeutique/architecture/coursebook/tomographie-architecturale-AR-129">FR</a></li><li><span aria-label="English" class="active">EN</span></li></ul>
+        </nav>
+    </div>
+</header>
+    <!-- body -->
+    <div class="main-container">
+        <!-- breadcrumb -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="breadcrumb-wrapper">
+        <ol class="breadcrumb pb-0">
+            <li class="breadcrumb-item">
+                <a href="//www.epfl.ch" title="Go to main site" aria-label="Go to main site" class="bread-link bread-home">
+                    <svg class="icon" aria-hidden="true">
+                        <use xlink:href="#icon-home"></use>
+                    </svg>
+                </a>
+            </li>
+            <li class="breadcrumb-item expand-links">
+                <button class="btn btn-expand-links" aria-expanded="false" title="Display the complete path">
+                    <span class="dots" aria-hidden="true">…</span>
+                    <span class="sr-only">Display the complete path</span>
+                </button>
+            </li>
+                    <li class="breadcrumb-item">
+                        <a href="/index.en.html">
+                            Study plans
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/studyplan/en/propedeutics/">
+                            Propedeutics
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/studyplan/en/propedeutics/architecture/">
+                            Architecture
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        Architectural Tomography
+                    </li>
+        </ol>
+    </nav>
+</div>
+        <!-- main container -->
+        <div class="nav-toggle-layout nav-aside-layout">
+            <div class="w-100 pb-3">
+                <main id="main" role="main" class="content container-grid">
+                    <div class="container mt-5">
+                        <header class="page-header d-xl-flex justify-content-xl-between align-items-xl-center mb-5">
+                            <h1 class="mb-4 mb-xl-0">Architectural Tomography</h1>
+
+                            <div class="mr-0">
+                            <a href="https://isa.epfl.ch/imoniteur_ISAP/!GEDPUBLICREPORTS.pdf?ww_i_reportModel=1696552884&ww_i_reportModelXsl=1696552963&ww_i_itemplan=4403998992&ww_c_langue=en">
+                                <button class="btn btn-sm btn-secondary">
+                                    <svg class="icon feather mb-1" aria-hidden="true">
+                                        <use xlink:href="#download"></use>
+                                    </svg>
+                                    Download the coursebook (PDF)
+                                </button>
+                            </a>
+                            </div>
+                        </header>
+
+                        <div class="row">
+                            <div class="course-details col-xl-7">
+                                <div class="course-summary mb-5">
+                                    <p>AR-129 / <strong>coefficient 4</strong></p>
+                                    <p><strong>Teacher(s): </strong> <a href='https://people.epfl.ch/282494?lang=en'>Derlet Maxence Denis</a>, <a href='https://people.epfl.ch/247708?lang=en'>Taillieu Jo François</a></p>
+                                    <p><strong>Language:</strong> French</p>
+                                </div>
+                                <hr>
+                                    <div class="mt-5">
+                                                <h2 class="h5">Résumé</h2>
+                                                <p>Cet enseignement situe le dessin technique comme outil d'enquête spatiale, constructive et contextuelle. Il introduit la coupe itérative comme outil sociotechnique de l'architecte permettant de mesurer, comprendre et interpréter des situations construites.</p>
+                                    </div>
+                                    <div class="mt-5">
+                                                <h2 class="h5">Contenu</h2>
+                                            <div class="collapse collapse-partial" id="course-content">
+                                                <p><p>L'acte de dessiner remplit, en architecture, plusieurs fonctions telles que la prescription, la description et/ou la sp&#233;culation (trad. Estevez, 2001 ; Spiro, 2013). Dans un contexte de d&#233;veloppement de strat&#233;gies de mod&#233;lisation int&#233;gr&#233;e, telles que le BIM, le dessin technique tend &#224; &#234;tre r&#233;duit &#224; sa seule capacit&#233; pr&#233;dictive. Il perd ainsi son r&#244;le fondamental de mesure, de compr&#233;hension, d'interpr&#233;tation et d'imagination de conditions spatiales complexes (trad. Dietz et Zamarbide, 2018).</p> <p>En contrepoint de cette r&#233;duction, ce cours positionne l'acte de dessiner comme un acte d'investigation spatiale et constructive (dimension analytique / scientifique). Il introduit le dessin en coupe 2D, &#224; la fois horizontal et vertical, comme une comp&#233;tence essentielle en architecture, ainsi qu'un prisme critique pour explorer des architectures situ&#233;es (trad. Bow-Wow, 2007 ; Fromonot, 2018).</p> <p>Le dessin en coupe r&#233;v&#232;le la morphologie gravitaire d'un b&#226;timent et sa logique constructive. Par analogie forte avec le discours m&#233;dical et les technologies d'imagerie (trad. Colomina, 2019), ce cours introduit la notion de tomographie architecturale comme moyen de r&#233;v&#233;ler l'anatomie de l'architecture et de rendre visibles des structures spatiales internes autrement inaccessibles &#224; la vision et &#224; l'exp&#233;rience. C'est &#233;galement un outil qui permet la mise en contexte dans le temps et l'espace, d&#233;passant les limites &#233;troites de l'architecture lue comme objet, pour examiner son insertion relationnelle dans un environnement plus large. Comme en g&#233;ologie et en arch&#233;ologie, le dessin en coupe permet une connexion au sol dans toute son &#233;paisseur (topographie naturelle, r&#233;seaux, infrastructures souterraines). Il donne aussi acc&#232;s &#224; une lecture du temps en r&#233;v&#233;lant des logiques de stratification, des disjonctions entre mat&#233;riel et immat&#233;riel, des extensions, des d&#233;molitions partielles, etc. Ainsi, dans le cadre de ce cours, le dessin en coupe est consid&#233;r&#233; comme un outil sociotechnique fondamental et op&#233;rationnel (trad. Akrich et al., 1987).</p> <p>Afin de permettre aux &#233;tudiants de pratiquer le dessin en coupe tout en d&#233;veloppant une compr&#233;hension critique de cet acte sp&#233;cifique, une s&#233;rie d'investigations sera men&#233;e sur un corpus de b&#226;timents s&#233;lectionn&#233;s pour leurs qualit&#233;s spatiales riches et leur lien fort avec leur environnement. Il s'agira donc de reconstituer la mati&#232;re, la structure et les spatialit&#233;s de ces projets par le biais du dessin en coupe 2D. Le corpus de cette automne 2025 portera sur des maisons avec un syst&#232;me constructif en bois. Au fil du semestre, une transition des techniques de dessin analogiques vers des outils num&#233;riques sera introduite pour r&#233;aliser les coupes et articuler une production collective autour de chaque maison.</p></p>
+                                            </div>
+                                            <button class="collapsed btn btn-light btn-block btn-sm mt-3" aria-expanded="false" data-toggle="collapse" data-target="#course-content" aria-controls="course-content">
+                                                Show more
+                                                <svg class="icon" aria-hidden="true"><use xlink:href="#icon-triangle"></use></svg>
+                                            </button>
+                                    </div>
+                                    <div class="mt-5">
+                                                <h2 class="h5">Mots-clés</h2>
+                                                <p><p>Dessin technique, tomographie, coupes, 2D, architecture contextualis&#233;e, analyse constructive</p></p>
+                                    </div>
+                                    <div class="mt-5">
+                                                <h2 class="h5">Acquis de formation</h2>
+                                                <p>A la fin de ce cours l'étudiant doit être capable de:<br></p>
+                                                <p><ul><li>Investiguer des situations construites par le dessin et reconstruire leur logique structurelle, spatiale et contextuelle</li><li>Composer avec des donn&#233;es et documents de nature h&#233;t&#233;rog&#232;ne</li><li>Formuler des hypoth&#232;ses</li><li>Contextualiser une production architecturale</li><li>Manipuler les conventions du dessin technique et d&#233;velopper son propre langage</li><li>Argumenter les choix de repr&#233;sentation</li><li>Interpr&#233;ter -&gt; R&#233;-interpr&#233;ter l'analyse constructive</li></ul></p>
+                                    </div>
+                                    <div class="mt-5">
+                                                <h2 class="h5">Compétences transversales</h2>
+                                                <p><ul><li>Communiquer efficacement et &#234;tre compris y compris par des personnes de languages et cultures diff&#233;rentes.</li><li>Recevoir du feedback (une critique) et y r&#233;pondre de mani&#232;re appropri&#233;e.</li><li>Faire preuve d'esprit critique</li><li>Faire preuve d'inventivit&#233;</li><li>Pers&#233;v&#233;rer dans la difficult&#233; ou apr&#232;s un &#233;chec initial pour trouver une meilleure solution.</li></ul></p>
+                                    </div>
+                                    <div class="mt-5">
+                                                <h2 class="h5">Méthode d'enseignement</h2>
+                                                <p><p>Le travail a lieu en atelier et sera soutenu par des conf&#233;rences ex-cathedra (en fran&#231;ais et/ou en anglais), des pin-ups en petits groupes et des retours comparatifs collectifs.<p>&#160;</p>Les &#233;tudiants r&#233;aliseront une analyse commune par studio, un fragment analogique et un profil num&#233;rique afin d'explorer un corpus de maisons non conventionnelles. Chaque maison sera pr&#233;sent&#233;e &#224; travers un ensemble de documents (plans, textes, documents techniques, photos de chantier, photos post-occupation, vid&#233;os). Le travail se d&#233;roulera ensuite en deux phases principales :<p>&#160;</p>- Analyse du sujet et &#233;tude analogique (carnet de croquis et fragment 1:1)&#160;<p>&#160;</p>- Profil habit&#233; constructif (production num&#233;rique collective)<p>&#160;</p>Estimation : 50 CHF (travail principalement informatique)</p></p>
+                                    </div>
+                                    <div class="mt-5">
+                                                <h2 class="h5">Méthode d'évaluation</h2>
+                                                <p><p>&#201;valuation continue (individuelle et collective).&#160;<p>&#160;</p>Les &#233;tudiants seront &#233;valu&#233;s selon les crit&#232;res qui se basent sur :<p>&#160;</p>- Capacit&#233; &#224; utiliser le dessin 2D (analogique et num&#233;rique) comme outil d'investigation constructive, spatiale et contextuelle<p>&#160;</p>- Capacit&#233; d'analyse, de compr&#233;hension constructive et de r&#233;interpr&#233;tation personnelle du sujet &#233;tudi&#233;<p>&#160;</p>- Capacit&#233; &#224; d&#233;velopper une approche personnelle et rigoureuse des conventions du dessin technique (niveau d'abstraction/figuration, techniques du trait, relations entre les dessins)&#160;<p>&#160;</p>- Collaboration (communication, n&#233;gociation, travail en &#233;quipe)&#160;<p>&#160;</p>- Engagement (participation, initiative, responsabilit&#233;)<p>&#160;</p>Acte 1 : D&#233;tail &#224; l'&#233;chelle 1:1 (50%)<p>&#160;</p>Acte 2 : Profil habit&#233; &#224; l'&#233;chelle 1:33 (50%)</p></p>
+                                    </div>
+                                    <div class="mt-5">
+                                                <h2 class="h5">Encadrement</h2>
+                                                <p><table><tbody><tr><td>
 Office hours
-      </texte>
-      <texte var="RUBRIQUE_OFFICE_HOURS" stl="textinline">
-No
-      </texte>
-     </ligne>
-     <ligne>
-      <texte var="LIB_RUBRIQUE_ASSISTANTS" stl="text">
+      </td><td>
+Oui
+      </td></tr><tr><td>
 Assistants
-      </texte>
-      <texte var="RUBRIQUE_ASSISTANTS" stl="textinline">
-Yes
-      </texte>
-     </ligne>
-     <ligne>
-      <texte var="LIB_RUBRIQUE_FORUM_ELECTRONIQUE" stl="text">
-Forum
-      </texte>
-      <texte var="RUBRIQUE_FORUM_ELECTRONIQUE" stl="textinline">
-Yes
-      </texte>
-     </ligne>
-    </texte>
-    <texte var="TITRE_RUBRIQUE_RESSOURCES" stl="title">
-Resources
-    </texte>
-    <texte var="LIB_RUBRIQUE_VDI" stl="subtitle">
-Virtual desktop infrastructure (VDI)
-    </texte>
-    <texte var="RUBRIQUE_VDI" stl="subtext">
-No
-    </texte>
-    <texte var="LIB_RUBRIQUE_BIBLIOGRAPHIE" stl="subtitle">
-Bibliography
-    </texte>
-    <texte var="RUBRIQUE_BIBLIOGRAPHIE" stl="subtext">
-<p>Available on Moodle</p>
-    </texte>
-    <texte var="LIB_RUBRIQUE_POLYCOPIES" stl="subtitle">
-Notes/Handbook
-    </texte>
-    <texte var="RUBRIQUE_POLYCOPIES" stl="subtext">
-<p>No</p>
-<p>Background readings on Moodle</p>
-    </texte>
-    <texte var="TITRE_LIENS_MOODLE" stl="subtitle">
-Moodle Link
-    </texte>
-    <texte var="RUBRIQUE_LIENS_MOODLE" stl="textWithLink">
-<ul><li><textWithLink><textLink>https://go.epfl.ch/HUM-289</textLink><link><a class="moodle_resource_link" href='https://go.epfl.ch/HUM-289'>https://go.epfl.ch/HUM-289</a></link></textWithLink></li></ul>
-    </texte>
-   </fiche>
-   <groupes>
-    <groupe>
-     <gpss>
-      <gps style="bama_cyclebachelor-shs" ordre="1">
-       <x_gps langue="fr">Programme Sciences humaines et sociales, 2025-2026, Bachelor semestre 3</x_gps>
-       <x_gps langue="en">Humanities and Social Sciences Program, 2025-2026, Bachelor semester 3</x_gps>
-       <uniteOrg>
-        <unite>
-         <x_unite langue="fr">Ecole polytechnique fédérale de Lausanne</x_unite>
-         <x_uniteCourt langue="fr">EPFL</x_uniteCourt>
-         <x_unite langue="en">Ecole polytechnique fédérale de Lausanne</x_unite>
-         <x_uniteCourt langue="en">EPFL</x_uniteCourt>
-        </unite>
-       </uniteOrg>
-       <periodeAcad>
-        <periode>
-         <x_periode langue="fr">2025-2026</x_periode>
-         <x_periodeCADI langue="fr"></x_periodeCADI>
-        </periode>
-       </periodeAcad>
-       <periodePedago>
-        <periode>
-         <x_periode langue="fr">Bachelor semestre 3</x_periode>
-         <x_periodeCADI langue="fr">BA3</x_periodeCADI>
-         <semestre>HIVER</semestre>
-         <x_periode langue="en">Bachelor semester 3</x_periode>
-         <x_periodeCADI langue="en">BA3</x_periodeCADI>
-        </periode>
-       </periodePedago>
-       <uniteAcad id="1751774" b_section="0">
-        <unite>
-         <x_unite langue="fr">Programme Sciences humaines et sociales</x_unite>
-         <x_uniteCourt langue="fr">SHS</x_uniteCourt>
-         <x_unite langue="en">Humanities and Social Sciences Program</x_unite>
-         <x_uniteCourt langue="en">SHS</x_uniteCourt>
-        </unite>
-       </uniteAcad>
-       <section>
-        <unite>
-         <x_unite langue="fr"></x_unite>
-         <x_uniteCourt langue="fr"></x_uniteCourt>
-         <x_unite langue="en"></x_unite>
-         <x_uniteCourt langue="en"></x_uniteCourt>
-        </unite>
-       </section>
-       <itps>
-        <itp>
-         <enseignement>
-          <specialisations>
-          </specialisations>
-          <typecourss>
-           <code langue="fr">obligatoire</code>
-           <code langue="en">mandatory</code>
-          </typecourss>
-          <details>
-           <detail>
-            <quantite>2</quantite>
-            <code langue="fr">Cours</code>
-            <code langue="en">Courses</code>
-            <frequences>
-             <code langue="fr">Heure(s) hebdo x 14 semaines</code>
-             <code langue="en">Hour(s) per week x 14 weeks</code>
-            </frequences>
-            <frequencesCodes>
-             <code langue="fr">H hebdo</code>
-             <code langue="en">H hebdo</code>
-            </frequencesCodes>
-            <profs>
-             <prof>
-              <nom>Zeni</nom>
-              <prenom>Federica</prenom>
-              <sciper>402789</sciper>
-              <section>
-               <unite>
-                <x_unite langue="fr">Ingénierie financière</x_unite>
-                <x_uniteCourt langue="fr">IF</x_uniteCourt>
-                <x_unite langue="en">Financial engineering</x_unite>
-                <x_uniteCourt langue="en">IF</x_uniteCourt>
-               </unite>
-              </section>
-             </prof>
-             <prof>
-              <nom>Danthine</nom>
-              <prenom>Jean-Pierre Marie Ghislain</prenom>
-              <sciper>152005</sciper>
-              <section>
-               <unite>
-                <x_unite langue="fr">Management de la technologie</x_unite>
-                <x_uniteCourt langue="fr">MTE</x_uniteCourt>
-                <x_unite langue="en">Management of Technology</x_unite>
-                <x_uniteCourt langue="en">MTE</x_uniteCourt>
-               </unite>
-              </section>
-             </prof>
-            </profs>
-           </detail>
-          </details>
-          <x_remarque>Une seule inscription à un cours SHS+MGT autorisée. En cas d&apos;inscriptions multiples elles seront toutes supprimées sans notification.</x_remarque>
-         </enseignement>
-         <examen>
-          <matiere>
-           <i_matiere>4478608290</i_matiere>
-           <x_matiere langue="fr">Sustainable Management and Finance</x_matiere>
-           <x_matiere langue="en">Sustainable Management and Finance</x_matiere>
-          </matiere>
-          <n_credits>2</n_credits>
-          <details>
-           <detail>
-            <code langue="fr">Pendant le semestre</code>
-            <code langue="en">During the semester</code>
-            <coeff>
-             <x_coeff langue="fr">Crédit</x_coeff>
-             <x_coeff langue="en">Credits</x_coeff>
-             <n_valeur>2</n_valeur>
-            </coeff>
-            <sessions>
-             <session>
-             </session>
-             <session>
-             </session>
-             <session>
-             </session>
-             <session>
-             </session>
-             <session>
-              <libelles>
-               <code langue="fr">Session hiver</code>
-               <code langue="en">Session winter</code>
-              </libelles>
-              <codes>
-               <code langue="fr">HIV</code>
-               <code langue="en">HIV</code>
-              </codes>
-             </session>
-             <session>
-             </session>
-            </sessions>
-           </detail>
-          </details>
-          <x_remarque>.</x_remarque>
-         </examen>
-        </itp>
-       </itps>
-      </gps>
-     </gpss>
-     <seances>
-      <seance ordre="1">
-       <d_seance>09-SEP-25</d_seance>
-       <n_duree>105</n_duree>
-       <n_day>2</n_day>
-       <n_heuredebut>17</n_heuredebut>
-       <n_dureeheure>2</n_dureeheure>
-       <espaces>
-        <espace>
-         <c_espace>CM1105</c_espace>
-         <x_espace langue="fr">CM 1 105</x_espace>
-         <x_espace langue="en">CM 1 105</x_espace>
-        </espace>
-       </espaces>
-       <typecours>LIP_COURS</typecours>
-      </seance>
-     </seances>
-    </groupe>
-   </groupes>
-   <codes>
-    <code>
-     <c_code>BALISES_TEXTES</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>BALISE_BOLD</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bb\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode>\x5b\x2fb\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[b]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode>[/b]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>font-weight=bold</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode>font-weight=normal</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;b&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode>&lt;/b&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3cb\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode>\x3c\x2fb\x3e</x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>BALISE_ITALIC</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bi\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode>\x5b\x2fi\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[i]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode>[/i]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>font-style=italic</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode>font-style=normal</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;i&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode>&lt;/i&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3ci\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode>\x3c\x2fi\x3e</x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>BALISE_RED</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bred\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode>\x5b\x2fred\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[red]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode>[/red]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>color=#990033</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode>color=black</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;span style=&quot;color:#990033;&quot;&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode>&lt;/span&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3cspan style=&quot;color:#990033;&quot;\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode>\x3c\x2fspan\x3e</x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>BALISE_TAB</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5btab\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[tab]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;img src=&quot;/images/gestacplus/base/pixel.gif&quot; width=&quot;40&quot; height=&quot;1&quot;/&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3cimg src=&quot;\x2fimages\x2fgestacplus\x2fbase\x2fpixel.gif&quot; width=&quot;40&quot; height=&quot;1&quot;\x2f\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>BALISE_LIST</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bli\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[li]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#x2022;&amp;#160;&amp;#160;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#x2022;&amp;#160;&amp;#160;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#x2022;\x26#160;\x26#160;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE5045487</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5b\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#160;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#160;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#160;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>BALISE_GREEN</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bgreen\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode>\x5b\x2fgreen\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[green]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode>[/green]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>color=#008000</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode>color=black</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;span style=&quot;color:#008000;&quot;&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode>&lt;/span&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3cspan style=&quot;color:#008000;&quot;\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode>\x3c\x2fspan\x3e</x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE7508550</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bblue\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode>\x5b\x2fblue\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[blue]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode>[/blue]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>color=#0080FF</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode>color=black</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;span style=&quot;color:#0080FF;&quot;&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode>&lt;/span&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3cspan style=&quot;color:#0080FF;&quot;\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode>\x3c\x2fspan\x3e</x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>BALISE_COURIER</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bcourier\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode>\x5b\x2fcourier\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[courier]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode>[/courier]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>font-family=Courier</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode>font-family=</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;font style=&quot;font-family:Courier;&quot;&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode>&lt;/font&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3cfont style=&quot;font-family:Courier;&quot;\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode>\x3c\x2ffont\x3e</x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>BALISE_SIZE20</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5b20\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode>\x5b\x2f20\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[20]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode>[/20]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>font-size=20pt</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode>font-size=</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;font style=&quot;font-size:20pt;&quot;&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode>&lt;/font&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3cfont style=&quot;font-size:20pt;&quot;\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode>\x3c\x2ffont\x3e</x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>BALISE_SIZE16</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5b16\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode>\x5b\x2f16\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[16]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode>[/16]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>font-size=16pt</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode>font-size=</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;font style=&quot;font-size:16pt;&quot;&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode>&lt;/font&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3cfont style=&quot;font-size:16pt;&quot;\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode>\x3c\x2ffont\x3e</x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>BALISE_SIZE12</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5b12\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode>\x5b\x2f12\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[12]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode>[/12]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>font-size=12pt</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode>font-size=</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;font style=&quot;font-size:12pt;&quot;&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode>&lt;/font&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3cfont style=&quot;font-size:12pt;&quot;\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode>\x3c\x2ffont\x3e</x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>BALISE_SIZE8</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5b8\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode>\x5b\x2f8\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[8]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode>[/8]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>font-size=8pt</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode>font-size=</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;font style=&quot;font-size:8pt;&quot;&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode>&lt;/font&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3cfont style=&quot;font-size:8pt;&quot;\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode>\x3c\x2ffont\x3e</x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>BALISE_BLACKBACK</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bblackback\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode>\x5b\x2fblackback\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[blackback]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode>[/blackback]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>background-color=black</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode>background-color=white</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;span style=&quot;background-color:black;&quot;&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode>&lt;/span&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3cspan style=&quot;background-color:black;&quot;\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode>\x3c\x2fspan\x3e</x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>BALISE_WHITE</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bwhite\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode>\x5b\x2fwhite\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[white]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode>[/white]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>color=white</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode>color=black</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;span style=&quot;color:white;&quot;&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode>&lt;/span&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3cspan style=&quot;color:white;&quot;\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode>\x3c\x2fspan\x3e</x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE47534071</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bbeta\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[beta]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#946;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#946;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#946;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE47534435</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5balpha\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[alpha]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#945;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#945;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#945;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE47551722</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bsub\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode>\x5b\x2fsub\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[sub]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode>[/sub]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>vertical-align=sub</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode>vertical-align=baseline</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;sub&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode>&lt;/sub&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3csub\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode>\x3c\x2fsub\x3e</x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE48535424</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bLAMBDA\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[LAMBDA]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#923;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#923;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#923;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE48535666</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5blambda\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[lambda]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#955;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#955;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#955;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE47551793</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bsup\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode>\x5b\x2fsup\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[sup]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode>[/sup]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>vertical-align=super</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode>vertical-align=baseline</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;sup&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode>&lt;/sup&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3csup\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode>\x3c\x2fsup\x3e</x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE56031535</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bdelta\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[delta]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#948;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#948;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#948;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE56073309</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bpi\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[pi]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#960;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#960;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#960;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE56074095</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bDELTA\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[DELTA]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#916;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#916;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#916;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE56074172</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bMU\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[MU]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#924;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#924;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#924;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE56074264</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bPI\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[PI]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#928;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#928;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#928;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE56074328</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bSIGMA\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[SIGMA]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#931;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#931;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#931;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE56075056</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bALPHA\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[ALPHA]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#913;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#913;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#913;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE56075186</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bBETA\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[BETA]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#914;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#914;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#914;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>BALISE_SYMBOL</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bsymbol\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode>\x5b\x2fsymbol\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[symbol]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode>[/symbol]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>font-family=Symbol</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode>font-family=</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;font style=&quot;font-family:Symbol;&quot;&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode>&lt;/font&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3cfont style=&quot;font-family:Symbol;&quot;\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode>\x3c\x2ffont\x3e</x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE56072935</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bmu\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[mu]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#956;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#956;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#956;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE56073842</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bsigma\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[sigma]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#963;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#963;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#963;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE68199232</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bphi\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[phi]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#966;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#966;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#966;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE68199285</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bPHI\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[PHI]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#934;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#934;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#934;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE68199991</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bgamma\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[gamma]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#947;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#947;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#947;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE68200031</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bGAMMA\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[GAMMA]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#915;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#915;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#915;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE68200077</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bomega\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[omega]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#969;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#969;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#969;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE68200150</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bOMEGA\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[OMEGA]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#937;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#937;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#937;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE72092691</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5beta\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[eta]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#951;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#951;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#951;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE72092805</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bETA\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[ETA]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#919;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#919;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#919;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>BALISE_SOULIGNER</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bu\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode>\x5b\x2fu\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[u]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode>[/u]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>text-decoration=underline</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode>text-decoration=none</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;u&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode>&lt;/u&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3cu\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode>\x3c\x2fu\x3e</x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE72092388</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bpsi\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[psi]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#968;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#968;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#968;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE72092541</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bPSI\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[PSI]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#936;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#936;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#936;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE140502511</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5brho\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[rho]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#961;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#961;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#961;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE140504636</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode>1</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bRHO\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[RHO]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#929;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#929;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#929;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE148292791</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bepsilon\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[epsilon]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#949;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#949;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#949;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE169976220</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5blig\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[lig]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#x203A;&amp;#160;&amp;#160;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#x203A;&amp;#160;&amp;#160;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#x203A;\x26#160;\x26#160;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>CODE148292899</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bEPSILON\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[EPSILON]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode>[inline]=&amp;#917;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&amp;#917;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x26#917;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-    <code>
-     <c_code>BALISETXT_SAUT</c_code>
-     <infocodes>
-      <infocode>
-       <c_infocode>BOOLEAN_Symbol</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_debut</c_infocode>
-       <x_infocode>\x5bbr\x2f\x5d</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>BaliseJS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_debut</c_infocode>
-       <x_infocode>[br/]</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>Balise_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_debut</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>FO_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_debut</c_infocode>
-       <x_infocode>&lt;br/&gt;</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>HTML_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_debut</c_infocode>
-       <x_infocode>\x3cbr\x2f\x3e</x_infocode>
-      </infocode>
-      <infocode>
-       <c_infocode>JS_fin</c_infocode>
-       <x_infocode></x_infocode>
-      </infocode>
-     </infocodes>
-    </code>
-   </codes>
-   <matiere>
-    <i_matiere>4478608290</i_matiere>
-    <x_matiere langue="fr">Sustainable Management and Finance</x_matiere>
-    <x_matiere langue="en">Sustainable Management and Finance</x_matiere>
-   </matiere>
-   <langueEns code="AN">English</langueEns>
-   <profs>
-    <prof>
-     <nom>Danthine Jean-Pierre Marie Ghislain</nom>
-     <sciper>152005</sciper>
-    </prof>
-    <prof>
-     <nom>Zeni Federica</nom>
-     <sciper>402789</sciper>
-    </prof>
-   </profs>
-  </fiche>
-  <i_uniteacad_for_pdf>1751774</i_uniteacad_for_pdf>
- </DATA>
-</PAGE>
-<!-- OpenXml:0.00s  agent ctrl:0.00s xml:0.25s  -->
+      </td><td>
+Oui
+      </td></tr></tbody></table></p>
+                                    </div>
+                                    <div class="mt-5">
+                                                <h2 class="h5">Ressources</h2>
+                                                <h2 class="h6">Bibliographie</h2>
+                                                <p><p>Liste indicative - non exhaustive</p> <p>ATELIER BOW-WOW, 2007,&#194;&#160;<i>Graphic Anatomy</i>, Toto, Tokyo</p> <p>COLOMINA Beatriz, 2019,&#194;&#160;<i>X-Ray Architecture</i>, Lars M&#195;&#338;ller Publishers, Z&#195;&#338;rich</p> <p>DIETZ Dieter et ZAMARBIDE&#194;&#160;Daniel, 2018, &#194;&#171;&#194;&#160;Drawing for Real. A Quest into the Space of Imagination&#194;&#160;&#194;&#187;, in&#194;&#160;<i>All About Space 3. </i><i>Beyond the Object</i>, Park Books, Zurich, pp. 259-288</p> <p>DUPIRE Alain et al., 1981,&#194;&#160;<i>Deux essais sur la construction&#194;&#160;: conventions, dimensions et architecture</i>, Mardaga, Bruxelles</p> <p>ESTEVEZ Daniel, 2001,&#194;&#160;<i>Dessin d'architecture et infographie</i>, CNRS, Paris</p> <p>FROMONOT Fran&#195;&#167;oise, Printemps 2018, &#194;&#171;&#194;&#160;&#195;&#137;loge de la coupe, ou l'enseignement de Rotterdam&#194;&#160;&#194;&#187;,&#194;&#160;<i>Criticat 20</i>, pp. 40-63</p> <p>SIMONNET Cyrille, 1997, <i>Imaginaire technique - Les Cahiers de la recherche architecturale,</i> #40, Parenth&#195;&#353;ses, Paris</p> <p>SPIRO Annette, 2013, <i>The Working Drawing, The Architect's Tool</i>, Park Books, Z&#195;&#338;rich</p> <p>DEPLAZES Andrea<em>, 2022, Construire l'architecture : du mate&#204;&#129;riau brut a&#204;&#128; l'e&#204;&#129;difice : un manuel</em></p></p>
+                                                <h2 class="h6">Ressources en bibliothèque</h2>
+                                                <p><ul><li><a href='https://epfl.swisscovery.slsp.ch/permalink/41SLSP_EPF/1g1fbol/alma990058196930205516'>Criticat, no 20, p. 40-63 : "Eloge de la coupe" / Fromonot</a></li><li><a href='https://slsp-epfl.primo.exlibrisgroup.com/permalink/41SLSP_EPF/1ce2fuc/alma990000077520205516'>Les Cahiers de la recherche architecturale, 40 (1997) : Imaginaire technique / Simonnet</a></li><li><a href='https://slsp-epfl.primo.exlibrisgroup.com/discovery/search?query=course_code,contains,%22AR-129%202025-2026%22&tab=41SLSP_EPF_MyInst_and_CI&search_scope=MyInst_and_CI&vid=41SLSP_EPF:prod'>Retrouver les livres recommandés à la Bibliothèque </a></li></ul></p>
+                                    </div>
+                            </div>
+                            <div class="course-infos col-xl-4 offset-xl-1 mt-5 mt-lg-0">
+                                <div class="study-plans">
+                                    <h2 class="h5">In the programs</h2>
+
+                                    <button class="collapse-title collapse-title-desktop " type="button" data-toggle="collapse" data-target="#bama_prop-ar_1" aria-expanded="true" aria-controls="bama_prop-ar_1">
+                                        Architecture<br>
+                                        <span class="d-block font-weight-normal">2025-2026  Bachelor semester 1</span>
+                                    </button>
+                                    <div class="collapse-item collapse-item-desktop show" id="bama_prop-ar_1" style="">
+                                        <ul class="list-bullet">
+                                                <li><strong>Semester:</strong> Fall</li>
+                                                <li><strong>Exam form:</strong> During the semester (winter session)</li>
+                                                <li><strong>Subject examined:</strong> Architectural Tomography</li>
+                                                <li><strong>Courses:</strong> 2 Hour(s) per week x 12 weeks</li>
+                                                <li><strong>Exercises:</strong> 2 Hour(s) per week x 12 weeks</li>
+                                                <li><strong>Type:</strong> mandatory</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="course-schedule mt-5">
+                                    <h2 class="h5">Reference week</h2>
+                                    <table aria-hidden="true" class="semaineDeRef"><tbody><tr><td class='time'>&nbsp;</td><td>Mo</td><td>Tu</td><td>We</td><td>Th</td><td>Fr</td></tr><tr><td class="time">8-9</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class="pt-4 pb-3 taken cours" rowspan="2"><a href="https://plan.epfl.ch/?room==SG 1138">SG1 138</a></td></tr><tr><td class="time">9-10</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">10-11</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class="pt-4 pb-3 taken exercice" rowspan="2"><a href="https://plan.epfl.ch/?room==SG 1138">SG1 138</a></td></tr><tr><td class="time">11-12</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">12-13</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">13-14</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">14-15</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">15-16</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">16-17</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">17-18</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">18-19</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">19-20</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">20-21</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">21-22</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></tbody></table>
+                                    <div class="coursebook-week-caption mt-4" role="presentation" aria-hidden="true">
+                                        <p>Légendes:</p>
+                                        <p class="caption caption-cours">
+                                            <span class="caption-icon"></span>
+                                            Lecture
+                                        </p>
+                                        <p class="caption caption-exercice">
+                                            <span class="caption-icon"></span>
+                                            Exercise, TP
+                                        </p>
+                                        <p class="caption caption-projet">
+                                            <span class="caption-icon"></span>
+                                            Project, Lab, other
+                                        </p>
+                                    </div>
+
+                                    <!-- accessible content for screen readers -->
+                                    <div class="coursebook-week-caption sr-only"><p>Friday, 8h -&nbsp;10h: Lecture <a href="https://plan.epfl.ch/?room==SG 1138">SG1 138</a></p><p>Friday, 10h -&nbsp;12h:  Exercise, TP <a href="https://plan.epfl.ch/?room==SG 1138">SG1 138</a></p></div>
+                                </div>
+
+                            <div class="my-5" id="relatedcourses">
+                                <h2 class="h5 mb-2">Related courses</h2>
+                                <p class="text-muted text-sm font-italic mb-4">Results from
+                                    <a href="https://graphsearch.epfl.ch">graphsearch.epfl.ch</a>.
+                                </p>
+                                <graph-widget-course-courses
+                                    course-id="AR-129"
+                                    locale="en"
+                                    limit="5"
+                                >
+                                </graph-widget-course-courses>
+                            </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- footer -->
+                </main>
+            </div>
+        </div>
+        <!-- footer -->
+        <div class="bg-gray-100 pt-5">
+            <div class="container">
+<footer class="footer-light">
+    <div class="row">
+        <div class="col-6 mx-auto mx-md-0 mb-4 col-md-3 col-lg-2">
+            <a href="//www.epfl.ch">
+                <img src="https://web2018.epfl.ch/8.1.0/icons/epfl-logo.svg"
+                     alt="Logo EPFL, Ecole polytechnique fédérale de Lausanne" class="img-fluid">
+            </a>
+        </div>
+        <div class="col-md-9 col-lg-10 mb-4">
+            <div class="ml-md-2 ml-lg-5">
+                <ul class="list-inline list-unstyled">
+                    <li class="list-inline-item">Contact</li>
+                    <li class="list-inline-item text-muted pl-3"><small>EPFL CH-1015 Lausanne</small>
+                    </li>
+                    <li class="list-inline-item text-muted pl-3"><small>+41 21 693 11 11</small></li>
+                </ul>
+                <div class="footer-light-socials">
+                    <p class="footer-title footer-title-no-underline">Follow the pulses of EPFL on social networks</p>
+                    <ul class="social-icon-list list-inline">
+                        <li>
+                            <a href="https://www.facebook.com/epflcampus"
+                            class="social-icon social-icon-facebook social-icon-negative" rel="noopener" target="_blank">
+                                <svg class="icon" aria-hidden="true"><use xlink:href="#icon-facebook"></use></svg>
+                                <span class="sr-only">Follow us on Facebook.</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://instagram.com/epflcampus"
+                            class="social-icon social-icon-instagram social-icon-negative" rel="noopener" target="_blank">
+                                <svg class="icon" aria-hidden="true"><use xlink:href="#icon-instagram"></use></svg>
+                                <span class="sr-only">Follow us on Instagram.</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.linkedin.com/school/epfl/"
+                            class="social-icon social-icon-linkedin social-icon-negative" rel="noopener" target="_blank">
+                                <svg class="icon" aria-hidden="true"><use xlink:href="#icon-linkedin"></use></svg>
+                                <span class="sr-only">Follow us on LinkedIn.</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://social.epfl.ch/@epfl/" 
+                            class="social-icon social-icon-mastodon social-icon-negative" rel="noopener" target="_blank">
+                                <svg class="icon" aria-hidden="true"><use xlink:href="#icon-mastodon"></use></svg>
+                                <span class="sr-only">Follow us on Mastodon.</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://x.com/epfl" class="social-icon social-icon-x social-icon-negative"
+                            rel="noopener" target="_blank">
+                                <svg class="icon" aria-hidden="true"><use xlink:href="#icon-x"></use></svg>
+                                <span class="sr-only">Follow us on X.</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.youtube.com/user/epflnews"
+                            class="social-icon social-icon-youtube social-icon-negative" rel="noopener" target="_blank">
+                                <svg class="icon" aria-hidden="true"><use xlink:href="#icon-youtube"></use></svg>
+                                <span class="sr-only">Follow us on Youtube.</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="footer-legal">
+                    <div class="footer-legal-links">
+                        <a href="https://www.epfl.ch/about/overview/regulations-and-guidelines/disclaimer/">Accessibility</a>
+                        <a href="https://www.epfl.ch/about/overview/regulations-and-guidelines/disclaimer/">Legal notice</a>
+                        <a href="https://go.epfl.ch/privacy-policy/">Privacy Policy</a>
+                    </div>
+                    <div>
+                        <p>© 2025 EPFL, all rights reserved</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+<button id="back-to-top" class="btn btn-primary btn-back-to-top">
+    <span class="sr-only">Back to top</span>
+    <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-chevron-top"></use>
+    </svg>
+</button>            </div>
+        </div>
+
+    </div>
+</div>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PJGBG5R"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+<script>
+    svgPath = 'https://web2018.epfl.ch/8.1.0/icons/icons.svg';
+    featherSvgPath = 'https://web2018.epfl.ch/8.1.0/icons/feather-sprite.svg';
+</script>
+  
+<script src="https://web2018.epfl.ch/8.1.0/js/elements.min.js"></script><script src="https://cdn.jsdelivr.net/gh/epflgraph/graphsearch_widgets@v1.0.2/dist/index.js" type="module"></script>
+<script>
+  // Hide Related courses if errors.
+  jQuery(function(){
+    setTimeout(function() {
+      const sr = jQuery('graph-widget-course-courses')[0].shadowRoot
+      const l = jQuery(sr).find('graph-widget-section').length
+      if (l === 0) {
+        jQuery('#relatedcourses').hide();
+      }
+    }, 1000)
+  });
+</script>
+</body>
+</html>

@@ -5,9 +5,8 @@ import requests
 def test_fetch_and_dump_from_url():
     """Fetch the provided URL and dump the response text to a file for eyeballing (no parsing)."""
     url = (
-        "http://isa.epfl.ch/imoniteur_ISAP/!itffichecours.htm?ww_i_matiere=4478608290"
-        "&ww_x_anneeacad=2840683608&ww_i_section=1751774&ww_i_niveau=6683117&ww_c_langue=en"
-    )
+        "https://edu.epfl.ch/studyplan/en/propedeutics/architecture/coursebook/architectural-tomography-AR-129"
+        )
     headers = {
         "User-Agent": (
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "

@@ -1,10 +1,9 @@
 /* global __SUPABASE_DEV_VARS__ */
 
 import { createClient } from '@supabase/supabase-js';
-import { inferMinorSeasonLabel } from '../utils/levels';
 
-const VIEW = 'courses_search_view';
-const SUBMISSIONS_TABLE = 'course_score_submissions';
+const VIEW = 'coursebook_course_summary';
+const PROGRAMS_TABLE = 'coursebook_programs';
 
 let cachedClient = null;
 let cachedClientKey = '';
@@ -16,21 +15,16 @@ export async function getCourses(options = {}) {
     q,
     type,
     semester,
-    creditsMin,
-    creditsMax,
-    availablePrograms,
+    degree,
     level,
     major,
     minor,
-    minorLabel,
-    degree,
+    creditsMin,
+    creditsMax,
+    section,
+    language,
     sortField,
     sortOrder,
-    minRelevance,
-    minSkills,
-    minProduct,
-    minVenture,
-    minFoundations,
   } = options;
 
   const { supabaseUrl, supabaseAnonKey } = resolveSupabaseConfig();
@@ -48,94 +42,46 @@ export async function getCourses(options = {}) {
     query = query.or(searchClause);
   }
 
-  if (type) {
-    query = query.eq('type', String(type));
+  if (section) {
+    query = query.eq('section', String(section));
   }
 
-  if (semester) {
-    query = query.eq('semester', String(semester));
+  if (language) {
+    const normalizedLanguage = String(language).trim();
+    if (normalizedLanguage) {
+      query = query.ilike('language', `%${normalizedLanguage}%`);
+    }
   }
 
-  const minCredits = parseNumberFilter(creditsMin);
-  if (minCredits != null) {
+  const minCredits = toNumericOrNull(creditsMin);
+  const maxCredits = toNumericOrNull(creditsMax);
+  if (minCredits !== null) {
     query = query.gte('credits', minCredits);
   }
-
-  const maxCredits = parseNumberFilter(creditsMax);
-  if (maxCredits != null) {
+  if (maxCredits !== null) {
     query = query.lte('credits', maxCredits);
   }
 
-  const programList = parseListFilter(availablePrograms);
-  if (programList.length) {
-    query = query.overlaps('available_programs', programList);
+  const programCourseIds = await collectCourseIdsForProgramFilters(supabase, {
+    type,
+    semester,
+    degree,
+    level,
+    major,
+    minor,
+  });
+
+  if (programCourseIds && programCourseIds.length === 0) {
+    return {
+      items: [],
+      total: 0,
+      page: resolvedPage,
+      pageSize: resolvedPageSize,
+    };
   }
 
-  const degreeValue = typeof degree === 'string' ? degree.trim() : '';
-  const levelValue = typeof level === 'string' ? level.trim() : '';
-  const majorValue = typeof major === 'string' ? major.trim() : '';
-  const minorProgram = typeof minor === 'string' ? minor.trim() : '';
-  const baseMinorLabel = typeof minorLabel === 'string' ? minorLabel.trim() : '';
-
-  const inferredMinorLevel = inferMinorSeasonLabel(degreeValue, levelValue);
-  const resolvedMinorLabel = baseMinorLabel || (minorProgram && inferredMinorLevel ? `${inferredMinorLevel} ${minorProgram}` : '');
-  let unionApplied = false;
-
-  if (majorValue && minorProgram && degreeValue === 'MA' && levelValue && inferredMinorLevel) {
-    const comboA = `and(available_levels.cs.${toPgArray([levelValue])},available_programs.cs.${toPgArray([majorValue])})`;
-    const comboBParts = [
-      `available_levels.cs.${toPgArray([inferredMinorLevel])}`,
-      `available_programs.cs.${toPgArray([minorProgram])}`,
-    ];
-    if (resolvedMinorLabel) {
-      comboBParts.push(`available_program_labels.cs.${toPgArray([resolvedMinorLabel])}`);
-    }
-    const comboB = `and(${comboBParts.join(',')})`;
-    query = query.or(`${comboA},${comboB}`);
-    unionApplied = true;
-  }
-
-  if (!unionApplied) {
-    if (levelValue) {
-      query = query.contains('available_levels', [levelValue]);
-    }
-    if (majorValue) {
-      query = query.contains('available_programs', [majorValue]);
-    }
-    if (minorProgram) {
-      if (inferredMinorLevel) {
-        query = query.contains('available_levels', [inferredMinorLevel]);
-      }
-      query = query.contains('available_programs', [minorProgram]);
-    }
-    if (resolvedMinorLabel) {
-      query = query.contains('available_program_labels', [resolvedMinorLabel]);
-    }
-  }
-
-  const minRelevanceVal = normalizeScoreFilter(minRelevance);
-  if (minRelevanceVal != null) {
-    query = query.gte('max_score_relevance_sigmoid', minRelevanceVal);
-  }
-
-  const minSkillsVal = normalizeScoreFilter(minSkills);
-  if (minSkillsVal != null) {
-    query = query.gte('max_score_skills_sigmoid', minSkillsVal);
-  }
-
-  const minProductVal = normalizeScoreFilter(minProduct);
-  if (minProductVal != null) {
-    query = query.gte('max_score_product_sigmoid', minProductVal);
-  }
-
-  const minVentureVal = normalizeScoreFilter(minVenture);
-  if (minVentureVal != null) {
-    query = query.gte('max_score_venture_sigmoid', minVentureVal);
-  }
-
-  const minFoundationsVal = normalizeScoreFilter(minFoundations);
-  if (minFoundationsVal != null) {
-    query = query.gte('max_score_foundations_sigmoid', minFoundationsVal);
+  if (programCourseIds && programCourseIds.length > 0) {
+    query = query.in('id', programCourseIds);
   }
 
   const orderColumn = mapSortField(sortField);
@@ -167,15 +113,12 @@ export async function getCourses(options = {}) {
   if (typeof console !== 'undefined') {
     const itemsCount = Array.isArray(data) ? data.length : 0;
     console.log(`[supabase] Retrieved ${itemsCount} rows from ${VIEW} (page ${resolvedPage}, total ${count ?? 'unknown'})`);
-    try {
-      console.log(JSON.stringify(data, null, 2));
-    } catch {
-      console.log(data);
-    }
   }
 
+  const items = (Array.isArray(data) ? data : []).map(normalizeCourseRecord);
+
   return {
-    items: data ?? [],
+    items,
     total: typeof count === 'number' ? count : (Array.isArray(data) ? data.length : 0),
     page: resolvedPage,
     pageSize: resolvedPageSize,
@@ -187,10 +130,8 @@ export async function getLevelsByDegree() {
   const supabase = ensureSupabaseClient(supabaseUrl, supabaseAnonKey);
 
   const { data, error } = await supabase
-    .from('levels')
-    .select('degree,label')
-    .order('degree', { ascending: true })
-    .order('label', { ascending: true });
+    .from(PROGRAMS_TABLE)
+    .select('semester');
 
   if (error) {
     throw new Error(`Supabase levels fetch failed: ${error.message}`);
@@ -199,10 +140,10 @@ export async function getLevelsByDegree() {
   const grouped = {};
   for (const row of data || []) {
     if (!row) continue;
-    const degreeRaw = typeof row.degree === 'string' ? row.degree.trim() : '';
-    const labelRaw = typeof row.label === 'string' ? row.label.trim() : '';
-    if (!degreeRaw || !labelRaw) continue;
-    const degree = degreeRaw.toUpperCase();
+    const labelRaw = typeof row.semester === 'string' ? row.semester.trim() : '';
+    if (!labelRaw) continue;
+    const degreeMatch = labelRaw.match(/^[A-Za-z]+/);
+    const degree = degreeMatch ? degreeMatch[0].toUpperCase() : 'OTHER';
     const list = grouped[degree] || (grouped[degree] = []);
     if (!list.includes(labelRaw)) {
       list.push(labelRaw);
@@ -214,6 +155,98 @@ export async function getLevelsByDegree() {
   }
 
   return grouped;
+}
+
+function normalizeCourseRecord(row) {
+  const teachers = Array.isArray(row?.teachers) ? row.teachers : [];
+  const programs = Array.isArray(row?.programs) ? row.programs : [];
+  const credits = normalizeCreditsValue(row?.credits);
+
+  const normalizedTeachers = teachers
+    .map((entry) => {
+      const name = typeof entry?.name === 'string' ? entry.name.trim() : '';
+      const url = typeof entry?.url === 'string' ? entry.url.trim() : '';
+      if (!name) return null;
+      return {
+        name,
+        ...(url ? { url } : {}),
+      };
+    })
+    .filter(Boolean);
+
+  const teacherNamesFromColumn = Array.isArray(row?.teacher_names) ? row.teacher_names : [];
+  const teacherNamesCombined = [
+    ...normalizedTeachers.map((t) => t.name),
+    ...teacherNamesFromColumn.map((name) => (typeof name === 'string' ? name.trim() : '')).filter(Boolean),
+  ];
+  const teacherNames = Array.from(new Set(teacherNamesCombined.filter(Boolean)));
+
+  const normalizedPrograms = programs
+    .map((entry) => {
+      const programName = typeof entry?.program_name === 'string' ? entry.program_name.trim() : '';
+      const level = typeof entry?.level === 'string' ? entry.level.trim() : '';
+      const semester = typeof entry?.semester === 'string' ? entry.semester.trim() : '';
+      const examForm = typeof entry?.exam_form === 'string' ? entry.exam_form.trim() : '';
+      const programType = typeof entry?.type === 'string' ? entry.type.trim() : '';
+      if (!programName && !level && !semester && !examForm && !programType) return null;
+      const payload = {};
+      if (programName) payload.program_name = programName;
+      if (level) payload.level = level;
+      if (semester) payload.semester = semester;
+      if (examForm) payload.exam_form = examForm;
+      if (programType) payload.type = programType;
+      return Object.keys(payload).length ? payload : null;
+    })
+    .filter(Boolean);
+
+  const availablePrograms = new Set();
+  const availableLevels = new Set();
+  const availableLabels = new Set();
+  for (const program of normalizedPrograms) {
+    if (program.program_name) {
+      availablePrograms.add(program.program_name);
+    }
+    if (program.level) {
+      availableLevels.add(program.level);
+    }
+    if (program.program_name && program.level) {
+      const seasonSuffix = program.semester ? ` (${program.semester})` : '';
+      availableLabels.add(`${program.level} ${program.program_name}${seasonSuffix}`.trim());
+    } else if (program.program_name) {
+      availableLabels.add(program.program_name);
+    } else if (program.level) {
+      availableLabels.add(program.level);
+    }
+  }
+
+  return {
+    id: row?.id ?? null,
+    unique_code: row?.unique_code ?? null,
+    course_key: row?.course_key ?? null,
+    course_name: row?.course_name ?? '',
+    course_code: row?.course_key ?? null,
+    section: row?.section ?? '',
+    course_url: row?.course_url ?? '',
+    language: row?.language ?? '',
+    credits,
+    type: typeof row?.type === 'string' ? row.type : null,
+    semester: typeof row?.semester === 'string' ? row.semester : null,
+    schedule: typeof row?.schedule === 'string' ? row.schedule : '',
+    teachers: normalizedTeachers,
+    teacher_names: teacherNames,
+    teacher_names_text: typeof row?.teacher_names_text === 'string' ? row.teacher_names_text : '',
+    programs: normalizedPrograms,
+    prof_name: teacherNames[0] || null,
+    prof_names: teacherNames.length ? teacherNames.join(', ') : null,
+    available_programs: Array.from(availablePrograms),
+    available_levels: Array.from(availableLevels),
+    available_program_labels: Array.from(availableLabels),
+    max_score_relevance_sigmoid: row?.max_score_relevance_sigmoid ?? null,
+    max_score_skills_sigmoid: row?.max_score_skills_sigmoid ?? null,
+    max_score_product_sigmoid: row?.max_score_product_sigmoid ?? null,
+    max_score_venture_sigmoid: row?.max_score_venture_sigmoid ?? null,
+    max_score_foundations_sigmoid: row?.max_score_foundations_sigmoid ?? null,
+  };
 }
 
 function ensureSupabaseClient(url, anonKey) {
@@ -247,42 +280,6 @@ function resolveSupabaseConfig() {
   return { supabaseUrl, supabaseAnonKey };
 }
 
-/**
- * Insert a user-submitted score record for a course.
- * Anonymous insert; ensure RLS allows anon INSERT on the table.
- */
-export async function submitCourseAspectScores(payload) {
-  const { supabaseUrl, supabaseAnonKey } = resolveSupabaseConfig();
-  const supabase = ensureSupabaseClient(supabaseUrl, supabaseAnonKey);
-
-  const record = normalizeSubmissionPayload(payload);
-  const { data, error } = await supabase.from(SUBMISSIONS_TABLE).insert([record]).select();
-  if (error) {
-    throw new Error(`Supabase insert failed: ${error.message}`);
-  }
-  return Array.isArray(data) && data.length ? data[0] : null;
-}
-
-function normalizeSubmissionPayload(p) {
-  const toNum = (v) => {
-    const n = Number(v);
-    if (!Number.isFinite(n)) return null;
-    if (n < 0) return 0;
-    if (n > 1) return 1;
-    return n;
-  };
-  return {
-    course_id: p?.courseId ?? null,
-    course_code: typeof p?.courseCode === 'string' ? p.courseCode : null,
-    score_skills: toNum(p?.scoreSkills),
-    score_product: toNum(p?.scoreProduct),
-    score_venture: toNum(p?.scoreVenture),
-    score_foundations: toNum(p?.scoreFoundations),
-    // Optional lightweight context for later analysis
-    user_agent: typeof navigator !== 'undefined' ? (navigator.userAgent || null) : null,
-  };
-}
-
 function buildSearchClause(rawValue) {
   if (typeof rawValue !== 'string') return '';
   const trimmed = rawValue.trim();
@@ -292,74 +289,31 @@ function buildSearchClause(rawValue) {
     .replace(/[^a-zA-Z0-9\s._-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-
   if (!sanitized) return '';
 
   const wildcard = sanitized.replace(/\s+/g, ' ');
   const pattern = `*${wildcard}*`;
-  const filters = [
+  const parts = [
     `course_name.ilike.${pattern}`,
-    `course_code.ilike.${pattern}`,
-    `prof_name.ilike.${pattern}`,
-    `prof_names.ilike.${pattern}`,
-    `exam_form.ilike.${pattern}`,
-    // Avoid ilike on enum/array columns (type/offering_types) to prevent Postgres 42883 errors
+    `course_key.ilike.${pattern}`,
+    `teacher_names_text.ilike.${pattern}`,
+    `language.ilike.${pattern}`,
+    `section.ilike.${pattern}`,
   ];
 
-  return filters.join(',');
-}
-
-function normalizeScoreFilter(value) {
-  if (value == null || value === '') return null;
-  const num = Number(value);
-  if (!Number.isFinite(num) || num <= 0) return null;
-  if (num >= 1) return 1;
-  return num;
-}
-
-function toPgArray(values) {
-  return `{${values.map((val) => `"${String(val).replace(/"/g, '\\"')}"`).join(',')}}`;
-}
-
-function parseNumberFilter(value) {
-  if (value == null || value === '') return null;
-  const num = Number(value);
-  return Number.isFinite(num) ? num : null;
-}
-
-function parseListFilter(value) {
-  if (Array.isArray(value)) {
-    return value.map((item) => String(item).trim()).filter(Boolean);
-  }
-
-  if (typeof value === 'string') {
-    return value
-      .split(',')
-      .map((item) => item.trim())
-      .filter(Boolean);
-  }
-
-  return [];
+  return parts.join(',');
 }
 
 function mapSortField(field) {
   switch (String(field)) {
-    case 'credits':
-      return 'credits';
-    case 'workload':
-      return 'workload';
-    case 'score_relevance':
-      return 'max_score_relevance_sigmoid';
-    case 'score_skills':
-      return 'max_score_skills_sigmoid';
-    case 'score_product':
-      return 'max_score_product_sigmoid';
-    case 'score_venture':
-      return 'max_score_venture_sigmoid';
-    case 'score_foundations':
-      return 'max_score_foundations_sigmoid';
     case 'course_name':
       return 'course_name';
+    case 'language':
+      return 'language';
+    case 'section':
+      return 'section';
+    case 'credits':
+      return 'credits';
     default:
       return null;
   }
@@ -388,4 +342,178 @@ function clampPage(value) {
   const num = Number(value);
   if (!Number.isFinite(num) || num < 1) return 1;
   return Math.trunc(num);
+}
+
+function toNumericOrNull(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
+}
+
+function normalizeCreditsValue(value) {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
+  if (typeof value === 'string') {
+    const numeric = Number(value.trim());
+    return Number.isFinite(numeric) ? numeric : null;
+  }
+  return null;
+}
+
+function normalizeSeasonValue(value) {
+  if (typeof value !== 'string') return '';
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return '';
+  if (normalized.includes('fall') || normalized.includes('autumn')) {
+    return 'Fall';
+  }
+  if (normalized.includes('spring')) {
+    return 'Spring';
+  }
+  return value.trim();
+}
+
+async function collectCourseIdsForProgramFilters(client, filters) {
+  const {
+    type,
+    semester,
+    degree,
+    level,
+    major,
+    minor,
+  } = filters || {};
+
+  const normalizedType = normalizeProgramType(type);
+  const normalizedLevel = typeof level === 'string' ? level.trim() : '';
+  const normalizedSeason = normalizeSeasonValue(semester);
+  const normalizedDegree = typeof degree === 'string' ? degree.trim().toUpperCase() : '';
+  const normalizedMajor = typeof major === 'string' ? major.trim() : '';
+  const normalizedMinor = typeof minor === 'string' ? minor.trim() : '';
+
+  const requirementSets = [];
+
+  async function fetchProgramCourseIds(programName, fallbackType) {
+    let query = client
+      .from(PROGRAMS_TABLE)
+      .select('course_id')
+      .eq('program_name', programName);
+
+    const enforcedType = normalizedDegree === 'PHD' ? null : (normalizedType || fallbackType);
+    if (enforcedType) {
+      query = query.eq('program_type', enforcedType);
+    }
+
+    if (normalizedDegree === 'PHD') {
+      query = query.eq('level', 'Doctoral School');
+    }
+
+    if (normalizedSeason) {
+      query = query.eq('semester', normalizedSeason);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      throw new Error(`Supabase program-filter fetch failed: ${error.message}`);
+    }
+    return extractCourseIdSet(data);
+  }
+
+  if (normalizedType || normalizedLevel || normalizedSeason || normalizedDegree) {
+    requirementSets.push(async () => {
+      let query = client
+        .from(PROGRAMS_TABLE)
+        .select('course_id');
+
+      if (normalizedType) {
+        query = query.eq('program_type', normalizedType);
+      }
+
+      if (normalizedLevel) {
+        query = query.eq('level', normalizedLevel);
+      } else if (normalizedDegree) {
+        if (normalizedDegree === 'PHD') {
+          query = query.eq('level', 'Doctoral School');
+        } else {
+          query = query.ilike('level', `${normalizedDegree}%`);
+        }
+      }
+
+      if (normalizedSeason) {
+        query = query.eq('semester', normalizedSeason);
+      }
+
+      const { data, error } = await query;
+      if (error) {
+        throw new Error(`Supabase program-filter fetch failed: ${error.message}`);
+      }
+      return extractCourseIdSet(data);
+    });
+  }
+
+  if (normalizedMajor && normalizedMinor) {
+    requirementSets.push(async () => {
+      const [majorSet, minorSet] = await Promise.all([
+        fetchProgramCourseIds(normalizedMajor, 'mandatory'),
+        fetchProgramCourseIds(normalizedMinor, 'optional'),
+      ]);
+      const union = new Set(majorSet);
+      for (const value of minorSet) union.add(value);
+      return union;
+    });
+  } else if (normalizedMajor) {
+    requirementSets.push(() => fetchProgramCourseIds(normalizedMajor, 'mandatory'));
+  } else if (normalizedMinor) {
+    requirementSets.push(() => fetchProgramCourseIds(normalizedMinor, 'optional'));
+  }
+
+  if (requirementSets.length === 0) {
+    return null;
+  }
+
+  let result = null;
+  for (const fetchSet of requirementSets) {
+    const ids = await fetchSet();
+    if (ids.size === 0) {
+      return [];
+    }
+    result = result ? intersectCourseIdSets(result, ids) : ids;
+    if (result.size === 0) {
+      return [];
+    }
+  }
+
+  return result ? Array.from(result) : [];
+}
+
+function normalizeProgramType(value) {
+  if (typeof value !== 'string') return '';
+  const candidate = value.trim().toLowerCase();
+  if (candidate === 'mandatory' || candidate === 'optional') {
+    return candidate;
+  }
+  return '';
+}
+
+function extractCourseIdSet(rows) {
+  const set = new Set();
+  for (const row of rows || []) {
+    const id = row?.course_id;
+    if (typeof id === 'number') {
+      set.add(id);
+    }
+  }
+  return set;
+}
+
+function intersectCourseIdSets(a, b) {
+  const smaller = a.size <= b.size ? a : b;
+  const larger = a.size > b.size ? a : b;
+  const result = new Set();
+  for (const value of smaller) {
+    if (larger.has(value)) {
+      result.add(value);
+    }
+  }
+  return result;
 }

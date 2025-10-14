@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import Questionnaire from './pages/Questionnaire.jsx';
+import GuidedSearch from './pages/GuidedSearch.jsx';
 import CoursesList from "./pages/CoursesList.jsx";
 
 function App() {
@@ -10,23 +10,21 @@ function App() {
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
-          padding: '10px 14px',
+          padding: '12px 0',
           marginBottom: '1.5rem',
-          borderRadius: 12,
-          background: 'var(--color-surface)',
           color: 'var(--color-text)',
-          border: '1px solid var(--color-border-subtle)',
-          boxShadow: 'var(--shadow-elevation)',
+          borderBottom: '1px solid var(--color-border-subtle)',
         }}
       >
         <img src="/logo.svg" alt="Site logo" style={{ height: '28px' }} />
         <Link to="/courses">Courses</Link>
         <span aria-hidden="true" style={{ color: 'var(--color-border)', fontSize: '0.9rem' }}>|</span>
-        <Link to="/questionnaire">Questionnaire</Link>
+        <Link to="/guided">Guided Search</Link>
       </nav>
       <Routes>
         <Route path="/courses" element={<CoursesList />} />
-        <Route path="/questionnaire" element={<Questionnaire />} />
+        <Route path="/guided" element={<GuidedSearch />} />
+        <Route path="/questionnaire" element={<GuidedSearch />} />
       </Routes>
     </Router>
   );

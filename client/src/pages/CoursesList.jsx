@@ -36,6 +36,22 @@ const TAG_COLORS = [
   '#14b8a6', '#facc15', '#ef4444', '#6366f1', '#10b981',
 ];
 
+const DETAIL_ROW_STYLE = {
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: 8,
+};
+
+const DETAIL_ICON_STYLE = {
+  width: 18,
+  height: 18,
+  flexShrink: 0,
+  marginTop: 2,
+  opacity: 0.75,
+};
+
+const DETAIL_PLAIN_OFFSET = 26;
+
 const THEME_VARS = Object.freeze({
   surface: 'var(--color-surface)',
   surfaceMuted: 'var(--color-surface-muted)',
@@ -209,6 +225,139 @@ function renderProgramTags(programs) {
   );
 }
 
+function renderIconRow(icon, label, content, key, inline = true) {
+  const src = icon.startsWith('/') ? icon : `/${icon}`;
+  if (inline) {
+    return (
+      <li key={key} style={DETAIL_ROW_STYLE}>
+        <img src={src} alt={label} style={DETAIL_ICON_STYLE} />
+        <span style={{ lineHeight: 1.5 }}>
+          
+          {content}
+        </span>
+      </li>
+    );
+  }
+
+  return (
+    <li key={key} style={DETAIL_ROW_STYLE}>
+      <img src={src} alt={label} style={DETAIL_ICON_STYLE} />
+      <div style={{ lineHeight: 1.5 }}>{content}</div>
+    </li>
+  );
+}
+
+function renderPlainRow(label, content, key) {
+  return (
+    <li key={key} style={{ marginLeft: DETAIL_PLAIN_OFFSET, lineHeight: 1.5 }}>
+      
+      {content}
+    </li>
+  );
+}
+
+function renderTeachers(entries, fallbackNames) {
+  const normalized = [];
+  const seen = new Set();
+
+  if (Array.isArray(entries)) {
+    for (const entry of entries) {
+      const name = typeof entry?.name === 'string' ? entry.name.trim() : '';
+      const url = typeof entry?.url === 'string' ? entry.url.trim() : '';
+      if (!name) continue;
+      const key = `${name}::${url}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      normalized.push({ name, url });
+    }
+  }
+
+  if (!normalized.length && Array.isArray(fallbackNames)) {
+    for (const candidate of fallbackNames) {
+      const cleaned = typeof candidate === 'string' ? candidate.trim() : '';
+      if (!cleaned) continue;
+      if (seen.has(`${cleaned}::`)) continue;
+      seen.add(`${cleaned}::`);
+      normalized.push({ name: cleaned, url: '' });
+    }
+  }
+
+  if (!normalized.length) return null;
+
+  const content = normalized.map((teacher, index) => {
+    const anchor = teacher.url ? (
+      <a href={teacher.url} target="_blank" rel="noreferrer">
+        {teacher.name}
+      </a>
+    ) : (
+      teacher.name
+    );
+    return (
+      <span key={`${teacher.name}-${teacher.url || index}`}>
+        {index > 0 ? ', ' : ''}
+        {anchor}
+      </span>
+    );
+  });
+
+  return renderIconRow(
+    'teacher.svg',
+    normalized.length > 1 ? 'Teachers' : 'Teacher',
+    content,
+    'teachers'
+  );
+}
+
+function splitScheduleLines(value) {
+  if (typeof value !== 'string') return [];
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function buildCourseDetailRows(course, scheduleLines) {
+  const rows = [];
+
+  const teacherRow = renderTeachers(course.teachers, course.teacher_names);
+  if (teacherRow) rows.push(teacherRow);
+
+  if (course.section) {
+    rows.push(renderIconRow('section.svg', 'Section', course.section, 'section'));
+  }
+
+  if (Number.isFinite(course.credits) || course.credits) {
+    rows.push(renderIconRow('credits.svg', 'Credits', course.credits, 'credits'));
+  }
+
+  if (course.type) {
+    rows.push(renderIconRow('type.svg', 'Type', course.type, 'type'));
+  }
+
+  if (course.semester) {
+    rows.push(renderIconRow('semester.svg', 'Semester', course.semester, 'semester'));
+  }
+
+  if (scheduleLines.length) {
+    const scheduleContent = scheduleLines.map((line, lineIdx) => (
+      <span key={`schedule-line-${lineIdx}`} style={{ display: 'block' }}>
+        {line}
+      </span>
+    ));
+    rows.push(renderIconRow('schedule.svg', 'Schedule', scheduleContent, 'schedule', false));
+  }
+
+  if (course.exam_form) {
+    rows.push(renderPlainRow('Exam', course.exam_form, 'exam'));
+  }
+
+  if (course.workload) {
+    rows.push(renderPlainRow('Workload', course.workload, 'workload'));
+  }
+
+  return rows;
+}
+
 const createDefaultFilters = () => ({
   query: "",
   type: "",
@@ -237,6 +386,8 @@ function parseFiltersFromSearch(search) {
   base.major = sp.get('major') || '';
   base.type = sp.get('type') || '';
   base.semester = sp.get('semester') || '';
+  if (base.semester.toLowerCase() === 'winter') base.semester = 'Fall';
+  if (base.semester.toLowerCase() === 'summer') base.semester = 'Spring';
   base.minor = sp.get('minor') || '';
   if (base.level && !base.semester) {
     base.semester = inferSemesterFromLevel(base.level) || '';
@@ -326,7 +477,9 @@ function getMajorOptions(tree, degree, level) {
   const majors = new Set();
 
   if (degree === 'PhD') {
-    const list = Array.isArray(tree.PhD?.edoc) ? tree.PhD.edoc : [];
+    const list = Array.isArray(tree.PhD?.['Doctoral School'])
+      ? tree.PhD['Doctoral School']
+      : [];
     for (const name of list) {
       if (typeof name === 'string' && name.trim()) {
         majors.add(name.trim());
@@ -384,7 +537,7 @@ function getMinorOptions(tree, degree, level) {
   if (!tree || degree !== 'MA') return [];
   if (isMAProjectLevel(level)) return [];
   const source = tree.MA || {};
-  const autumn = Array.isArray(source['Minor Autumn Semester']) ? source['Minor Autumn Semester'] : [];
+  const autumn = Array.isArray(source['Minor Fall Semester']) ? source['Minor Fall Semester'] : [];
   const spring = Array.isArray(source['Minor Spring Semester']) ? source['Minor Spring Semester'] : [];
   if (!level) {
     return Array.from(new Set([...autumn, ...spring])).sort();
@@ -396,7 +549,7 @@ function getMinorOptions(tree, degree, level) {
       return (idx % 2 === 1 ? autumn : spring).slice().sort();
     }
   }
-  if (level.toLowerCase().includes('autumn')) return autumn.slice().sort();
+  if (level.toLowerCase().includes('autumn') || level.toLowerCase().includes('fall')) return autumn.slice().sort();
   if (level.toLowerCase().includes('spring')) return spring.slice().sort();
   return Array.from(new Set([...autumn, ...spring])).sort();
 }
@@ -408,20 +561,20 @@ function adjustLevelForSemester(level, degree, semester) {
     const prefix = match[1];
     let num = Number(match[2]);
     if (Number.isFinite(num)) {
-      if (semester === 'winter' && num % 2 === 0) {
+      if (semester === 'Fall' && num % 2 === 0) {
         num = Math.max(1, num - 1);
-      } else if (semester === 'summer' && num % 2 === 1) {
+      } else if (semester === 'Spring' && num % 2 === 1) {
         num = num + 1;
       }
       return `${prefix}${num}`;
     }
   }
   if (degree === 'MA' && level.toLowerCase().includes('minor')) {
-    if (semester === 'winter' && level.toLowerCase().includes('spring')) {
-      return level.replace(/Spring/i, 'Autumn');
+    if (semester === 'Fall' && level.toLowerCase().includes('spring')) {
+      return level.replace(/Spring/i, 'Fall');
     }
-    if (semester === 'summer' && level.toLowerCase().includes('autumn')) {
-      return level.replace(/Autumn/i, 'Spring');
+    if (semester === 'Spring' && (level.toLowerCase().includes('autumn') || level.toLowerCase().includes('fall'))) {
+      return level.replace(/Autumn|Fall/i, 'Spring');
     }
   }
   return level;
@@ -946,7 +1099,8 @@ useEffect(() => {
     [programsTree, draftFilters.degree, draftFilters.level, draftFilters.minor],
   );
 
-  const levelDisabled = !draftFilters.degree || levelOptions.length === 0;
+  const isPhD = draftFilters.degree === 'PhD';
+  const levelDisabled = !draftFilters.degree || isPhD || levelOptions.length === 0;
   const majorDisabled = majorOptions.length === 0;
   const skipMinorFilters = shouldSkipMinorQuestion(draftFilters.degree, draftFilters.level);
   const minorDisabled = skipMinorFilters || !draftFilters.degree || minorOptions.length === 0;
@@ -1030,9 +1184,24 @@ useEffect(() => {
         }}
       >
         <div style={filterPanelStyle}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
             <h3 style={{ margin: 0 }}>Filters</h3>
-            <button onClick={() => setShowFilters(false)}>Hide</button>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                style={{
+                  background: THEME_VARS.surfaceMuted,
+                  border: `1px solid ${THEME_VARS.border}`,
+                  color: THEME_VARS.text,
+                  padding: '4px 8px',
+                  borderRadius: 4,
+                }}
+              >
+                Clear filters
+              </button>
+              <button onClick={() => setShowFilters(false)}>Hide</button>
+            </div>
           </div>
           <div style={{ display: "grid", gap: "0.75rem" }}>
             <input
@@ -1198,7 +1367,7 @@ useEffect(() => {
                 type="button"
                 onClick={() => {
                   setDraftFilters((prev) => {
-                    const nextSemester = prev.semester === "winter" ? "" : "winter";
+                    const nextSemester = prev.semester === "Fall" ? "" : "Fall";
                     let nextLevel = prev.level;
                     if (nextSemester) {
                       nextLevel = adjustLevelForSemester(prev.level, prev.degree, nextSemester);
@@ -1208,15 +1377,15 @@ useEffect(() => {
                     return next;
                   });
                 }}
-                style={chipButtonStyle(draftFilters.semester === "winter")}
+                style={chipButtonStyle(draftFilters.semester === "Fall")}
               >
-                Winter
+                Fall
               </button>
               <button
                 type="button"
                 onClick={() => {
                   setDraftFilters((prev) => {
-                    const nextSemester = prev.semester === "summer" ? "" : "summer";
+                    const nextSemester = prev.semester === "Spring" ? "" : "Spring";
                     let nextLevel = prev.level;
                     if (nextSemester) {
                       nextLevel = adjustLevelForSemester(prev.level, prev.degree, nextSemester);
@@ -1226,9 +1395,9 @@ useEffect(() => {
                     return next;
                   });
                 }}
-                style={chipButtonStyle(draftFilters.semester === "summer")}
+                style={chipButtonStyle(draftFilters.semester === "Spring")}
               >
-                Summer
+                Spring
               </button>
             </div>
           </div>
@@ -1297,18 +1466,6 @@ useEffect(() => {
               );
             })}
           </div>
-          <button
-            type="button"
-            onClick={handleClearFilters}
-            style={{
-              alignSelf: 'start',
-              background: THEME_VARS.surfaceMuted,
-              border: `1px solid ${THEME_VARS.border}`,
-              color: THEME_VARS.text,
-            }}
-          >
-            Clear filters
-          </button>
         </div>
         </div>
       </aside>
@@ -1445,6 +1602,8 @@ useEffect(() => {
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
             {courses.map((c, idx) => {
               const courseKey = courseKeyOf(c, idx);
+              const scheduleLines = splitScheduleLines(c.schedule);
+              const courseUrl = c.course_url || c.url || '';
               return (
                 <li key={courseKey}>
                   <article
@@ -1460,36 +1619,27 @@ useEffect(() => {
                     }}
                   >
                   <h3 style={{ margin: 0 }}>
-                    {c.url ? (
-                      <a href={c.url} target="_blank" rel="noreferrer">{c.course_name}</a>
-                    ) : (
-                      c.course_name
-                    )}
+                    <a
+                      href={courseUrl || '#'}
+                      target={courseUrl ? '_blank' : '_self'}
+                      rel={courseUrl ? 'noreferrer' : undefined}
+                      style={{
+                        color: 'inherit',
+                        textDecoration: 'none',
+                        pointerEvents: courseUrl ? 'auto' : 'none',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {c.course_name}
+                    </a>
                     {c.course_code && (
                       <small style={{ marginLeft: 8 }}>({c.course_code})</small>
                     )}
                   </h3>
                   {renderProgramTags(c.available_programs)}
                   {renderLevelTags(c.available_levels)}
-                  <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0 }}>
-                    {c.prof_name && (
-                      <li><strong>Professor:</strong> {c.prof_name}</li>
-                    )}
-                    {Number.isFinite(c.credits) || c.credits ? (
-                      <li><strong>Credits:</strong> {c.credits}</li>
-                    ) : null}
-                    {c.semester && (
-                      <li><strong>Semester:</strong> {c.semester}</li>
-                    )}
-                    {c.exam_form && (
-                      <li><strong>Exam:</strong> {c.exam_form}</li>
-                    )}
-                    {c.workload && (
-                      <li><strong>Workload:</strong> {c.workload}</li>
-                    )}
-                    {c.type && (
-                      <li><strong>Type:</strong> {c.type}</li>
-                    )}
+                  <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {buildCourseDetailRows(c, scheduleLines)}
                   </ul>
                   <ScoreSummary
                     course={c}
@@ -1541,6 +1691,8 @@ useEffect(() => {
               >
                 {arranged.map(({ c, rank, idx }) => {
                   const courseKey = courseKeyOf(c, idx);
+                  const scheduleLines = splitScheduleLines(c.schedule);
+                  const courseUrl = c.course_url || c.url || '';
                   const t = maxRank <= 0 || rank === Infinity ? 1 : rank / maxRank; // 0..1, worst close to 1
                   const minL = 25, maxL = 90;
                   const lightness = Math.round(minL + t * (maxL - minL));
@@ -1562,31 +1714,28 @@ useEffect(() => {
                       }}
                     >
                       <h3 style={{ margin: 0, fontSize: 16, lineHeight: '20px' }}>
-                        {c.url ? (
-                          <a href={c.url} target="_blank" rel="noreferrer" style={{ color: 'inherit' }}>{c.course_name}</a>
-                        ) : (
-                          c.course_name
-                        )}
+                        <a
+                          href={courseUrl || '#'}
+                          target={courseUrl ? '_blank' : '_self'}
+                          rel={courseUrl ? 'noreferrer' : undefined}
+                          style={{
+                            color: 'inherit',
+                            textDecoration: 'none',
+                            pointerEvents: courseUrl ? 'auto' : 'none',
+                            fontWeight: 600,
+                          }}
+                        >
+                          {c.course_name}
+                        </a>
                       </h3>
                       {c.course_code && (
                         <div style={{ fontSize: 12, opacity: 0.85, marginTop: 2 }}>{c.course_code}</div>
                       )}
-                      {renderProgramTags(c.available_programs)}
-                      {renderLevelTags(c.available_levels)}
-                      <div style={{ marginTop: 8, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontSize: 12 }}>
-                        {Number.isFinite(c.credits) || c.credits ? (
-                          <div><strong>ECTS:</strong> {c.credits}</div>
-                        ) : <div />}
-                        {c.semester && (
-                          <div><strong>Sem:</strong> {c.semester}</div>
-                        )}
-                        {c.workload && (
-                          <div><strong>Work:</strong> {c.workload}</div>
-                        )}
-                        {c.type && (
-                          <div><strong>Type:</strong> {c.type}</div>
-                        )}
-                      </div>
+                    {renderProgramTags(c.available_programs)}
+                    {renderLevelTags(c.available_levels)}
+                      <ul style={{ listStyle: 'none', padding: 0, margin: '8px 0 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {buildCourseDetailRows(c, scheduleLines)}
+                      </ul>
                       <ScoreSummary
                         course={c}
                         layout="grid"

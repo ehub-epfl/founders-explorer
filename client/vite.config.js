@@ -91,7 +91,7 @@ async function printSupabaseSnapshot(vars) {
   }
 
   try {
-    const endpoint = new URL('/rest/v1/courses_search_view', url.replace(/\/$/, ''))
+    const endpoint = new URL('/rest/v1/coursebook_course_summary', url.replace(/\/$/, ''))
     endpoint.searchParams.set('select', '*')
 
     const response = await fetch(endpoint, {
@@ -109,7 +109,7 @@ async function printSupabaseSnapshot(vars) {
 
     const data = await response.json()
     const total = Array.isArray(data) ? data.length : 0
-    console.log(`[supabase] Retrieved ${total} rows from courses_search_view`)
+    console.log(`[supabase] Retrieved ${total} rows from coursebook_course_summary`)
     console.log(JSON.stringify(data, null, 2))
   } catch (err) {
     console.error('[supabase] Snapshot fetch threw an error:', err?.message || err)

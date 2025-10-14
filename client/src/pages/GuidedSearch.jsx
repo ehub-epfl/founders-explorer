@@ -8,9 +8,10 @@ import {
     shouldSkipMinorQuestion,
 } from '../utils/levels';
 
-function Questionnaire() {
+function GuidedSearch() {
     const navigate = useNavigate();
     const [currentStep, setCurrentStep] = useState(0);
+    const [showIntro, setShowIntro] = useState(true);
     const [formData, setFormData] = useState({
         program: '',
         semester: '',
@@ -70,8 +71,7 @@ function Questionnaire() {
                 key: 'program',
                 get: () => {
                     const base = safeKeys(tree);
-                    if (base.length === 0) return [];
-                    return [...base, 'Other'];
+                    return base;
                 }
             },
             {
@@ -87,13 +87,13 @@ function Questionnaire() {
                         for (const label of MA_PROJECT_LEVELS) {
                             if (!result.includes(label)) result.push(label);
                         }
-                        return result.length ? [...result, 'Other'] : ['Other'];
+                    return result;
                     }
                     if (p === 'BA') {
                         const semesters = keys.filter(k => /^BA\d+$/i.test(k));
-                        return semesters.length ? [...semesters, 'Other'] : ['Other'];
-                    }
-                    return ['Other'];
+                    return semesters;
+                }
+                return [];
                 }
             },
             {
@@ -103,13 +103,13 @@ function Questionnaire() {
                     if (!p) return [];
                     if (p === 'PhD') {
                         const list = Array.isArray(tree.PhD?.edoc) ? tree.PhD.edoc : [];
-                        return list.length ? [...list, 'Other'] : ['Other'];
+                        return list;
                     }
                     const sem = data.semester;
                     if (!sem || !tree[p]) return [];
                     const bucket = tree[p];
                     const list = Array.isArray(bucket?.[sem]) ? bucket[sem] : [];
-                    return list.length ? [...list, 'Other'] : ['Other'];
+                    return list;
                 }
             },
             {
@@ -129,7 +129,7 @@ function Questionnaire() {
                         const set = new Set([...autumn, ...spring]);
                         list = [...set];
                     }
-                    return list.length ? [...list, 'Other'] : ['Other'];
+                    return list;
                 }
             }
         ][stepIndex];
@@ -140,11 +140,7 @@ function Questionnaire() {
         {
             key: 'program',
             question: 'Which program are you in?',
-            getOptions: () => {
-                const base = Object.keys(programsTree || {});
-                if (base.length === 0) return [];
-                return [...base, 'Other'];
-            }
+            getOptions: () => Object.keys(programsTree || {}),
         },
         {
             key: 'semester',
@@ -160,13 +156,13 @@ function Questionnaire() {
                     for (const label of MA_PROJECT_LEVELS) {
                         if (!result.includes(label)) result.push(label);
                     }
-                    return result.length ? [...result, 'Other'] : ['Other'];
+                    return result;
                 }
                 if (p === 'BA') {
                     const semesters = keys.filter(k => /^BA\d+$/i.test(k));
-                    return semesters.length ? [...semesters, 'Other'] : ['Other'];
+                    return semesters;
                 }
-                return ['Other'];
+                return [];
             }
         },
         {
@@ -177,14 +173,14 @@ function Questionnaire() {
                 const p = formData.program;
                 if (!p) return [];
                 if (p === 'PhD') {
-                    const list = Array.isArray(programsTree.PhD?.edoc) ? programsTree.PhD.edoc : [];
-                    return list.length ? [...list, 'Other'] : ['Other'];
+                    const list = Array.isArray(programsTree.PhD?.['Doctoral School']) ? programsTree.PhD['Doctoral School'] : [];
+                    return list;
                 }
                 const sem = formData.semester;
                 if (!sem || !programsTree[p]) return [];
                 const bucket = programsTree[p];
                 const list = Array.isArray(bucket?.[sem]) ? bucket[sem] : [];
-                return list.length ? [...list, 'Other'] : ['Other'];
+                return list;
             }
         },
         {
@@ -192,6 +188,7 @@ function Questionnaire() {
             question: 'Which minor?',
             getOptions: (formData) => {
                 if (!programsTree) return [];
+                if (formData.program === 'PhD') return [];
                 if (shouldSkipMinorQuestion(formData.program, formData.semester)) return [];
                 const sem = formData.semester || '';
                 const autumn = Array.isArray(programsTree.MA?.['Minor Autumn Semester']) ? programsTree.MA['Minor Autumn Semester'] : [];
@@ -206,7 +203,7 @@ function Questionnaire() {
                     const set = new Set([...autumn, ...spring]);
                     list = [...set];
                 }
-                return list.length ? [...list, 'Other'] : ['Other'];
+                return list;
             }
         }
     ];
@@ -258,14 +255,14 @@ function Questionnaire() {
 
     // Auto-advance when options are empty; define this hook before any early return
     useEffect(() => {
-        // Do nothing while loading tree
-        if (!programsTree && !loadError) return;
+        // Do nothing while loading tree or while the intro screen is visible
+        if (showIntro || (!programsTree && !loadError)) return;
         const opts = computeOptions(currentStep, formData, programsTree);
         if (Array.isArray(opts) && opts.length === 0) {
             // Skip this step with empty answer for this key
             handleAnswer('');
         }
-    }, [currentStep, programsTree, loadError]);
+    }, [currentStep, programsTree, loadError, showIntro]);
 
     if (!programsTree && !loadError) {
         return (
@@ -305,6 +302,59 @@ function Questionnaire() {
         );
     }
 
+    if (showIntro) {
+        return (
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '70vh',
+                padding: '48px 16px',
+                textAlign: 'center',
+                gap: '24px',
+            }}>
+                <div style={{ maxWidth: 560 }}>
+                    <h1 style={{ marginBottom: '0.75rem', fontSize: '2rem' }}>Guided Search</h1>
+                    <p style={{ margin: 0, fontSize: '1.05rem', color: 'var(--color-text-muted, #4b5563)' }}>
+                        Answer a few quick questions and we’ll prefill the course filters for you.
+                    </p>
+                </div>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <button
+                        type="button"
+                        onClick={() => navigate('/courses')}
+                        style={{
+                            padding: '10px 18px',
+                            borderRadius: 6,
+                            border: '1px solid var(--color-border, #d1d5db)',
+                            background: 'var(--color-surface, #fff)',
+                            color: 'var(--color-text, #111827)',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        Skip
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setShowIntro(false)}
+                        style={{
+                            padding: '10px 18px',
+                            borderRadius: 6,
+                            border: '1px solid var(--color-primary, #2563eb)',
+                            background: 'var(--color-primary, #2563eb)',
+                            color: 'var(--color-primary-contrast, #fff)',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                        }}
+                    >
+                        Continue
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     const q = allQuestions[currentStep];
     let options = [];
     if (q.getOptions) {
@@ -316,51 +366,53 @@ function Questionnaire() {
     // (auto-advance handled by the earlier effect to keep Hooks order stable)
 
     return (
-        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100vw', padding: '16px'}}>
+        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', width: '100%', padding: '40px 16px'}}>
             <div style={{
                 textAlign: 'center',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '20px',
-                padding: '24px',
-                borderRadius: 12,
-                background: 'var(--color-surface)',
+                padding: '0 12px',
                 color: 'var(--color-text)',
-                border: '1px solid var(--color-border-subtle)',
-                boxShadow: 'var(--shadow-elevation)',
-                minWidth: 'min(90vw, 420px)',
+                maxWidth: '520px',
+                width: '100%',
             }}>
-                <h2>{q.question}</h2>
+                <h2 style={{ margin: '0 0 0.5rem' }}>{q.question}</h2>
                 {(q.key === 'major' || q.key === 'minor') ? (
-                    <div style={{display: 'flex', flexDirection: 'row', gap: '10px', justifyContent: 'center', alignItems: 'center'}}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
                         <select
                             value={formData[q.key]}
                             onChange={(e) => setFormData(prev => ({ ...prev, [q.key]: e.target.value }))}
+                            disabled={q.key !== 'major' && formData.program === 'PhD'}
                         >
                             <option value="" disabled>Select an option</option>
                             {options.map(opt => (
                                 <option key={opt} value={opt}>{opt}</option>
                             ))}
                         </select>
-                        <button onClick={() => handleAnswer(formData[q.key])} disabled={!formData[q.key]}>Next</button>
-                        <button onClick={goBack} disabled={!canGoBack}>Back</button>
+                        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+                            <button onClick={goBack} disabled={!canGoBack}>Back</button>
+                            <button onClick={() => handleAnswer(formData[q.key])} disabled={!formData[q.key]}>Next</button>
+                        </div>
                     </div>
                 ) : (
-                    <div style={{display: 'flex', flexDirection: 'row', gap: '10px', justifyContent: 'center', alignItems: 'center'}}>
-                        {(() => {
-                            const opts = options.includes('Other') ? options : [...options, 'Other'];
-                            return opts.map(opt => (
+                    <>
+                        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+                            {options.map(opt => (
                                 <button key={opt} onClick={() => handleAnswer(opt)}>
                                     {opt}
                                 </button>
-                            ));
-                        })()}
-                        <button onClick={goBack} disabled={!canGoBack}>Back</button>
-                    </div>
+                            ))}
+                        </div>
+                        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', marginTop: 12 }}>
+                            <button onClick={goBack} disabled={!canGoBack}>Back</button>
+                            <button onClick={() => handleAnswer('')}>Skip</button>
+                        </div>
+                    </>
                 )}
             </div>
         </div>
     );
 }
 
-export default Questionnaire;
+export default GuidedSearch;
