@@ -6,10 +6,10 @@
 //   course_code: string,
 //   course_id: string,
 //   score_relevance: number (0..100),
-//   score_skills: number (0..100),
+//   score_personal: number (0..100),
 //   score_product: number (0..100),
 //   score_venture: number (0..100),
-//   score_foundations: number (0..100),
+//   score_intro: number (0..100),
 //   turnstileToken?: string // optional if you enable Turnstile
 // }
 
@@ -67,10 +67,10 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       course_code,
       course_id,
       score_relevance,
-      score_skills,
+      score_personal,
       score_product,
       score_venture,
-      score_foundations,
+      score_intro,
       // turnstileToken,
     } = json as Record<string, unknown>;
 
@@ -81,11 +81,11 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       return cors({ status: 400 }, JSON.stringify({ error: 'course_id is required (string)' }));
     }
 
-    const scores = [score_relevance, score_skills, score_product, score_venture, score_foundations];
+    const scores = [score_relevance, score_personal, score_product, score_venture, score_intro];
     if (scores.some((s) => !inRange(s, 0, 100))) {
       return cors(
         { status: 400 },
-        JSON.stringify({ error: 'scores must be numbers between 0 and 100: score_relevance, score_skills, score_product, score_venture, score_foundations' })
+        JSON.stringify({ error: 'scores must be numbers between 0 and 100: score_relevance, score_personal, score_product, score_venture, score_intro' })
       );
     }
 
@@ -120,10 +120,10 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
         course_code: (course_code as string).trim(),
         course_id: String(course_id).trim(),
         score_relevance: roundScore(score_relevance as number),
-        score_skills: roundScore(score_skills as number),
+        score_personal: roundScore(score_personal as number),
         score_product: roundScore(score_product as number),
         score_venture: roundScore(score_venture as number),
-        score_foundations: roundScore(score_foundations as number),
+        score_intro: roundScore(score_intro as number),
         ip_hash,
         ua,
       }),

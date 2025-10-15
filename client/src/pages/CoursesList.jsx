@@ -985,10 +985,10 @@ function ScoreSummary({
         course_id: course?.id ?? null,
         course_code: course?.course_code ?? null,
         score_relevance: Math.max(0, Math.min(100, Math.round(values.relevance ?? 0))),
-        score_skills: Math.max(0, Math.min(100, Math.round(values.skills ?? 0))),
+        score_personal: Math.max(0, Math.min(100, Math.round(values.skills ?? 0))),
         score_product: Math.max(0, Math.min(100, Math.round(values.product ?? 0))),
         score_venture: Math.max(0, Math.min(100, Math.round(values.venture ?? 0))),
-        score_foundations: Math.max(0, Math.min(100, Math.round(values.foundations ?? 0))),
+        score_intro: Math.max(0, Math.min(100, Math.round(values.foundations ?? 0))),
       });
       setSubmitted(true);
       broadcastState({ submitted: true, timestamp: Date.now() });

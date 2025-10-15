@@ -15,10 +15,10 @@
  *     course_code: 'CS101',
  *     course_id: '12345',
  *     score_relevance: 75,
- *     score_skills: 90,
+ *     score_personal: 90,
  *     score_product: 74,
  *     score_venture: 100,
- *     score_foundations: 84,
+ *     score_intro: 84,
  *   });
  */
 
@@ -45,14 +45,14 @@ function roundScore(n) {
  * @param {string} params.course_code
  * @param {string} params.course_id
  * @param {number} params.score_relevance
- * @param {number} params.score_skills
+ * @param {number} params.score_personal
  * @param {number} params.score_product
  * @param {number} params.score_venture
- * @param {number} params.score_foundations
+ * @param {number} params.score_intro
  * @param {string} [params.turnstileToken]  // optional, if you enable Cloudflare Turnstile
- * @returns {{course_code:string, course_id:string, score_relevance:number, score_skills:number, score_product:number, score_venture:number, score_foundations:number, turnstileToken?:string}}
+ * @returns {{course_code:string, course_id:string, score_relevance:number, score_personal:number, score_product:number, score_venture:number, score_intro:number, turnstileToken?:string}}
  */
-function buildPayload({ course_code, course_id, score_relevance, score_skills, score_product, score_venture, score_foundations, turnstileToken }) {
+function buildPayload({ course_code, course_id, score_relevance, score_personal, score_product, score_venture, score_intro, turnstileToken }) {
   const normalizedCode = typeof course_code === 'string' ? course_code.trim() : String(course_code ?? '').trim()
   if (!normalizedCode) {
     throw new Error('course_code is required');
@@ -62,18 +62,18 @@ function buildPayload({ course_code, course_id, score_relevance, score_skills, s
   if (!normalizedId) {
     throw new Error('course_id is required');
   }
-  const scores = [score_relevance, score_skills, score_product, score_venture, score_foundations];
+  const scores = [score_relevance, score_personal, score_product, score_venture, score_intro];
   if (scores.some((s) => !inRange(s, 0, 100))) {
-    throw new Error('score_relevance, score_skills, score_product, score_venture, and score_foundations must be numbers between 0 and 100');
+    throw new Error('score_relevance, score_personal, score_product, score_venture, and score_intro must be numbers between 0 and 100');
   }
   return {
     course_code: normalizedCode,
     course_id: normalizedId,
     score_relevance: roundScore(score_relevance),
-    score_skills: roundScore(score_skills),
+    score_personal: roundScore(score_personal),
     score_product: roundScore(score_product),
     score_venture: roundScore(score_venture),
-    score_foundations: roundScore(score_foundations),
+    score_intro: roundScore(score_intro),
     ...(turnstileToken ? { turnstileToken } : {}),
   };
 }

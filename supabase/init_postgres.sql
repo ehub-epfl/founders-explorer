@@ -119,12 +119,12 @@ create table if not exists course_ratings (
     course_id           text        not null check (char_length(course_id) > 0),
     course_code         text        not null check (char_length(course_code) > 0),
     score_relevance     smallint    not null check (score_relevance between 0 and 100),
-    score_skills        smallint    not null check (score_skills between 0 and 100),
+    score_personal      smallint    not null check (score_personal between 0 and 100),
     score_product       smallint    not null check (score_product between 0 and 100),
     score_venture       smallint    not null check (score_venture between 0 and 100),
-    score_foundations   smallint    not null check (score_foundations between 0 and 100),
+    score_intro         smallint    not null check (score_intro between 0 and 100),
     ip_hash             text,
-    user_agent          text
+    ua                  text
 );
 
 create index if not exists course_ratings_course_id_idx
