@@ -82,10 +82,9 @@ const DETAIL_ICON_STYLE = {
 const DETAIL_PLAIN_OFFSET = 26;
 
 const PARETO_RANK_COLORS = Object.freeze([
-  '#3B82F6', // top Pareto front
-  '#60A5FA',
-  '#93C5FD',
-  '#BFDBFE', // fallback for lower tiers
+  '#5E0002', // top Pareto front
+  '#BE0D10',
+  '#FF9799', // fallback for lower tiers
 ]);
 
 const THEME_VARS = Object.freeze({
@@ -1200,17 +1199,6 @@ function colorForRank(rank) {
   return PARETO_RANK_COLORS[paletteIndex];
 }
 
-function textColorForHex(bgColor) {
-  if (typeof bgColor !== 'string') return '#111';
-  const hex = bgColor.replace('#', '');
-  const expanded = hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex.padEnd(6, '0');
-  const r = parseInt(expanded.slice(0, 2), 16);
-  const g = parseInt(expanded.slice(2, 4), 16);
-  const b = parseInt(expanded.slice(4, 6), 16);
-  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-  return luminance < 140 ? '#fff' : '#111';
-}
-
 function CoursesList() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -2085,18 +2073,17 @@ useEffect(() => {
                   const courseKey = courseKeyOf(c, idx);
                   const scheduleLines = splitScheduleLines(c.schedule);
                   const courseUrl = c.course_url || c.url || '';
-                  const bg = colorForRank(rank === Infinity ? maxRank : rank);
-                  const fg = textColorForHex(bg);
+                  const accent = colorForRank(rank === Infinity ? maxRank : rank);
                   return (
                     <article
                       key={courseKey}
                       style={{
-                        border: '1px solid rgba(0,0,0,0.08)',
+                        border: `2px solid ${accent}`,
                         borderRadius: 8,
                         padding: '12px',
                         boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                        background: bg,
-                        color: fg,
+                        background: THEME_VARS.surface,
+                        color: THEME_VARS.text,
                         display: 'flex',
                         flexDirection: 'column',
                         gap: 10,
@@ -2137,7 +2124,6 @@ useEffect(() => {
                         <ScoreSummary
                           course={c}
                           layout="grid"
-                          theme={fg === '#fff' ? 'dark' : 'light'}
                           submissionState={submissionStates[courseKey]}
                           onSubmissionStateChange={(state) => updateSubmissionState(courseKey, state)}
                           savedValues={ratingValues[courseKey]}
