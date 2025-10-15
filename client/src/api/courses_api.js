@@ -8,6 +8,15 @@ const PROGRAMS_TABLE = 'coursebook_programs';
 let cachedClient = null;
 let cachedClientKey = '';
 
+const SCORE_SORT_COLUMNS = [
+  { key: 'score_relevance', column: 'entre_score' },
+  { key: 'score_skills', column: 'PD' },
+  { key: 'score_product', column: 'PB' },
+  { key: 'score_venture', column: 'VB' },
+  { key: 'score_foundations', column: 'INTRO' },
+];
+const SCORE_SORT_COLUMN_SET = new Set(SCORE_SORT_COLUMNS.map((entry) => entry.column));
+
 export async function getCourses(options = {}) {
   const {
     page = 1,
@@ -25,6 +34,11 @@ export async function getCourses(options = {}) {
     language,
     sortField,
     sortOrder,
+    minRelevance,
+    minSkills,
+    minProduct,
+    minVenture,
+    minFoundations,
   } = options;
 
   const { supabaseUrl, supabaseAnonKey } = resolveSupabaseConfig();
@@ -40,6 +54,28 @@ export async function getCourses(options = {}) {
   const searchClause = buildSearchClause(q);
   if (searchClause) {
     query = query.or(searchClause);
+  }
+
+  const minRelevanceScore = toNumericOrNull(minRelevance);
+  const minSkillsScore = toNumericOrNull(minSkills);
+  const minProductScore = toNumericOrNull(minProduct);
+  const minVentureScore = toNumericOrNull(minVenture);
+  const minFoundationsScore = toNumericOrNull(minFoundations);
+
+  if (minRelevanceScore !== null) {
+    query = query.gte('entre_score', minRelevanceScore);
+  }
+  if (minSkillsScore !== null) {
+    query = query.gte('PD', minSkillsScore);
+  }
+  if (minProductScore !== null) {
+    query = query.gte('PB', minProductScore);
+  }
+  if (minVentureScore !== null) {
+    query = query.gte('VB', minVentureScore);
+  }
+  if (minFoundationsScore !== null) {
+    query = query.gte('INTRO', minFoundationsScore);
   }
 
   if (section) {
@@ -87,10 +123,31 @@ export async function getCourses(options = {}) {
   const orderColumn = mapSortField(sortField);
   const ascending = String(sortOrder).toLowerCase() === 'asc';
 
+  const orderClauses = [];
   if (orderColumn) {
-    query = query.order(orderColumn, { ascending, nullsFirst: ascending });
+    const isCreditsOrWorkload = orderColumn === 'credits' || orderColumn === 'workload';
+    const isScoreColumn = SCORE_SORT_COLUMN_SET.has(orderColumn);
+    orderClauses.push({ column: orderColumn, ascending, nullsFirst: ascending });
+
+    if (isCreditsOrWorkload || isScoreColumn) {
+      for (const { column } of SCORE_SORT_COLUMNS) {
+        if (isScoreColumn && column === orderColumn) continue;
+        orderClauses.push({ column, ascending: false, nullsFirst: false });
+      }
+    }
   } else {
-    query = query.order('course_name', { ascending: true });
+    for (const { column } of SCORE_SORT_COLUMNS) {
+      orderClauses.push({ column, ascending: false, nullsFirst: false });
+    }
+  }
+
+  orderClauses.push({ column: 'course_name', ascending: true, nullsFirst: true });
+
+  for (const clause of orderClauses) {
+    query = query.order(clause.column, {
+      ascending: clause.ascending,
+      nullsFirst: clause.nullsFirst,
+    });
   }
 
   query = query.range(offset, rangeEnd);
@@ -161,6 +218,7 @@ function normalizeCourseRecord(row) {
   const teachers = Array.isArray(row?.teachers) ? row.teachers : [];
   const programs = Array.isArray(row?.programs) ? row.programs : [];
   const credits = normalizeCreditsValue(row?.credits);
+  const workload = normalizeWorkloadValue(row?.workload);
 
   const normalizedTeachers = teachers
     .map((entry) => {
@@ -219,6 +277,12 @@ function normalizeCourseRecord(row) {
     }
   }
 
+  const scoreRelevance = normalizeScoreValue(row?.entre_score);
+  const scoreSkills = normalizeScoreValue(row?.PD);
+  const scoreProduct = normalizeScoreValue(row?.PB);
+  const scoreVenture = normalizeScoreValue(row?.VB);
+  const scoreFoundations = normalizeScoreValue(row?.INTRO);
+
   return {
     id: row?.id ?? null,
     unique_code: row?.unique_code ?? null,
@@ -229,6 +293,7 @@ function normalizeCourseRecord(row) {
     course_url: row?.course_url ?? '',
     language: row?.language ?? '',
     credits,
+    workload,
     type: typeof row?.type === 'string' ? row.type : null,
     semester: typeof row?.semester === 'string' ? row.semester : null,
     schedule: typeof row?.schedule === 'string' ? row.schedule : '',
@@ -241,11 +306,11 @@ function normalizeCourseRecord(row) {
     available_programs: Array.from(availablePrograms),
     available_levels: Array.from(availableLevels),
     available_program_labels: Array.from(availableLabels),
-    max_score_relevance_sigmoid: row?.max_score_relevance_sigmoid ?? null,
-    max_score_skills_sigmoid: row?.max_score_skills_sigmoid ?? null,
-    max_score_product_sigmoid: row?.max_score_product_sigmoid ?? null,
-    max_score_venture_sigmoid: row?.max_score_venture_sigmoid ?? null,
-    max_score_foundations_sigmoid: row?.max_score_foundations_sigmoid ?? null,
+    score_relevance: scoreRelevance,
+    score_skills: scoreSkills,
+    score_product: scoreProduct,
+    score_venture: scoreVenture,
+    score_foundations: scoreFoundations,
   };
 }
 
@@ -314,6 +379,18 @@ function mapSortField(field) {
       return 'section';
     case 'credits':
       return 'credits';
+    case 'workload':
+      return 'workload';
+    case 'score_relevance':
+      return 'entre_score';
+    case 'score_skills':
+      return 'PD';
+    case 'score_product':
+      return 'PB';
+    case 'score_venture':
+      return 'VB';
+    case 'score_foundations':
+      return 'INTRO';
     default:
       return null;
   }
@@ -350,6 +427,22 @@ function toNumericOrNull(value) {
   return Number.isFinite(num) ? num : null;
 }
 
+function normalizeWorkloadValue(value) {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    const numeric = Number(trimmed);
+    return Number.isFinite(numeric) ? numeric : trimmed;
+  }
+  return null;
+}
+
 function normalizeCreditsValue(value) {
   if (typeof value === 'number') {
     return Number.isFinite(value) ? value : null;
@@ -372,6 +465,14 @@ function normalizeSeasonValue(value) {
     return 'Spring';
   }
   return value.trim();
+}
+
+function normalizeScoreValue(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return null;
+  if (num < 0) return 0;
+  if (num > 100) return 100;
+  return Math.round(num);
 }
 
 async function collectCourseIdsForProgramFilters(client, filters) {

@@ -5,11 +5,11 @@
 // {
 //   course_code: string,
 //   course_id: string,
-//   score_relevance: number (0..1),
-//   score_skills: number (0..1),
-//   score_product: number (0..1),
-//   score_venture: number (0..1),
-//   score_foundations: number (0..1),
+//   score_relevance: number (0..100),
+//   score_skills: number (0..100),
+//   score_product: number (0..100),
+//   score_venture: number (0..100),
+//   score_foundations: number (0..100),
 //   turnstileToken?: string // optional if you enable Turnstile
 // }
 
@@ -39,8 +39,8 @@ function inRange(n: unknown, min: number, max: number): n is number {
   return typeof n === 'number' && !Number.isNaN(n) && n >= min && n <= max;
 }
 
-function round2(n: number) {
-  return Math.round(n * 100) / 100;
+function roundScore(n: number) {
+  return Math.round(n);
 }
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
@@ -82,10 +82,10 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     }
 
     const scores = [score_relevance, score_skills, score_product, score_venture, score_foundations];
-    if (scores.some((s) => !inRange(s, 0, 1))) {
+    if (scores.some((s) => !inRange(s, 0, 100))) {
       return cors(
         { status: 400 },
-        JSON.stringify({ error: 'scores must be numbers between 0 and 1: score_relevance, score_skills, score_product, score_venture, score_foundations' })
+        JSON.stringify({ error: 'scores must be numbers between 0 and 100: score_relevance, score_skills, score_product, score_venture, score_foundations' })
       );
     }
 
@@ -119,11 +119,11 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       body: JSON.stringify({
         course_code: (course_code as string).trim(),
         course_id: String(course_id).trim(),
-        score_relevance: round2(score_relevance as number),
-        score_skills: round2(score_skills as number),
-        score_product: round2(score_product as number),
-        score_venture: round2(score_venture as number),
-        score_foundations: round2(score_foundations as number),
+        score_relevance: roundScore(score_relevance as number),
+        score_skills: roundScore(score_skills as number),
+        score_product: roundScore(score_product as number),
+        score_venture: roundScore(score_venture as number),
+        score_foundations: roundScore(score_foundations as number),
         ip_hash,
         ua,
       }),

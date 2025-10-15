@@ -27,6 +27,9 @@ DEFAULT_COURSES_CSV = (
 DEFAULT_PROGRAMS_CSV = (
     RepositoryPath / "data-scraper" / "data" / "coursebook_programs.csv"
 )
+DEFAULT_ENTRE_SCORES_CSV = (
+    RepositoryPath / "data-scraper" / "data" / "coursebook_entre_scores.csv"
+)
 ENV_PATH = Path(__file__).resolve().with_name(".env")
 
 
@@ -126,7 +129,44 @@ def _parse_credit(value: str) -> Optional[float]:
     return round(numeric, 2)
 
 
-def read_course_rows(path: Path) -> Tuple[List[dict], List[dict]]:
+def _parse_int(value: str) -> Optional[int]:
+    cleaned = (value or "").strip()
+    if not cleaned:
+        return None
+    try:
+        return int(float(cleaned))
+    except ValueError:
+        return None
+
+
+def _compute_vb_average(row: dict) -> Optional[float]:
+    keys = ["VB-MKT", "VB-FIN", "VB-START", "VB-OPS", "VB-IP"]
+    values = []
+    for key in keys:
+        score = _parse_int(row.get(key, ""))
+        if score is not None:
+            values.append(score)
+    if not values:
+        return None
+    average = sum(values) / len(values)
+    return round(average, 2)
+
+
+def read_score_rows(path: Path) -> Dict[str, dict]:
+    if not path.exists():
+        return {}
+    mapping: Dict[str, dict] = {}
+    with path.open("r", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            course_key = (row.get("course_key") or "").strip()
+            if not course_key:
+                continue
+            mapping[course_key] = row
+    return mapping
+
+
+def read_course_rows(path: Path, scores: Dict[str, dict]) -> Tuple[List[dict], List[dict]]:
     courses: List[dict] = []
     teachers: List[dict] = []
 
@@ -140,6 +180,17 @@ def read_course_rows(path: Path) -> Tuple[List[dict], List[dict]]:
 
             credits_raw = row.get("credits", "")
             credits_value = _parse_credit(credits_raw)
+            workload_raw = row.get("workload", "")
+            workload_value = _parse_credit(workload_raw)
+
+            score_entry = scores.get(course_key, {})
+            entre_score = _parse_int(score_entry.get("entre_score", "")) if score_entry else None
+            pd_score = _parse_int(score_entry.get("PD", "")) if score_entry else None
+            pb_score = _parse_int(score_entry.get("PB", "")) if score_entry else None
+            vb_average = _compute_vb_average(score_entry) if score_entry else None
+            intro_score = _parse_int(score_entry.get("INTRO", "")) if score_entry else None
+            if intro_score is None:
+                intro_score = 0
 
             courses.append(
                 {
@@ -149,9 +200,15 @@ def read_course_rows(path: Path) -> Tuple[List[dict], List[dict]]:
                     "course_url": row.get("course_url", "").strip(),
                     "language": row.get("language", "").strip(),
                     "credits": credits_value,
+                    "workload": workload_value,
                     "semester": (row.get("semester") or "").strip() or None,
                     "course_type": (row.get("type") or "").strip() or None,
                     "schedule": row.get("schedule", "").strip(),
+                    "entre_score": entre_score,
+                    "PD": pd_score,
+                    "PB": pb_score,
+                    "VB": vb_average,
+                    "INTRO": intro_score,
                 }
             )
 
@@ -191,6 +248,7 @@ def read_program_rows(path: Path) -> List[dict]:
             semester = row.get("semester", "").strip()
             exam_form = row.get("exam_form", "").strip()
             program_type = row.get("type", "").strip()
+            workload_value = _parse_credit(row.get("workload", ""))
             if not course_key or not program_name:
                 continue
             programs.append(
@@ -201,6 +259,7 @@ def read_program_rows(path: Path) -> List[dict]:
                     "semester": semester,
                     "exam_form": exam_form,
                     "program_type": program_type,
+                    "workload": workload_value,
                 }
             )
     return programs
@@ -324,6 +383,8 @@ def upsert_programs(
             row["program_type"],
         )
         if key in unique_records:
+            if unique_records[key].get("workload") is None and row.get("workload") is not None:
+                unique_records[key]["workload"] = row.get("workload")
             continue
         unique_records[key] = {
             "course_id": course_id,
@@ -332,6 +393,7 @@ def upsert_programs(
             "semester": row["semester"],
             "exam_form": row["exam_form"],
             "program_type": row["program_type"],
+            "workload": row.get("workload"),
         }
 
     payload = list(unique_records.values())
@@ -359,6 +421,9 @@ def main() -> int:
     programs_csv = Path(
         os.environ.get("COURSEBOOK_PROGRAMS_CSV", DEFAULT_PROGRAMS_CSV)
     )
+    entre_scores_csv = Path(
+        os.environ.get("COURSEBOOK_ENTRE_SCORES_CSV", DEFAULT_ENTRE_SCORES_CSV)
+    )
 
     if not supabase_url or not service_role_key:
         print("error: Supabase credentials missing in supabase/.env.", file=sys.stderr)
@@ -371,7 +436,16 @@ def main() -> int:
         print(f"error: {programs_csv} does not exist.", file=sys.stderr)
         return 1
 
-    courses, teachers = read_course_rows(courses_csv)
+    if entre_scores_csv.exists():
+        scores = read_score_rows(entre_scores_csv)
+    else:
+        print(
+            f"warning: {entre_scores_csv} does not exist. Entrepreneurship scores will be empty.",
+            file=sys.stderr,
+        )
+        scores = {}
+
+    courses, teachers = read_course_rows(courses_csv, scores)
     programs = read_program_rows(programs_csv)
 
     print(

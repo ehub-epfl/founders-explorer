@@ -38,6 +38,17 @@ CREDITS_PATTERNS = (
     re.compile(r"coefficient\s*/?\s*(?:credits?|crédits?)\s*(\d+(?:[.,]\d+)?)", re.IGNORECASE),
     re.compile(r"coefficient\s*(\d+(?:[.,]\d+)?)", re.IGNORECASE),
 )
+WORKLOAD_WEEK_KEYWORDS = (
+    "per week",
+    "per-week",
+    "weekly",
+    "hebdo",
+    "hebdomadaire",
+    "hebdom.",
+    "hebdom",
+    "par semaine",
+)
+SEMESTER_WEEKS = 14
 
 
 def load_program_urls() -> List[str]:
@@ -170,6 +181,74 @@ def extract_teachers(tree) -> List[Dict[str, str]]:
             raw = node.text_content().replace("Teacher:", "")
             append_teacher(raw)
     return teachers
+
+
+def _parse_float_token(token: str) -> float | None:
+    try:
+        return float(token.replace(",", "."))
+    except (AttributeError, ValueError):
+        return None
+
+
+def _text_contains_per_week(text_lc: str) -> bool:
+    if any(keyword in text_lc for keyword in WORKLOAD_WEEK_KEYWORDS):
+        return True
+    semester_weeks_str = str(SEMESTER_WEEKS)
+    if "x" in text_lc and semester_weeks_str in text_lc and ("week" in text_lc or "semaine" in text_lc):
+        return True
+    return False
+
+
+def extract_workload(detail) -> float | None:
+    # Only consider the primary information list inside this program block.
+    info_list = None
+    direct_list = detail.xpath('./ul[contains(@class, "list-bullet")]')
+    if direct_list:
+        info_list = direct_list[0]
+    else:
+        nested_list = detail.xpath('.//ul[contains(@class, "list-bullet")]')
+        if nested_list:
+            info_list = nested_list[0]
+    if info_list is None:
+        return None
+
+    total = 0.0
+    found = False
+    for li in info_list.xpath("./li"):
+        text = normalize_ws(li.text_content())
+        if not text:
+            continue
+        text_lc = text.lower()
+
+        # Determine if the line expresses a weekly pattern ("per week", "x 14 weeks", etc.)
+        per_week = _text_contains_per_week(text_lc)
+
+        # Prefer numbers that explicitly refer to hours
+        hours_match = re.search(r"(\d+(?:[.,]\d+)?)\s*(?:hour|heure)(?:\(s\)|s)?", text_lc)
+
+        value = None
+        if hours_match:
+            value = _parse_float_token(hours_match.group(1))
+        else:
+            # Only allow generic numbers when a weekly pattern is clearly present
+            if per_week:
+                generic_match = re.search(r"(\d+(?:[.,]\d+)?)", text_lc)
+                if generic_match:
+                    value = _parse_float_token(generic_match.group(1))
+
+        # Skip lines that don't provide a valid workload number (e.g., "Number of places: 216")
+        if value is None:
+            continue
+
+        if per_week:
+            total += value
+        else:
+            total += value / SEMESTER_WEEKS
+
+        found = True
+    if not found:
+        return None
+    return round(total, 2)
 
 
 def extract_language(tree) -> str:
@@ -331,7 +410,9 @@ def parse_program_sections(tree, course_key: str) -> List[Dict[str, str]]:
         exam_form = ""
         course_type = ""
         semester_term = ""
+        workload_value = None
         if detail is not None:
+            workload_value = extract_workload(detail)
             for li in detail.xpath(".//li"):
                 label_nodes = li.xpath("./strong/text()")
                 if not label_nodes:
@@ -353,6 +434,7 @@ def parse_program_sections(tree, course_key: str) -> List[Dict[str, str]]:
                 "semester": semester_term,
                 "exam_form": exam_form,
                 "type": course_type,
+                "workload": workload_value,
             }
         )
     return programs
@@ -409,6 +491,7 @@ def write_courses_csv(entries: Iterable[Dict[str, str]]) -> None:
                 "teacher",
                 "language",
                 "credits",
+                "workload",
                 "semester",
                 "type",
                 "schedule",
@@ -480,6 +563,16 @@ def clean_exam_form(label: str) -> str:
     return normalize_ws(label)
 
 
+def format_workload_value(value: float | None) -> str:
+    if value is None:
+        return ""
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return ""
+    return f"{numeric:.2f}".rstrip("0").rstrip(".")
+
+
 def write_programs_csv(entries: Iterable[Dict[str, str]], valid_keys: Iterable[str]) -> None:
     COURSES_CSV.parent.mkdir(parents=True, exist_ok=True)
     keep = {key for key in valid_keys}
@@ -488,6 +581,7 @@ def write_programs_csv(entries: Iterable[Dict[str, str]], valid_keys: Iterable[s
         row["level"] = simplify_semester(row.get("level", ""))
         row["semester"] = normalize_semester_term(row.get("semester", ""))
         row["exam_form"] = clean_exam_form(row.get("exam_form", ""))
+        row["workload"] = format_workload_value(row.get("workload"))
     with PROGRAMS_CSV.open("w", encoding="utf-8", newline="") as fh:
         writer = csv.DictWriter(
             fh,
@@ -498,6 +592,7 @@ def write_programs_csv(entries: Iterable[Dict[str, str]], valid_keys: Iterable[s
                 "semester",
                 "exam_form",
                 "type",
+                "workload",
             ],
         )
         writer.writeheader()
@@ -550,6 +645,17 @@ def main() -> None:
         if course_type:
             course_type = course_type.capitalize()
 
+        program_workloads = [program.get("workload") for program in program_entries]
+        all_programs_have_workload = bool(program_entries) and all(
+            value is not None for value in program_workloads
+        )
+        normalized_workloads = {
+            round(float(value), 2) for value in program_workloads if value is not None
+        }
+        course_workload = ""
+        if all_programs_have_workload and len(normalized_workloads) == 1:
+            course_workload = format_workload_value(normalized_workloads.pop())
+
         course_row = {
             "course_key": course_key,
             "course_name": detail_info.get("course_name", ""),
@@ -558,6 +664,7 @@ def main() -> None:
             "teacher": json.dumps(detail_info.get("teacher", []), ensure_ascii=False),
             "language": detail_info.get("language", ""),
             "credits": detail_info.get("credits", ""),
+            "workload": course_workload,
             "semester": course_semester,
             "type": course_type,
             "schedule": detail_info.get("schedule", ""),

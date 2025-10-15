@@ -44,9 +44,15 @@ create table if not exists coursebook_courses (
     course_url      text        not null,
     language        text        not null,
     credits         numeric(6,2),
+    workload        numeric(6,2),
     semester        text,
     course_type     text,
     schedule        text        not null default '',
+    entre_score     integer,
+    "PD"            integer,
+    "PB"            integer,
+    "VB"            numeric(5,2),
+    "INTRO"         integer     not null default 0,
     unique_code     text        generated always as (
         coalesce(btrim(course_key), '') || '::' || coalesce(btrim(course_name), '')
     ) stored
@@ -88,6 +94,7 @@ create table if not exists coursebook_programs (
     semester      text        not null,
     exam_form     text        not null,
     program_type  text        not null,
+    workload      numeric(6,2),
     unique (course_id, program_name, level, semester, exam_form, program_type)
 );
 
@@ -106,6 +113,26 @@ create index if not exists coursebook_programs_program_type_idx
 create index if not exists coursebook_programs_exam_form_idx
     on coursebook_programs (exam_form);
 
+create table if not exists course_ratings (
+    id                  bigserial primary key,
+    created_at          timestamptz not null default now(),
+    course_id           text        not null check (char_length(course_id) > 0),
+    course_code         text        not null check (char_length(course_code) > 0),
+    score_relevance     smallint    not null check (score_relevance between 0 and 100),
+    score_skills        smallint    not null check (score_skills between 0 and 100),
+    score_product       smallint    not null check (score_product between 0 and 100),
+    score_venture       smallint    not null check (score_venture between 0 and 100),
+    score_foundations   smallint    not null check (score_foundations between 0 and 100),
+    ip_hash             text,
+    user_agent          text
+);
+
+create index if not exists course_ratings_course_id_idx
+    on course_ratings (course_id);
+
+create index if not exists course_ratings_course_code_idx
+    on course_ratings (course_code);
+
 
 create or replace view coursebook_course_summary as
 select
@@ -117,9 +144,15 @@ select
     c.course_url,
     c.language,
     c.credits,
+    c.workload,
     c.semester,
     c.course_type as type,
     c.schedule,
+    c.entre_score,
+    c."PD",
+    c."PB",
+    c."VB",
+    c."INTRO",
     coalesce(
         jsonb_agg(
         jsonb_build_object(
@@ -144,7 +177,8 @@ select
             'level',       p.level,
             'semester',     p.semester,
             'exam_form',    p.exam_form,
-            'type',         p.program_type
+            'type',         p.program_type,
+            'workload',     p.workload
         ) order by p.program_name, p.level
     ) filter (where p.id is not null),
         '[]'::jsonb

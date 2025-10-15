@@ -13,22 +13,51 @@ import {
 const GRID_MIN_WIDTH = 220; // px
 
 const SCORE_FIELDS = [
-  { key: 'max_score_relevance_sigmoid', label: 'Relevance to Entrepreneurship' },
-  { key: 'max_score_skills_sigmoid', label: 'Skills' },
-  { key: 'max_score_product_sigmoid', label: 'Product' },
-  { key: 'max_score_venture_sigmoid', label: 'Venture' },
-  { key: 'max_score_foundations_sigmoid', label: 'Foundations' },
+  { key: 'score_relevance', label: 'Entrepreneurship Relevance' },
+  { key: 'score_skills', label: 'Personal Development' },
+  { key: 'score_product', label: 'Product Innovation' },
+  { key: 'score_venture', label: 'Venture Ops' },
+  { key: 'score_foundations', label: 'Startup Basics' },
 ];
 
-const SCORE_STEP_VALUES = Object.freeze([0, 0.25, 0.5, 0.75, 1]);
+// For multi-key sorting in list view
+const SCORE_SORT_KEYS = ['score_relevance','score_skills','score_product','score_venture','score_foundations'];
+
+// Helpers to build multi-key priorities and encode them for the API
+function buildSortPriorities(sortField, sortOrder) {
+  const isScoreField = SCORE_SORT_KEYS.includes(sortField);
+  if (!sortField) {
+    return SCORE_SORT_KEYS.map((f) => ({ field: f, order: 'desc' }));
+  }
+  if (sortField === 'credits' || sortField === 'workload') {
+    return [{ field: sortField, order: sortOrder === 'asc' ? 'asc' : 'desc' }]
+      .concat(SCORE_SORT_KEYS.map((f) => ({ field: f, order: 'desc' })));
+  }
+  if (isScoreField) {
+    const rest = SCORE_SORT_KEYS.filter((f) => f !== sortField);
+    return [{ field: sortField, order: sortOrder === 'asc' ? 'asc' : 'desc' }]
+      .concat(rest.map((f) => ({ field: f, order: 'desc' })));
+  }
+  return SCORE_SORT_KEYS.map((f) => ({ field: f, order: 'desc' }));
+}
+
+function encodeSortKeys(priorities) {
+  // Encode as a compact, backend-friendly string, e.g. "credits:asc,score_relevance:desc,..."
+  if (!Array.isArray(priorities)) return '';
+  return priorities
+    .map((p) => `${p.field}:${p.order === 'asc' ? 'asc' : 'desc'}`)
+    .join(',');
+}
+
+const SCORE_STEP_VALUES = Object.freeze([0, 25, 50, 75, 100]);
 const SCORE_STEP_SIZE = SCORE_STEP_VALUES.length > 1 ? SCORE_STEP_VALUES[1] - SCORE_STEP_VALUES[0] : 1;
 
 const MIN_SCORE_SLIDERS = [
-  { key: 'minRelevance', label: 'Relevance to Entrepreneurship' },
-  { key: 'minSkills', label: 'Skills' },
-  { key: 'minProduct', label: 'Product' },
-  { key: 'minVenture', label: 'Venture' },
-  { key: 'minFoundations', label: 'Foundations' },
+  { key: 'minRelevance', label: 'Entrepreneurship Relevance' },
+  { key: 'minSkills', label: 'Personal Development' },
+  { key: 'minProduct', label: 'Product Innovation' },
+  { key: 'minVenture', label: 'Venture Ops' },
+  { key: 'minFoundations', label: 'Startup Basics' },
 ];
 
 const TAG_COLORS = [
@@ -52,6 +81,13 @@ const DETAIL_ICON_STYLE = {
 
 const DETAIL_PLAIN_OFFSET = 26;
 
+const PARETO_RANK_COLORS = Object.freeze([
+  '#3B82F6', // top Pareto front
+  '#60A5FA',
+  '#93C5FD',
+  '#BFDBFE', // fallback for lower tiers
+]);
+
 const THEME_VARS = Object.freeze({
   surface: 'var(--color-surface)',
   surfaceMuted: 'var(--color-surface-muted)',
@@ -70,6 +106,30 @@ const THEME_VARS = Object.freeze({
   warningBg: 'var(--color-warning-bg)',
   danger: 'var(--color-danger)',
   dangerBg: 'var(--color-danger-bg)',
+});
+
+const SCORE_LABELS_FULL = Object.freeze({
+  relevance: 'Entrepreneurship Relevance',
+  skills: 'Personal Development',
+  product: 'Product Innovation',
+  venture: 'Venture Ops',
+  foundations: 'Startup Basics',
+});
+
+const SCORE_LABELS_ABBR = Object.freeze({
+  relevance: 'ER',
+  skills: 'PD',
+  product: 'PI',
+  venture: 'VO',
+  foundations: 'SB',
+});
+
+const SCORE_COLORS = Object.freeze({
+  relevance: '#0ea5e9',
+  skills: '#2563eb',
+  product: '#10b981',
+  venture: '#f59e0b',
+  foundations: '#a855f7',
 });
 
 const selectFieldStyle = (disabled = false) => ({
@@ -151,21 +211,27 @@ function clampScore(value) {
 
 function snapToScoreStep(value) {
   const clamped = clampScore(value);
-  const steps = SCORE_STEP_VALUES.length - 1;
-  if (steps <= 0) return clamped;
-  const index = Math.round(clamped * steps);
-  return SCORE_STEP_VALUES[index] ?? SCORE_STEP_VALUES[0];
+  let nearest = SCORE_STEP_VALUES[0];
+  let minDiff = Math.abs(clamped - nearest);
+  for (const option of SCORE_STEP_VALUES) {
+    const diff = Math.abs(clamped - option);
+    if (diff < minDiff) {
+      nearest = option;
+      minDiff = diff;
+    }
+  }
+  return nearest;
 }
 
 function getScoreStepIndex(value) {
   const snapped = snapToScoreStep(value);
   const index = SCORE_STEP_VALUES.findIndex((option) => option === snapped);
-  return index >= 0 ? index : Math.round(snapped * (SCORE_STEP_VALUES.length - 1));
+  return index >= 0 ? index : 0;
 }
 
 function formatScoreLevelLabel(value) {
-  const index = getScoreStepIndex(value);
-  return `Level ${index + 1}`;
+  const snapped = snapToScoreStep(value);
+  return `${snapped}`;
 }
 
 function renderLevelTags(levels) {
@@ -256,6 +322,24 @@ function renderPlainRow(label, content, key) {
   );
 }
 
+function formatWorkloadDisplay(value) {
+  if (value == null) return '';
+  const raw = String(value).trim();
+  if (!raw) return '';
+  if (/semester/i.test(raw)) {
+    return raw;
+  }
+  const numeric = parseNumberLike(raw);
+  if (Number.isFinite(numeric)) {
+    const text = `${numeric}`.replace(/\.0$/, '');
+    return `${text} hour(s)/week`;
+  }
+  if (/\bhour/i.test(raw) && /\bweek/i.test(raw)) {
+    return raw;
+  }
+  return `${raw} hour(s)/week`;
+}
+
 function renderTeachers(entries, fallbackNames) {
   const normalized = [];
   const seen = new Set();
@@ -316,6 +400,204 @@ function splitScheduleLines(value) {
     .filter(Boolean);
 }
 
+const DAY_DEFINITIONS = Object.freeze([
+  { index: 0, label: 'Mon', names: ['monday', 'mon', 'lundi', 'lun'] },
+  { index: 1, label: 'Tue', names: ['tuesday', 'tue', 'mardi', 'mar'] },
+  { index: 2, label: 'Wed', names: ['wednesday', 'wed', 'mercredi', 'mer'] },
+  { index: 3, label: 'Thu', names: ['thursday', 'thu', 'jeudi', 'jeu'] },
+  { index: 4, label: 'Fri', names: ['friday', 'fri', 'vendredi', 'ven'] },
+  { index: 5, label: 'Sat', names: ['saturday', 'sat', 'samedi', 'sam'] },
+  { index: 6, label: 'Sun', names: ['sunday', 'sun', 'dimanche', 'dim'] },
+]);
+
+const DAY_INDEX_LOOKUP = DAY_DEFINITIONS.reduce((map, day) => {
+  day.names.forEach((name) => {
+    map.set(name.toLowerCase(), day.index);
+  });
+  return map;
+}, new Map());
+
+function parseDayToken(token) {
+  if (!token) return null;
+  const normalized = token.toLowerCase().replace(/[,.;:]/g, '').trim();
+  return DAY_INDEX_LOOKUP.get(normalized) ?? null;
+}
+
+function parseTimeToken(token) {
+  if (!token) return null;
+  const normalized = token
+    .toLowerCase()
+    .replace(/h/g, ':')
+    .replace(/\s+/g, '')
+    .replace(/\u2013|\u2014/g, '-')
+    .replace(/\.-/g, '-')
+    .replace(/\.(\d{2})/g, ':$1');
+  const [hoursPart, minutesPart] = normalized.split(':');
+  const hours = Number.parseInt(hoursPart, 10);
+  const minutes = minutesPart !== undefined ? Number.parseInt(minutesPart, 10) : 0;
+  if (!Number.isFinite(hours) || hours < 0 || hours > 24) {
+    return null;
+  }
+  if (!Number.isFinite(minutes) || minutes < 0 || minutes >= 60) {
+    return null;
+  }
+  return hours * 60 + minutes;
+}
+
+function formatMinutesToLabel(totalMinutes) {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+}
+
+const EVENT_COLORS = Object.freeze({
+  lecture: 'rgba(14, 165, 233, 0.85)',
+  exercise: 'rgba(34, 197, 94, 0.85)',
+  lab: 'rgba(249, 115, 22, 0.85)',
+  other: 'rgba(107, 114, 128, 0.8)',
+});
+
+function categorizeEventLabel(label) {
+  const text = (label || '').toLowerCase();
+  if (!text) return 'other';
+  if (text.includes('lecture') || text.includes('cours') || text.includes('class')) {
+    return 'lecture';
+  }
+  if (text.includes('exercise') || text.includes('tp') || text.includes('tutorial') || text.includes('seminar')) {
+    return 'exercise';
+  }
+  if (text.includes('lab') || text.includes('laboratory') || text.includes('workshop') || text.includes('project')) {
+    return 'lab';
+  }
+  return 'other';
+}
+
+function buildScheduleEvents(scheduleLines) {
+  if (!Array.isArray(scheduleLines) || scheduleLines.length === 0) {
+    return [];
+  }
+
+  const events = [];
+  const rangeRegex =
+    /^(?<day>[A-Za-zÀ-ÿ]+)[,]?\s+(?<start>\d{1,2}(?::\d{2})?|\d{1,2}h\d{0,2})\s*[–—-]\s*(?<end>\d{1,2}(?::\d{2})?|\d{1,2}h\d{0,2})(?:\s*[:,-]\s*(?<label>.*))?$/u;
+
+  for (const rawLine of scheduleLines) {
+    const match = rangeRegex.exec(rawLine);
+    if (!match) continue;
+    const dayIndex = parseDayToken(match.groups?.day || '');
+    if (dayIndex === null) continue;
+    const startMinutes = parseTimeToken(match.groups?.start || '');
+    const endMinutes = parseTimeToken(match.groups?.end || '');
+    if (!Number.isFinite(startMinutes) || !Number.isFinite(endMinutes)) continue;
+    if (endMinutes <= startMinutes) continue;
+    events.push({
+      dayIndex,
+      startMinutes,
+      endMinutes,
+      label: (match.groups?.label || '').trim(),
+      category: categorizeEventLabel((match.groups?.label || '').trim()),
+      raw: rawLine,
+    });
+  }
+
+  return events.sort((a, b) => {
+    if (a.dayIndex !== b.dayIndex) {
+      return a.dayIndex - b.dayIndex;
+    }
+    return a.startMinutes - b.startMinutes;
+  });
+}
+
+function WeekScheduleCalendar({ events }) {
+  if (!Array.isArray(events) || events.length === 0) {
+    return null;
+  }
+
+  const minStart = events.reduce((min, event) => Math.min(min, event.startMinutes), Infinity);
+  const maxEnd = events.reduce((max, event) => Math.max(max, event.endMinutes), -Infinity);
+  if (!Number.isFinite(minStart) || !Number.isFinite(maxEnd)) {
+    return null;
+  }
+
+  const anchorStart = Math.min(minStart, 8 * 60);
+  const anchorEnd = Math.max(maxEnd, 19 * 60);
+  const totalMinutes = Math.max(anchorEnd - anchorStart, 60);
+  const heightPx = 180;
+
+  return (
+    <div
+      style={{
+        border: `1px solid ${THEME_VARS.borderSubtle}`,
+        borderRadius: 8,
+        padding: 8,
+        background: THEME_VARS.surfaceMuted,
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 6,
+      }}
+    >
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${DAY_DEFINITIONS.length}, minmax(0, 1fr))`,
+          gap: 4,
+          fontSize: 10,
+          lineHeight: 1.2,
+        }}
+      >
+        {DAY_DEFINITIONS.map((day) => {
+          const dayEvents = events.filter((event) => event.dayIndex === day.index);
+          return (
+            <div
+              key={day.index}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4,
+              }}
+            >
+              <div style={{ textAlign: 'center', fontWeight: 600, color: THEME_VARS.textMuted }}>
+                {day.label}
+              </div>
+              <div
+                style={{
+                  position: 'relative',
+                  height: heightPx,
+                  borderRadius: 6,
+                  background: 'rgba(148, 163, 184, 0.15)',
+                  overflow: 'hidden',
+                }}
+              >
+                {dayEvents.map((event, idx) => {
+                  const top = ((event.startMinutes - anchorStart) / totalMinutes) * 100;
+                  const height = ((event.endMinutes - event.startMinutes) / totalMinutes) * 100;
+                  return (
+                    <div
+                      key={`${event.raw}-${idx}`}
+                      title={`${formatMinutesToLabel(event.startMinutes)} – ${formatMinutesToLabel(event.endMinutes)}${event.label ? ` • ${event.label}` : ''}`}
+                      style={{
+                        position: 'absolute',
+                        left: '6%',
+                        right: '6%',
+                        top: `${Math.max(0, top)}%`,
+                        height: `${Math.max(8, height)}%`,
+                        borderRadius: 4,
+                        background: EVENT_COLORS[event.category] || EVENT_COLORS.other,
+                        boxShadow: '0 1px 3px rgba(15, 23, 42, 0.25)',
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function buildCourseDetailRows(course, scheduleLines) {
   const rows = [];
 
@@ -330,6 +612,11 @@ function buildCourseDetailRows(course, scheduleLines) {
     rows.push(renderIconRow('credits.svg', 'Credits', course.credits, 'credits'));
   }
 
+  const workloadDisplay = formatWorkloadDisplay(course.workload);
+  if (workloadDisplay) {
+    rows.push(renderIconRow('workload.svg', 'Workload', workloadDisplay, 'workload'));
+  }
+
   if (course.type) {
     rows.push(renderIconRow('type.svg', 'Type', course.type, 'type'));
   }
@@ -338,21 +625,8 @@ function buildCourseDetailRows(course, scheduleLines) {
     rows.push(renderIconRow('semester.svg', 'Semester', course.semester, 'semester'));
   }
 
-  if (scheduleLines.length) {
-    const scheduleContent = scheduleLines.map((line, lineIdx) => (
-      <span key={`schedule-line-${lineIdx}`} style={{ display: 'block' }}>
-        {line}
-      </span>
-    ));
-    rows.push(renderIconRow('schedule.svg', 'Schedule', scheduleContent, 'schedule', false));
-  }
-
   if (course.exam_form) {
     rows.push(renderPlainRow('Exam', course.exam_form, 'exam'));
-  }
-
-  if (course.workload) {
-    rows.push(renderPlainRow('Workload', course.workload, 'workload'));
   }
 
   return rows;
@@ -583,9 +857,15 @@ function adjustLevelForSemester(level, degree, semester) {
 function normalizeScore(value) {
   const num = Number(value);
   if (!Number.isFinite(num)) return null;
-  if (num < 0) return 0;
-  if (num > 1) return 1;
-  return num;
+  if (num < SCORE_STEP_VALUES[0]) return SCORE_STEP_VALUES[0];
+  if (num > SCORE_STEP_VALUES[SCORE_STEP_VALUES.length - 1]) return SCORE_STEP_VALUES[SCORE_STEP_VALUES.length - 1];
+  return Math.round(num);
+}
+
+function formatScoreDisplay(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return '–';
+  return `${Math.round(num)}`;
 }
 
 function ScoreSummary({
@@ -598,11 +878,11 @@ function ScoreSummary({
   onValuesChange,
 }) {
   const base = {
-    relevance: normalizeScore(course?.max_score_relevance_sigmoid),
-    skills: normalizeScore(course?.max_score_skills_sigmoid),
-    product: normalizeScore(course?.max_score_product_sigmoid),
-    venture: normalizeScore(course?.max_score_venture_sigmoid),
-    foundations: normalizeScore(course?.max_score_foundations_sigmoid),
+    relevance: normalizeScore(course?.score_relevance),
+    skills: normalizeScore(course?.score_skills),
+    product: normalizeScore(course?.score_product),
+    venture: normalizeScore(course?.score_venture),
+    foundations: normalizeScore(course?.score_foundations),
   };
 
   const snapValueOrDefault = (value) => {
@@ -656,12 +936,13 @@ function ScoreSummary({
     onValuesChange(next);
   }, [values, onValuesChange]);
 
+  const labelMap = layout === 'grid' ? SCORE_LABELS_ABBR : SCORE_LABELS_FULL;
   const rows = [
-    { key: 'relevance', label: 'Relevance to Entrepreneurship', color: '#0ea5e9', base: base.relevance },
-    { key: 'skills', label: 'Skills', color: '#2563eb', base: base.skills },
-    { key: 'product', label: 'Product', color: '#10b981', base: base.product },
-    { key: 'venture', label: 'Venture', color: '#f59e0b', base: base.venture },
-    { key: 'foundations', label: 'Foundations', color: '#a855f7', base: base.foundations },
+    { key: 'relevance', label: labelMap.relevance, color: SCORE_COLORS.relevance, base: base.relevance },
+    { key: 'skills', label: labelMap.skills, color: SCORE_COLORS.skills, base: base.skills },
+    { key: 'product', label: labelMap.product, color: SCORE_COLORS.product, base: base.product },
+    { key: 'venture', label: labelMap.venture, color: SCORE_COLORS.venture, base: base.venture },
+    { key: 'foundations', label: labelMap.foundations, color: SCORE_COLORS.foundations, base: base.foundations },
   ];
 
   const isDark = theme === 'dark';
@@ -703,11 +984,11 @@ function ScoreSummary({
       await submitCourseRating({
         course_id: course?.id ?? null,
         course_code: course?.course_code ?? null,
-        score_relevance: Math.max(0, Math.min(1, values.relevance ?? 0)),
-        score_skills: Math.max(0, Math.min(1, values.skills ?? 0)),
-        score_product: Math.max(0, Math.min(1, values.product ?? 0)),
-        score_venture: Math.max(0, Math.min(1, values.venture ?? 0)),
-        score_foundations: Math.max(0, Math.min(1, values.foundations ?? 0)),
+        score_relevance: Math.max(0, Math.min(100, Math.round(values.relevance ?? 0))),
+        score_skills: Math.max(0, Math.min(100, Math.round(values.skills ?? 0))),
+        score_product: Math.max(0, Math.min(100, Math.round(values.product ?? 0))),
+        score_venture: Math.max(0, Math.min(100, Math.round(values.venture ?? 0))),
+        score_foundations: Math.max(0, Math.min(100, Math.round(values.foundations ?? 0))),
       });
       setSubmitted(true);
       broadcastState({ submitted: true, timestamp: Date.now() });
@@ -758,7 +1039,7 @@ function ScoreSummary({
           <div key={r.key} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <div style={{ fontSize: 10, color: labelColor, fontWeight: 600, opacity: 0.85 }}>{r.label}</div>
             <div
-              title={`You: ${values[r.key].toFixed(2)} • Data: ${r.base != null ? r.base.toFixed(2) : '–'}`}
+              title={`You: ${formatScoreDisplay(values[r.key])}/100 • Data: ${r.base != null ? `${formatScoreDisplay(r.base)}/100` : '–'}`}
               aria-label={`${r.label} slider`}
               style={{ position: 'relative', height: 16 }}
             >
@@ -769,7 +1050,7 @@ function ScoreSummary({
                   height: 4, borderRadius: 9999, background: '#e5e7eb', overflow: 'hidden', zIndex: 1,
                 }}
               >
-                <div style={{ width: r.base != null ? `${Math.round(r.base * 100)}%` : '0%', height: '100%', background: '#9ca3af' }} />
+                <div style={{ width: r.base != null ? `${Math.round(r.base)}%` : '0%', height: '100%', background: '#9ca3af' }} />
               </div>
               <div
                 aria-hidden
@@ -806,7 +1087,7 @@ function ScoreSummary({
                   height: 4, borderRadius: 9999, overflow: 'hidden', zIndex: 3, pointerEvents: 'none',
                 }}
               >
-                <div style={{ width: `${Math.round(values[r.key] * 100)}%`, height: '100%', background: r.color, opacity: 1 }} />
+                <div style={{ width: `${Math.round(values[r.key])}%`, height: '100%', background: r.color, opacity: 1 }} />
               </div>
               <input
                 type="range"
@@ -911,19 +1192,23 @@ function computeParetoRanks(items, pref) {
   return ranks; // if some remain Infinity (shouldn't), treat as worst
 }
 
-function colorForRank(rank, maxRank) {
-  const baseHue = 210; // blue
-  const sat = 70; // percent
-  const minL = 25; // darkest for best
-  const maxL = 90; // lightest for worst
-  const t = maxRank <= 0 ? 0 : rank / maxRank; // 0..1
-  const l = Math.round(minL + t * (maxL - minL));
-  return `hsl(${baseHue} ${sat}% ${l}%)`;
+function colorForRank(rank) {
+  if (!Number.isFinite(rank) || rank < 0) {
+    return PARETO_RANK_COLORS[PARETO_RANK_COLORS.length - 1];
+  }
+  const paletteIndex = Math.min(Math.floor(rank), PARETO_RANK_COLORS.length - 1);
+  return PARETO_RANK_COLORS[paletteIndex];
 }
 
-function textColorForBgHslLightness(lightness) {
-  // simple contrast heuristic
-  return lightness < 55 ? '#fff' : '#111';
+function textColorForHex(bgColor) {
+  if (typeof bgColor !== 'string') return '#111';
+  const hex = bgColor.replace('#', '');
+  const expanded = hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex.padEnd(6, '0');
+  const r = parseInt(expanded.slice(0, 2), 16);
+  const g = parseInt(expanded.slice(2, 4), 16);
+  const b = parseInt(expanded.slice(4, 6), 16);
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luminance < 140 ? '#fff' : '#111';
 }
 
 function CoursesList() {
@@ -946,6 +1231,11 @@ function CoursesList() {
   const [paretoPref, setParetoPref] = useState({ credits: 'max', workload: 'min' }); // 'max'|'min' for each
   const [submissionStates, setSubmissionStates] = useState({});
   const [ratingValues, setRatingValues] = useState({});
+
+  const toggleSortField = useCallback((field) => {
+    setSortOrder((prevOrder) => (sortField === field ? (prevOrder === 'desc' ? 'asc' : 'desc') : 'desc'));
+    setSortField(field);
+  }, [sortField]);
 
   const updateSubmissionState = useCallback((courseKey, state) => {
     if (!courseKey) return;
@@ -1122,6 +1412,9 @@ useEffect(() => {
       setLoading(true);
       setError(null);
       try {
+        // Compute multi-key sort priorities and encode for API
+        const sortPriorities = buildSortPriorities(sortField, sortOrder);
+        const sortKeys = encodeSortKeys(sortPriorities);
         const params = {
           page,
           pageSize,
@@ -1137,6 +1430,7 @@ useEffect(() => {
           minor: appliedFilters.minor || undefined,
           sortField: sortField || undefined,
           sortOrder: sortField ? sortOrder : undefined,
+          sortKeys: sortKeys || undefined,
           minRelevance: appliedFilters.minRelevance > 0 ? appliedFilters.minRelevance : undefined,
           minSkills: appliedFilters.minSkills > 0 ? appliedFilters.minSkills : undefined,
           minProduct: appliedFilters.minProduct > 0 ? appliedFilters.minProduct : undefined,
@@ -1158,6 +1452,58 @@ useEffect(() => {
     }
     fetchData();
   }, [page, pageSize, appliedFilters, sortField, sortOrder]);
+
+  // Sorted list for list view (client-side sort, multi-key)
+  const sortedCourses = useMemo(() => {
+    const list = Array.isArray(courses) ? courses.slice() : [];
+    // Build sort priority
+    let priorities = [];
+    const isScoreField = SCORE_SORT_KEYS.includes(sortField);
+    if (!sortField) {
+      // Default: all scores DESC
+      priorities = SCORE_SORT_KEYS.map((f) => ({ field: f, order: 'desc' }));
+    } else if (sortField === 'credits' || sortField === 'workload') {
+      // Primary: credits/workload (asc/desc). Secondary: all scores DESC (stable within equal primary)
+      priorities = [{ field: sortField, order: sortOrder === 'asc' ? 'asc' : 'desc' }]
+        .concat(SCORE_SORT_KEYS.map((f) => ({ field: f, order: 'desc' })));
+    } else if (isScoreField) {
+      // Primary: selected score with chosen order. Secondary: remaining scores DESC.
+      const rest = SCORE_SORT_KEYS.filter((f) => f !== sortField);
+      priorities = [{ field: sortField, order: sortOrder === 'asc' ? 'asc' : 'desc' }]
+        .concat(rest.map((f) => ({ field: f, order: 'desc' })));
+    } else {
+      // Fallback: keep default
+      priorities = SCORE_SORT_KEYS.map((f) => ({ field: f, order: 'desc' }));
+    }
+
+    const num = (v) => {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : -Infinity;
+    };
+
+    list.sort((a, b) => {
+      for (const p of priorities) {
+        let av = a?.[p.field];
+        let bv = b?.[p.field];
+        // Normalize scores to numbers; credits/workload already numeric-ish
+        av = num(av);
+        bv = num(bv);
+        if (av === bv) continue;
+        if (p.order === 'asc') return av - bv;
+        return bv - av; // desc
+      }
+      // Final tie-breaker: course_name asc, then course_code asc
+      const an = (a?.course_name || '').toString().toLowerCase();
+      const bn = (b?.course_name || '').toString().toLowerCase();
+      if (an !== bn) return an < bn ? -1 : 1;
+      const ac = (a?.course_code || '').toString().toLowerCase();
+      const bc = (b?.course_code || '').toString().toLowerCase();
+      if (ac !== bc) return ac < bc ? -1 : 1;
+      return 0;
+    });
+
+    return list;
+  }, [courses, sortField, sortOrder]);
 
   useEffect(() => {
     setPage(1);
@@ -1437,7 +1783,7 @@ useEffect(() => {
               return (
                 <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-                    <span>{label} minimum</span>
+                    <span>{label}</span>
                     <span style={{ color: THEME_VARS.textMuted }}>
                       ≥ {formatScoreLevelLabel(draftFilters[key])}
                     </span>
@@ -1501,32 +1847,32 @@ useEffect(() => {
               <span style={{ fontSize: 12, color: THEME_VARS.textMuted }}>Sort by</span>
               <div style={{ display: "flex", gap: 4, flexWrap: 'wrap' }}>
                 <button
-                  onClick={() => { setSortField("credits"); setSortOrder(sortField === "credits" && sortOrder === "asc" ? "desc" : "asc"); }}
+                  type="button"
+                  onClick={() => toggleSortField("credits")}
                   style={chipButtonStyle(sortField === "credits")}
                   title="Toggle credits ascending/descending"
                 >
                   Credits {sortField === "credits" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
                 </button>
                 <button
-                  onClick={() => { setSortField("workload"); setSortOrder(sortField === "workload" && sortOrder === "asc" ? "desc" : "asc"); }}
+                  type="button"
+                  onClick={() => toggleSortField("workload")}
                   style={chipButtonStyle(sortField === "workload")}
                   title="Toggle workload ascending/descending"
                 >
                   Workload {sortField === "workload" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
                 </button>
                 {[
-                  { key: 'score_relevance', label: 'Relevance score' },
-                  { key: 'score_skills', label: 'Skills score' },
-                  { key: 'score_product', label: 'Product score' },
-                  { key: 'score_venture', label: 'Venture score' },
-                  { key: 'score_foundations', label: 'Foundations score' },
+                  { key: 'score_relevance', label: 'Entrepreneurship Relevance' },
+                  { key: 'score_skills', label: 'Personal Development' },
+                  { key: 'score_product', label: 'Product Innovation' },
+                  { key: 'score_venture', label: 'Venture Ops' },
+                  { key: 'score_foundations', label: 'Startup Basics' },
                 ].map(({ key, label }) => (
                   <button
+                    type="button"
                     key={key}
-                    onClick={() => {
-                      setSortField(key);
-                      setSortOrder(sortField === key ? (sortOrder === "desc" ? "asc" : "desc") : "desc");
-                    }}
+                    onClick={() => toggleSortField(key)}
                     style={chipButtonStyle(sortField === key)}
                     title={`Toggle ${label} ascending/descending`}
                   >
@@ -1534,7 +1880,7 @@ useEffect(() => {
                   </button>
                 ))}
                 <button
-                  onClick={() => { setSortField(""); setSortOrder("asc"); }}
+                  onClick={() => { setSortField(""); setSortOrder("desc"); }}
                   style={chipButtonStyle(false)}
                 >
                   Clear sort
@@ -1600,10 +1946,12 @@ useEffect(() => {
 
         {viewMode === 'list' ? (
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
-            {courses.map((c, idx) => {
+            {sortedCourses.map((c, idx) => {
               const courseKey = courseKeyOf(c, idx);
               const scheduleLines = splitScheduleLines(c.schedule);
               const courseUrl = c.course_url || c.url || '';
+              const scheduleEvents = buildScheduleEvents(scheduleLines);
+              const hasSchedule = scheduleEvents.length > 0;
               return (
                 <li key={courseKey}>
                   <article
@@ -1615,41 +1963,85 @@ useEffect(() => {
                       background: THEME_VARS.surface,
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: 8,
+                      gap: 12,
                     }}
                   >
-                  <h3 style={{ margin: 0 }}>
-                    <a
-                      href={courseUrl || '#'}
-                      target={courseUrl ? '_blank' : '_self'}
-                      rel={courseUrl ? 'noreferrer' : undefined}
+                    <div
                       style={{
-                        color: 'inherit',
-                        textDecoration: 'none',
-                        pointerEvents: courseUrl ? 'auto' : 'none',
-                        fontWeight: 600,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 8,
+                        minWidth: 0,
                       }}
                     >
-                      {c.course_name}
-                    </a>
-                    {c.course_code && (
-                      <small style={{ marginLeft: 8 }}>({c.course_code})</small>
-                    )}
-                  </h3>
-                  {renderProgramTags(c.available_programs)}
-                  {renderLevelTags(c.available_levels)}
-                  <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {buildCourseDetailRows(c, scheduleLines)}
-                  </ul>
-                  <ScoreSummary
-                    course={c}
-                    layout="list"
-                    submissionState={submissionStates[courseKey]}
-                    onSubmissionStateChange={(state) => updateSubmissionState(courseKey, state)}
-                    savedValues={ratingValues[courseKey]}
-                    onValuesChange={(vals) => updateRatingValues(courseKey, vals)}
-                  />
-                </article>
+                      <h3 style={{ margin: 0 }}>
+                        <a
+                          href={courseUrl || '#'}
+                          target={courseUrl ? '_blank' : '_self'}
+                          rel={courseUrl ? 'noreferrer' : undefined}
+                          style={{
+                            color: 'inherit',
+                            textDecoration: 'none',
+                            pointerEvents: courseUrl ? 'auto' : 'none',
+                            fontWeight: 600,
+                          }}
+                        >
+                          {c.course_name}
+                        </a>
+                        {c.course_code && (
+                          <small style={{ marginLeft: 8 }}>({c.course_code})</small>
+                        )}
+                      </h3>
+                      {renderProgramTags(c.available_programs)}
+                      {renderLevelTags(c.available_levels)}
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 16,
+                          marginTop: 4,
+                        }}
+                      >
+                        <div
+                          style={{
+                            flex: '1 1 320px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 6,
+                            minWidth: 0,
+                          }}
+                        >
+                          <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {buildCourseDetailRows(c, scheduleLines)}
+                          </ul>
+                        </div>
+                        {hasSchedule && (
+                          <aside
+                            style={{
+                              flex: '0 0 240px',
+                              minWidth: 220,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: 6,
+                            }}
+                          >
+                            <div style={{ fontSize: 12, fontWeight: 600, color: THEME_VARS.textMuted, textTransform: 'uppercase' }}>
+                              Weekly Schedule
+                            </div>
+                            <WeekScheduleCalendar events={scheduleEvents} />
+                          </aside>
+                        )}
+                      </div>
+                      <ScoreSummary
+                        course={c}
+                        layout="list"
+                        submissionState={submissionStates[courseKey]}
+                        onSubmissionStateChange={(state) => updateSubmissionState(courseKey, state)}
+                        savedValues={ratingValues[courseKey]}
+                        onValuesChange={(vals) => updateRatingValues(courseKey, vals)}
+                      />
+                    </div>
+                  </article>
                 </li>
               );
             })}
@@ -1693,11 +2085,8 @@ useEffect(() => {
                   const courseKey = courseKeyOf(c, idx);
                   const scheduleLines = splitScheduleLines(c.schedule);
                   const courseUrl = c.course_url || c.url || '';
-                  const t = maxRank <= 0 || rank === Infinity ? 1 : rank / maxRank; // 0..1, worst close to 1
-                  const minL = 25, maxL = 90;
-                  const lightness = Math.round(minL + t * (maxL - minL));
-                  const bg = colorForRank(rank === Infinity ? maxRank : rank, maxRank);
-                  const fg = textColorForBgHslLightness(lightness);
+                  const bg = colorForRank(rank === Infinity ? maxRank : rank);
+                  const fg = textColorForHex(bg);
                   return (
                     <article
                       key={courseKey}
@@ -1710,41 +2099,51 @@ useEffect(() => {
                         color: fg,
                         display: 'flex',
                         flexDirection: 'column',
-                        minHeight: 120
+                        gap: 10,
+                        minHeight: 140
                       }}
                     >
-                      <h3 style={{ margin: 0, fontSize: 16, lineHeight: '20px' }}>
-                        <a
-                          href={courseUrl || '#'}
-                          target={courseUrl ? '_blank' : '_self'}
-                          rel={courseUrl ? 'noreferrer' : undefined}
-                          style={{
-                            color: 'inherit',
-                            textDecoration: 'none',
-                            pointerEvents: courseUrl ? 'auto' : 'none',
-                            fontWeight: 600,
-                          }}
-                        >
-                          {c.course_name}
-                        </a>
-                      </h3>
-                      {c.course_code && (
-                        <div style={{ fontSize: 12, opacity: 0.85, marginTop: 2 }}>{c.course_code}</div>
-                      )}
-                    {renderProgramTags(c.available_programs)}
-                    {renderLevelTags(c.available_levels)}
-                      <ul style={{ listStyle: 'none', padding: 0, margin: '8px 0 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        {buildCourseDetailRows(c, scheduleLines)}
-                      </ul>
-                      <ScoreSummary
-                        course={c}
-                        layout="grid"
-                        theme={fg === '#fff' ? 'dark' : 'light'}
-                        submissionState={submissionStates[courseKey]}
-                        onSubmissionStateChange={(state) => updateSubmissionState(courseKey, state)}
-                        savedValues={ratingValues[courseKey]}
-                        onValuesChange={(vals) => updateRatingValues(courseKey, vals)}
-                      />
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 8,
+                          minWidth: 0,
+                        }}
+                      >
+                        <h3 style={{ margin: 0, fontSize: 16, lineHeight: '20px' }}>
+                          <a
+                            href={courseUrl || '#'}
+                            target={courseUrl ? '_blank' : '_self'}
+                            rel={courseUrl ? 'noreferrer' : undefined}
+                            style={{
+                              color: 'inherit',
+                              textDecoration: 'none',
+                              pointerEvents: courseUrl ? 'auto' : 'none',
+                              fontWeight: 600,
+                            }}
+                          >
+                            {c.course_name}
+                          </a>
+                        </h3>
+                        {c.course_code && (
+                          <div style={{ fontSize: 12, opacity: 0.85 }}>{c.course_code}</div>
+                        )}
+                        {renderProgramTags(c.available_programs)}
+                        {renderLevelTags(c.available_levels)}
+                        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {buildCourseDetailRows(c, scheduleLines)}
+                        </ul>
+                        <ScoreSummary
+                          course={c}
+                          layout="grid"
+                          theme={fg === '#fff' ? 'dark' : 'light'}
+                          submissionState={submissionStates[courseKey]}
+                          onSubmissionStateChange={(state) => updateSubmissionState(courseKey, state)}
+                          savedValues={ratingValues[courseKey]}
+                          onValuesChange={(vals) => updateRatingValues(courseKey, vals)}
+                        />
+                      </div>
                     </article>
                   );
                 })}

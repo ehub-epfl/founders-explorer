@@ -14,11 +14,11 @@
  *   await submitCourseRating({
  *     course_code: 'CS101',
  *     course_id: '12345',
- *     score_relevance: 0.75,
- *     score_skills: 0.9,
- *     score_product: 0.74,
- *     score_venture: 1,
- *     score_foundations: 0.84,
+ *     score_relevance: 75,
+ *     score_skills: 90,
+ *     score_product: 74,
+ *     score_venture: 100,
+ *     score_foundations: 84,
  *   });
  */
 
@@ -33,10 +33,10 @@ function inRange(n, min, max) {
 }
 
 /**
- * Round to 2 decimal places to reduce payload noise
+ * Round scores to whole numbers
  */
-function round2(n) {
-  return Math.round(n * 100) / 100;
+function roundScore(n) {
+  return Math.round(n);
 }
 
 /**
@@ -63,17 +63,17 @@ function buildPayload({ course_code, course_id, score_relevance, score_skills, s
     throw new Error('course_id is required');
   }
   const scores = [score_relevance, score_skills, score_product, score_venture, score_foundations];
-  if (scores.some((s) => !inRange(s, 0, 1))) {
-    throw new Error('score_relevance, score_skills, score_product, score_venture, and score_foundations must be numbers between 0 and 1');
+  if (scores.some((s) => !inRange(s, 0, 100))) {
+    throw new Error('score_relevance, score_skills, score_product, score_venture, and score_foundations must be numbers between 0 and 100');
   }
   return {
     course_code: normalizedCode,
     course_id: normalizedId,
-    score_relevance: round2(score_relevance),
-    score_skills: round2(score_skills),
-    score_product: round2(score_product),
-    score_venture: round2(score_venture),
-    score_foundations: round2(score_foundations),
+    score_relevance: roundScore(score_relevance),
+    score_skills: roundScore(score_skills),
+    score_product: roundScore(score_product),
+    score_venture: roundScore(score_venture),
+    score_foundations: roundScore(score_foundations),
     ...(turnstileToken ? { turnstileToken } : {}),
   };
 }
