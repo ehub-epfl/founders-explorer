@@ -30,6 +30,7 @@ begin
         select format('drop table if exists %I.%I cascade;', schemaname, tablename)
         from pg_catalog.pg_tables
         where schemaname = current_schema()
+          and tablename <> 'course_ratings'
     loop
         execute stmt;
     end loop;
@@ -41,6 +42,9 @@ create table if not exists coursebook_courses (
     course_key      text        not null check (char_length(course_key) > 0),
     course_name     text        not null check (char_length(course_name) > 0),
     section         text        not null,
+    study_program   text,
+    study_faculty   text,
+    study_block     text,
     course_url      text        not null,
     language        text        not null,
     credits         numeric(6,2),
@@ -48,6 +52,8 @@ create table if not exists coursebook_courses (
     semester        text,
     course_type     text,
     schedule        text        not null default '',
+    description     text        not null default '',
+    keywords        text        not null default '',
     entre_score     integer,
     "PD"            integer,
     "PB"            integer,
@@ -66,6 +72,12 @@ create index if not exists coursebook_courses_section_idx
 
 create index if not exists coursebook_courses_language_idx
     on coursebook_courses (language);
+
+create index if not exists coursebook_courses_study_program_idx
+    on coursebook_courses (study_program);
+
+create index if not exists coursebook_courses_study_faculty_idx
+    on coursebook_courses (study_faculty);
 
 create index if not exists coursebook_courses_name_trgm_idx
     on coursebook_courses using gin (course_name extensions.gin_trgm_ops);
@@ -113,6 +125,21 @@ create index if not exists coursebook_programs_program_type_idx
 create index if not exists coursebook_programs_exam_form_idx
     on coursebook_programs (exam_form);
 
+create table if not exists coursebook_studyplans (
+    id             bigserial primary key,
+    course_id      bigint      not null references coursebook_courses (id) on delete cascade,
+    study_program  text        not null,
+    study_faculty  text        not null,
+    study_block    text        not null,
+    unique (course_id, study_program, study_faculty, study_block)
+);
+
+create index if not exists coursebook_studyplans_program_idx
+    on coursebook_studyplans (study_program);
+
+create index if not exists coursebook_studyplans_faculty_idx
+    on coursebook_studyplans (study_faculty);
+
 create table if not exists course_ratings (
     id                  bigserial primary key,
     created_at          timestamptz not null default now(),
@@ -141,6 +168,9 @@ select
     c.course_key,
     c.course_name,
     c.section,
+    c.study_program,
+    c.study_faculty,
+    c.study_block,
     c.course_url,
     c.language,
     c.credits,
@@ -148,45 +178,62 @@ select
     c.semester,
     c.course_type as type,
     c.schedule,
+    c.description,
+    c.keywords,
     c.entre_score,
     c."PD",
     c."PB",
     c."VB",
     c."INTRO",
-    coalesce(
-        jsonb_agg(
-        jsonb_build_object(
-            'name', t.teacher_name,
-            'url',  coalesce(t.teacher_url, '')
-        ) order by t.teacher_name
-    ) filter (where t.id is not null),
-        '[]'::jsonb
-    ) as teachers,
-    coalesce(
-        array_agg(distinct t.teacher_name) filter (where t.teacher_name is not null),
-        ARRAY[]::text[]
-    ) as teacher_names,
-    coalesce(
-        string_agg(distinct t.teacher_name, ' ') filter (where t.teacher_name is not null),
-        ''
-    ) as teacher_names_text,
-    coalesce(
-        jsonb_agg(
-        jsonb_build_object(
-            'program_name', p.program_name,
-            'level',       p.level,
-            'semester',     p.semester,
-            'exam_form',    p.exam_form,
-            'type',         p.program_type,
-            'workload',     p.workload
-        ) order by p.program_name, p.level
-    ) filter (where p.id is not null),
-        '[]'::jsonb
-    ) as programs
+    coalesce(t_data.teachers, '[]'::jsonb) as teachers,
+    coalesce(t_data.teacher_names, ARRAY[]::text[]) as teacher_names,
+    coalesce(t_data.teacher_names_text, '') as teacher_names_text,
+    coalesce(p_data.programs, '[]'::jsonb) as programs,
+    coalesce(sp_data.study_plans, '[]'::jsonb) as study_plans
 from coursebook_courses c
-left join coursebook_teachers t on t.course_id = c.id
-left join coursebook_programs p on p.course_id = c.id
-group by c.id;
+left join lateral (
+    select
+        jsonb_agg(
+            jsonb_build_object(
+                'name', t.teacher_name,
+                'url',  coalesce(t.teacher_url, '')
+            )
+            order by t.teacher_name
+        ) as teachers,
+        array_agg(distinct t.teacher_name) as teacher_names,
+        coalesce(string_agg(distinct t.teacher_name, ' '), '') as teacher_names_text
+    from coursebook_teachers t
+    where t.course_id = c.id
+) as t_data on true
+left join lateral (
+    select
+        jsonb_agg(
+            jsonb_build_object(
+                'program_name', p.program_name,
+                'level',        p.level,
+                'semester',     p.semester,
+                'exam_form',    p.exam_form,
+                'type',         p.program_type,
+                'workload',     p.workload
+            )
+            order by p.program_name, p.level
+        ) as programs
+    from coursebook_programs p
+    where p.course_id = c.id
+) as p_data on true
+left join lateral (
+    select
+        jsonb_agg(
+            jsonb_build_object(
+                'study_program', s.study_program,
+                'study_faculty', s.study_faculty,
+                'study_block',   s.study_block
+            )
+            order by s.study_program, s.study_faculty, s.study_block
+        ) as study_plans
+    from coursebook_studyplans s
+    where s.course_id = c.id
+) as sp_data on true;
 
 
 drop trigger if exists set_coursebook_courses_updated_at on coursebook_courses;

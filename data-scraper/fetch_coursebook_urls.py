@@ -75,12 +75,14 @@ def extract_links(source_url: str, html_text: str) -> Iterable[Dict[str, str]]:
                 continue
 
             label = anchor.text_content().strip() or (anchor.get("title") or "").strip()
+            if label == "Humanities and Social Sciences Program":
+                continue
             full_url = urljoin("https://edu.epfl.ch/", href)
 
             entry: Dict[str, str] = {
                 "href": full_url,
-                "label": label,
-                "section": header_text or "",
+                "study_faculty": label,
+                "study_program": header_text or "",
             }
 
             results.append(entry)

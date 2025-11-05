@@ -27,6 +27,9 @@ DEFAULT_COURSES_CSV = (
 DEFAULT_PROGRAMS_CSV = (
     RepositoryPath / "data-scraper" / "data" / "coursebook_programs.csv"
 )
+DEFAULT_STUDYPLANS_CSV = (
+    RepositoryPath / "data-scraper" / "data" / "coursebook_studyplans.csv"
+)
 DEFAULT_ENTRE_SCORES_CSV = (
     RepositoryPath / "data-scraper" / "data" / "coursebook_entre_scores.csv"
 )
@@ -197,6 +200,9 @@ def read_course_rows(path: Path, scores: Dict[str, dict]) -> Tuple[List[dict], L
                     "course_key": course_key,
                     "course_name": course_name,
                     "section": row.get("section", "").strip(),
+                    "study_program": (row.get("study_program") or "").strip() or None,
+                    "study_faculty": (row.get("study_faculty") or "").strip() or None,
+                    "study_block": (row.get("study_block") or "").strip() or None,
                     "course_url": row.get("course_url", "").strip(),
                     "language": row.get("language", "").strip(),
                     "credits": credits_value,
@@ -204,6 +210,8 @@ def read_course_rows(path: Path, scores: Dict[str, dict]) -> Tuple[List[dict], L
                     "semester": (row.get("semester") or "").strip() or None,
                     "course_type": (row.get("type") or "").strip() or None,
                     "schedule": row.get("schedule", "").strip(),
+                    "description": (row.get("description") or "").strip(),
+                    "keywords": (row.get("keywords") or "").strip(),
                     "entre_score": entre_score,
                     "PD": pd_score,
                     "PB": pb_score,
@@ -263,6 +271,28 @@ def read_program_rows(path: Path) -> List[dict]:
                 }
             )
     return programs
+
+
+def read_studyplan_rows(path: Path) -> List[dict]:
+    studyplans: List[dict] = []
+    with path.open("r", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            course_key = (row.get("course_key") or "").strip()
+            study_program = (row.get("study_program") or "").strip()
+            study_faculty = (row.get("study_faculty") or "").strip()
+            study_block = (row.get("study_block") or "").strip()
+            if not course_key or not study_program or not study_faculty or not study_block:
+                continue
+            studyplans.append(
+                {
+                    "course_key": course_key,
+                    "study_program": study_program,
+                    "study_faculty": study_faculty,
+                    "study_block": study_block,
+                }
+            )
+    return studyplans
 
 
 # ---- Utilities ---------------------------------------------------------
@@ -411,6 +441,41 @@ def upsert_programs(
             )
 
 
+def upsert_studyplans(
+    client: SupabaseClient,
+    studyplan_rows: Sequence[dict],
+    course_id_map: Dict[str, int],
+) -> None:
+    if not studyplan_rows:
+        return
+    payload: List[dict] = []
+    for row in studyplan_rows:
+        course_id = course_id_map.get(row["course_key"])
+        if not course_id:
+            continue
+        payload.append(
+            {
+                "course_id": course_id,
+                "study_program": row["study_program"],
+                "study_faculty": row["study_faculty"],
+                "study_block": row["study_block"],
+            }
+        )
+    if not payload:
+        return
+    delete_existing_children(
+        client,
+        "coursebook_studyplans",
+        [row["course_id"] for row in payload],
+    )
+    for chunk in chunked(payload, 500):
+        client.upsert(
+            "coursebook_studyplans",
+            rows=chunk,
+            on_conflict="course_id,study_program,study_faculty,study_block",
+        )
+
+
 def main() -> int:
     load_env(ENV_PATH)
     supabase_url = os.environ.get("SUPABASE_URL")
@@ -420,6 +485,9 @@ def main() -> int:
     )
     programs_csv = Path(
         os.environ.get("COURSEBOOK_PROGRAMS_CSV", DEFAULT_PROGRAMS_CSV)
+    )
+    studyplans_csv = Path(
+        os.environ.get("COURSEBOOK_STUDYPLANS_CSV", DEFAULT_STUDYPLANS_CSV)
     )
     entre_scores_csv = Path(
         os.environ.get("COURSEBOOK_ENTRE_SCORES_CSV", DEFAULT_ENTRE_SCORES_CSV)
@@ -435,6 +503,9 @@ def main() -> int:
     if not programs_csv.exists():
         print(f"error: {programs_csv} does not exist.", file=sys.stderr)
         return 1
+    if not studyplans_csv.exists():
+        print(f"error: {studyplans_csv} does not exist.", file=sys.stderr)
+        return 1
 
     if entre_scores_csv.exists():
         scores = read_score_rows(entre_scores_csv)
@@ -447,10 +518,11 @@ def main() -> int:
 
     courses, teachers = read_course_rows(courses_csv, scores)
     programs = read_program_rows(programs_csv)
+    studyplans = read_studyplan_rows(studyplans_csv)
 
     print(
         f"Loaded {len(courses)} courses, {len(teachers)} teacher entries, "
-        f"and {len(programs)} program rows."
+        f"{len(programs)} program rows, and {len(studyplans)} study plan rows."
     )
 
     client = SupabaseClient(supabase_url, service_role_key)
@@ -483,6 +555,9 @@ def main() -> int:
 
     upsert_programs(client, programs, course_id_map)
     print("Programs synced.")
+
+    upsert_studyplans(client, studyplans, course_id_map)
+    print("Study plans synced.")
 
     return 0
 

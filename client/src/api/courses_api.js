@@ -17,6 +17,28 @@ const SCORE_SORT_COLUMNS = [
 ];
 const SCORE_SORT_COLUMN_SET = new Set(SCORE_SORT_COLUMNS.map((entry) => entry.column));
 
+const PROGRAM_NAME_CANONICALS = new Map([
+  ['management technology and entrepreneurship', 'Management, Technology and Entrepreneurship'],
+  ['management technology and entrepreneurship minor', 'Management, Technology and Entrepreneurship minor'],
+]);
+
+function canonicalProgramKey(value) {
+  if (typeof value !== 'string') return '';
+  return value
+    .toLowerCase()
+    .replace(/,/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function canonicalizeProgramName(value) {
+  if (typeof value !== 'string') return '';
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  const key = canonicalProgramKey(trimmed);
+  return PROGRAM_NAME_CANONICALS.get(key) || trimmed;
+}
+
 export async function getCourses(options = {}) {
   const {
     page = 1,
@@ -26,8 +48,6 @@ export async function getCourses(options = {}) {
     semester,
     degree,
     level,
-    major,
-    minor,
     creditsMin,
     creditsMax,
     section,
@@ -39,6 +59,7 @@ export async function getCourses(options = {}) {
     minProduct,
     minVenture,
     minFoundations,
+    availabilitySlots, // reserved for client-side availability filtering
   } = options;
 
   const { supabaseUrl, supabaseAnonKey } = resolveSupabaseConfig();
@@ -103,8 +124,6 @@ export async function getCourses(options = {}) {
     semester,
     degree,
     level,
-    major,
-    minor,
   });
 
   if (programCourseIds && programCourseIds.length === 0) {
@@ -217,6 +236,7 @@ export async function getLevelsByDegree() {
 function normalizeCourseRecord(row) {
   const teachers = Array.isArray(row?.teachers) ? row.teachers : [];
   const programs = Array.isArray(row?.programs) ? row.programs : [];
+  const studyPlansRaw = Array.isArray(row?.study_plans) ? row.study_plans : [];
   const credits = normalizeCreditsValue(row?.credits);
   const workload = normalizeWorkloadValue(row?.workload);
 
@@ -241,7 +261,7 @@ function normalizeCourseRecord(row) {
 
   const normalizedPrograms = programs
     .map((entry) => {
-      const programName = typeof entry?.program_name === 'string' ? entry.program_name.trim() : '';
+      const programName = canonicalizeProgramName(entry?.program_name);
       const level = typeof entry?.level === 'string' ? entry.level.trim() : '';
       const semester = typeof entry?.semester === 'string' ? entry.semester.trim() : '';
       const examForm = typeof entry?.exam_form === 'string' ? entry.exam_form.trim() : '';
@@ -257,9 +277,24 @@ function normalizeCourseRecord(row) {
     })
     .filter(Boolean);
 
+  const normalizedStudyPlans = studyPlansRaw
+    .map((entry) => {
+      const studyProgram = canonicalizeProgramName(entry?.study_program);
+      const studyFaculty = canonicalizeProgramName(entry?.study_faculty);
+      const studyBlock = typeof entry?.study_block === 'string' ? entry.study_block.trim() : '';
+      if (!studyProgram && !studyFaculty && !studyBlock) return null;
+      const payload = {};
+      if (studyProgram) payload.study_program = studyProgram;
+      if (studyFaculty) payload.study_faculty = studyFaculty;
+      if (studyBlock) payload.study_block = studyBlock;
+      return payload;
+    })
+    .filter(Boolean);
+
   const availablePrograms = new Set();
   const availableLevels = new Set();
   const availableLabels = new Set();
+  const studyFaculties = new Set();
   for (const program of normalizedPrograms) {
     if (program.program_name) {
       availablePrograms.add(program.program_name);
@@ -283,6 +318,43 @@ function normalizeCourseRecord(row) {
   const scoreVenture = normalizeScoreValue(row?.VB);
   const scoreFoundations = normalizeScoreValue(row?.INTRO);
 
+  const topStudyProgram = canonicalizeProgramName(row?.study_program);
+  const topStudyFaculty = canonicalizeProgramName(row?.study_faculty);
+  const topStudyBlock = typeof row?.study_block === 'string' ? row.study_block.trim() : '';
+
+  const studyPlanLabels = new Set();
+  const appendStudyPlanLabel = ({ study_program, study_faculty, study_block }) => {
+    const program = canonicalizeProgramName(study_program);
+    const faculty = canonicalizeProgramName(study_faculty);
+    const block = typeof study_block === 'string' ? study_block.trim() : '';
+    const parts = [program, faculty, block].filter(Boolean);
+    if (parts.length) {
+      studyPlanLabels.add(parts.join(' • '));
+    }
+    if (faculty) studyFaculties.add(faculty);
+  };
+
+  if (normalizedStudyPlans.length) {
+    for (const plan of normalizedStudyPlans) {
+      appendStudyPlanLabel(plan);
+    }
+  }
+  if (!studyPlanLabels.size && (topStudyProgram || topStudyFaculty || topStudyBlock)) {
+    appendStudyPlanLabel({
+      study_program: topStudyProgram,
+      study_faculty: topStudyFaculty,
+      study_block: topStudyBlock,
+    });
+  } else if (topStudyFaculty) {
+    studyFaculties.add(topStudyFaculty);
+  }
+
+  const normalizedFacultySet = new Set(
+    Array.from(studyFaculties)
+      .map((value) => canonicalProgramKey(value))
+      .filter(Boolean),
+  );
+
   return {
     id: row?.id ?? null,
     unique_code: row?.unique_code ?? null,
@@ -301,11 +373,28 @@ function normalizeCourseRecord(row) {
     teacher_names: teacherNames,
     teacher_names_text: typeof row?.teacher_names_text === 'string' ? row.teacher_names_text : '',
     programs: normalizedPrograms,
+    study_plans: normalizedStudyPlans.length
+      ? normalizedStudyPlans
+      : (topStudyProgram || topStudyFaculty || topStudyBlock
+          ? [{
+              ...(topStudyProgram ? { study_program: topStudyProgram } : {}),
+              ...(topStudyFaculty ? { study_faculty: topStudyFaculty } : {}),
+              ...(topStudyBlock ? { study_block: topStudyBlock } : {}),
+            }]
+          : []),
     prof_name: teacherNames[0] || null,
     prof_names: teacherNames.length ? teacherNames.join(', ') : null,
-    available_programs: Array.from(availablePrograms),
+    available_programs: Array.from(availablePrograms).filter((name) => {
+      const key = canonicalProgramKey(name);
+      return key && !normalizedFacultySet.has(key);
+    }),
     available_levels: Array.from(availableLevels),
     available_program_labels: Array.from(availableLabels),
+    study_plan_labels: Array.from(studyPlanLabels),
+    study_plan_tags: Array.from(studyFaculties),
+    study_program: topStudyProgram,
+    study_faculty: topStudyFaculty,
+    study_block: topStudyBlock,
     score_relevance: scoreRelevance,
     score_skills: scoreSkills,
     score_product: scoreProduct,
@@ -481,44 +570,15 @@ async function collectCourseIdsForProgramFilters(client, filters) {
     semester,
     degree,
     level,
-    major,
-    minor,
   } = filters || {};
 
   const normalizedType = normalizeProgramType(type);
   const normalizedLevel = typeof level === 'string' ? level.trim() : '';
   const normalizedSeason = normalizeSeasonValue(semester);
-  const normalizedDegree = typeof degree === 'string' ? degree.trim().toUpperCase() : '';
-  const normalizedMajor = typeof major === 'string' ? major.trim() : '';
-  const normalizedMinor = typeof minor === 'string' ? minor.trim() : '';
+  const degreeRaw = typeof degree === 'string' ? degree.trim() : '';
+  const normalizedDegree = degreeRaw.toUpperCase();
 
   const requirementSets = [];
-
-  async function fetchProgramCourseIds(programName, fallbackType) {
-    let query = client
-      .from(PROGRAMS_TABLE)
-      .select('course_id')
-      .eq('program_name', programName);
-
-    const enforcedType = normalizedDegree === 'PHD' ? null : (normalizedType || fallbackType);
-    if (enforcedType) {
-      query = query.eq('program_type', enforcedType);
-    }
-
-    if (normalizedDegree === 'PHD') {
-      query = query.eq('level', 'Doctoral School');
-    }
-
-    if (normalizedSeason) {
-      query = query.eq('semester', normalizedSeason);
-    }
-
-    const { data, error } = await query;
-    if (error) {
-      throw new Error(`Supabase program-filter fetch failed: ${error.message}`);
-    }
-    return extractCourseIdSet(data);
-  }
 
   if (normalizedType || normalizedLevel || normalizedSeason || normalizedDegree) {
     requirementSets.push(async () => {
@@ -531,12 +591,23 @@ async function collectCourseIdsForProgramFilters(client, filters) {
       }
 
       if (normalizedLevel) {
-        query = query.eq('level', normalizedLevel);
-      } else if (normalizedDegree) {
-        if (normalizedDegree === 'PHD') {
-          query = query.eq('level', 'Doctoral School');
+        const isLevelCode = /^[A-Za-z]+\d+$/i.test(normalizedLevel);
+        if (isLevelCode) {
+          query = query.eq('level', normalizedLevel);
         } else {
+          query = query.ilike('program_name', normalizedLevel);
+        }
+      } else if (normalizedDegree) {
+        if (normalizedDegree === 'PHD' || degreeRaw === 'Doctoral School') {
+          query = query.eq('level', 'Doctoral School');
+        } else if (normalizedDegree === 'BA' || normalizedDegree === 'MA') {
           query = query.ilike('level', `${normalizedDegree}%`);
+        } else if (normalizedDegree === 'MA MINOR') {
+          query = query.ilike('program_name', '%minor%');
+        } else if (normalizedDegree === 'PROPEDEUTICS') {
+          query = query.ilike('program_name', 'Propedeutics');
+        } else {
+          query = query.ilike('program_name', degreeRaw);
         }
       }
 
@@ -550,22 +621,6 @@ async function collectCourseIdsForProgramFilters(client, filters) {
       }
       return extractCourseIdSet(data);
     });
-  }
-
-  if (normalizedMajor && normalizedMinor) {
-    requirementSets.push(async () => {
-      const [majorSet, minorSet] = await Promise.all([
-        fetchProgramCourseIds(normalizedMajor, 'mandatory'),
-        fetchProgramCourseIds(normalizedMinor, 'optional'),
-      ]);
-      const union = new Set(majorSet);
-      for (const value of minorSet) union.add(value);
-      return union;
-    });
-  } else if (normalizedMajor) {
-    requirementSets.push(() => fetchProgramCourseIds(normalizedMajor, 'mandatory'));
-  } else if (normalizedMinor) {
-    requirementSets.push(() => fetchProgramCourseIds(normalizedMinor, 'optional'));
   }
 
   if (requirementSets.length === 0) {

@@ -1,14 +1,9 @@
 // src/pages/CoursesList.jsx
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getCourses, getLevelsByDegree } from "../api/courses_api";
 import submitCourseRating from "../api/submit_rating";
-import {
-  MA_PROJECT_LEVELS,
-  inferSemesterFromLevel,
-  isMAProjectLevel,
-  shouldSkipMinorQuestion,
-} from "../utils/levels";
+import { inferSemesterFromLevel } from "../utils/levels";
 
 const GRID_MIN_WIDTH = 220; // px
 
@@ -262,9 +257,44 @@ function renderLevelTags(levels) {
   );
 }
 
-function renderProgramTags(programs) {
+function renderProgramTags(programs, studyPlanTags = []) {
   if (!Array.isArray(programs) || programs.length === 0) return null;
-  const uniquePrograms = Array.from(new Set(programs.map((name) => name?.trim()).filter(Boolean)));
+
+  const normalizeProgramName = (entry) => {
+    if (!entry) return '';
+    if (typeof entry === 'string') return entry.trim();
+    if (typeof entry === 'object') {
+      if (typeof entry.program_name === 'string') return entry.program_name.trim();
+      if (typeof entry.name === 'string') return entry.name.trim();
+    }
+    return '';
+  };
+
+  const exclusion = new Set(
+    (Array.isArray(studyPlanTags) ? studyPlanTags : [])
+      .map((value) => {
+        if (typeof value === 'string') return value.trim().toLowerCase();
+        if (value && typeof value === 'object') {
+          if (typeof value.study_faculty === 'string') return value.study_faculty.trim().toLowerCase();
+          if (typeof value.faculty === 'string') return value.faculty.trim().toLowerCase();
+        }
+        return '';
+      })
+      .filter(Boolean),
+  );
+
+  const uniquePrograms = Array.from(
+    new Set(
+      programs
+        .map((entry) => normalizeProgramName(entry))
+        .filter((name) => {
+          if (!name) return false;
+          const normalized = name.toLowerCase();
+          return !exclusion.has(normalized);
+        }),
+    ),
+  );
+
   if (uniquePrograms.length === 0) return null;
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
@@ -286,6 +316,46 @@ function renderProgramTags(programs) {
           </span>
         );
       })}
+    </div>
+  );
+}
+
+function renderStudyPlanTags(course) {
+  if (!course) return null;
+  const tags = Array.isArray(course.study_plan_tags)
+    ? course.study_plan_tags.map((label) => (typeof label === 'string' ? label.trim() : '')).filter(Boolean)
+    : [];
+  if (!tags.length) {
+    const fallbackFaculty = typeof course.study_faculty === 'string' ? course.study_faculty.trim() : '';
+    if (fallbackFaculty) {
+      tags.push(fallbackFaculty);
+    }
+  }
+  if (!tags.length) return null;
+  return (
+    <div style={{ marginTop: 6 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        {tags.map((tag) => {
+          const color = colorForTag(tag);
+          return (
+            <span
+              key={tag}
+              style={{
+                display: 'inline-block',
+                background: color,
+                color: tagTextColor(color),
+                padding: '2px 12px',
+                borderRadius: 999,
+                fontSize: 11,
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {tag}
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -400,14 +470,75 @@ function splitScheduleLines(value) {
 }
 
 const DAY_DEFINITIONS = Object.freeze([
-  { index: 0, label: 'Mon', names: ['monday', 'mon', 'lundi', 'lun'] },
-  { index: 1, label: 'Tue', names: ['tuesday', 'tue', 'mardi', 'mar'] },
-  { index: 2, label: 'Wed', names: ['wednesday', 'wed', 'mercredi', 'mer'] },
-  { index: 3, label: 'Thu', names: ['thursday', 'thu', 'jeudi', 'jeu'] },
-  { index: 4, label: 'Fri', names: ['friday', 'fri', 'vendredi', 'ven'] },
-  { index: 5, label: 'Sat', names: ['saturday', 'sat', 'samedi', 'sam'] },
-  { index: 6, label: 'Sun', names: ['sunday', 'sun', 'dimanche', 'dim'] },
+  { index: 0, label: 'Mon', fullLabel: 'Monday', names: ['monday', 'mon', 'lundi', 'lun'] },
+  { index: 1, label: 'Tue', fullLabel: 'Tuesday', names: ['tuesday', 'tue', 'mardi', 'mar'] },
+  { index: 2, label: 'Wed', fullLabel: 'Wednesday', names: ['wednesday', 'wed', 'mercredi', 'mer'] },
+  { index: 3, label: 'Thu', fullLabel: 'Thursday', names: ['thursday', 'thu', 'jeudi', 'jeu'] },
+  { index: 4, label: 'Fri', fullLabel: 'Friday', names: ['friday', 'fri', 'vendredi', 'ven'] },
+  { index: 5, label: 'Sat', fullLabel: 'Saturday', names: ['saturday', 'sat', 'samedi', 'sam'] },
+  { index: 6, label: 'Sun', fullLabel: 'Sunday', names: ['sunday', 'sun', 'dimanche', 'dim'] },
 ]);
+
+const AVAILABILITY_GRID_START = 8 * 60; // 08:00
+const AVAILABILITY_GRID_END = 20 * 60; // 20:00
+const AVAILABILITY_GRID_STEP = 60; // minutes
+
+const AVAILABILITY_SLOT_MINUTES = (() => {
+  const slots = [];
+  for (let minute = AVAILABILITY_GRID_START; minute < AVAILABILITY_GRID_END; minute += AVAILABILITY_GRID_STEP) {
+    slots.push(minute);
+  }
+  return slots;
+})();
+
+const AVAILABILITY_SELECTED_BG = 'rgba(248, 113, 113, 0.3)';
+
+function buildAvailabilitySlotId(dayIndex, minuteStart) {
+  return `${dayIndex}-${minuteStart}`;
+}
+
+function decodeAvailabilitySlots(serialized) {
+  if (typeof serialized !== 'string' || !serialized.trim()) {
+    return new Set();
+  }
+  return new Set(
+    serialized
+      .split(',')
+      .map((token) => token.trim())
+      .filter(Boolean),
+  );
+}
+
+function encodeAvailabilitySlots(slots) {
+  if (!(slots instanceof Set)) return '';
+  return Array.from(slots)
+    .sort((a, b) => {
+      const [aDay, aMinute] = a.split('-').map(Number);
+      const [bDay, bMinute] = b.split('-').map(Number);
+      if (aDay !== bDay) return aDay - bDay;
+      return aMinute - bMinute;
+    })
+    .join(',');
+}
+
+function setAvailabilitySlotValue(serialized, slotId, shouldSelect) {
+  if (!slotId) return serialized || '';
+  const current = decodeAvailabilitySlots(serialized);
+  const next = new Set(current);
+  if (shouldSelect) {
+    next.add(slotId);
+  } else {
+    next.delete(slotId);
+  }
+  return encodeAvailabilitySlots(next);
+}
+
+function toggleAvailabilitySlotValue(serialized, slotId) {
+  if (!slotId) return serialized || '';
+  const current = decodeAvailabilitySlots(serialized);
+  const shouldSelect = !current.has(slotId);
+  return setAvailabilitySlotValue(serialized, slotId, shouldSelect);
+}
 
 const DAY_INDEX_LOOKUP = DAY_DEFINITIONS.reduce((map, day) => {
   day.names.forEach((name) => {
@@ -456,6 +587,8 @@ const EVENT_COLORS = Object.freeze({
   other: 'rgba(107, 114, 128, 0.8)',
 });
 
+const EVENT_BLOCK_HORIZONTAL_INSET = 1; // px margin inside the day column so hover area matches the fill
+
 function categorizeEventLabel(label) {
   const text = (label || '').toLowerCase();
   if (!text) return 'other';
@@ -489,13 +622,24 @@ function buildScheduleEvents(scheduleLines) {
     const endMinutes = parseTimeToken(match.groups?.end || '');
     if (!Number.isFinite(startMinutes) || !Number.isFinite(endMinutes)) continue;
     if (endMinutes <= startMinutes) continue;
+    const rawLabel = (match.groups?.label || '').trim();
+    const dayDefinition = DAY_DEFINITIONS.find((day) => day.index === dayIndex);
+    const rawDayToken = (match.groups?.day || '').trim();
+    let tooltipDayLabel = dayDefinition?.fullLabel || '';
+    if (!tooltipDayLabel && rawDayToken) {
+      tooltipDayLabel = `${rawDayToken.charAt(0).toUpperCase()}${rawDayToken.slice(1).toLowerCase()}`;
+    }
+    const tooltipTime = `${formatMinutesToLabel(startMinutes)}\u2013${formatMinutesToLabel(endMinutes)}`;
+    const tooltip =
+      `${tooltipDayLabel ? `${tooltipDayLabel} ` : ''}${tooltipTime}${rawLabel ? `: ${rawLabel}` : ''}`.trim();
     events.push({
       dayIndex,
       startMinutes,
       endMinutes,
-      label: (match.groups?.label || '').trim(),
-      category: categorizeEventLabel((match.groups?.label || '').trim()),
+      label: rawLabel,
+      category: categorizeEventLabel(rawLabel),
       raw: rawLine,
+      tooltip: tooltip || rawLine,
     });
   }
 
@@ -571,19 +715,24 @@ function WeekScheduleCalendar({ events }) {
                 {dayEvents.map((event, idx) => {
                   const top = ((event.startMinutes - anchorStart) / totalMinutes) * 100;
                   const height = ((event.endMinutes - event.startMinutes) / totalMinutes) * 100;
+                  const fallbackDayLabel = day.fullLabel || day.label || '';
+                  const fallbackTooltip = `${fallbackDayLabel ? `${fallbackDayLabel} ` : ''}${formatMinutesToLabel(event.startMinutes)}\u2013${formatMinutesToLabel(event.endMinutes)}${event.label ? `: ${event.label}` : ''}`;
+                  const blockTitle = event.tooltip || event.raw || fallbackTooltip;
                   return (
                     <div
                       key={`${event.raw}-${idx}`}
-                      title={`${formatMinutesToLabel(event.startMinutes)} – ${formatMinutesToLabel(event.endMinutes)}${event.label ? ` • ${event.label}` : ''}`}
+                      title={blockTitle}
                       style={{
                         position: 'absolute',
-                        left: '6%',
-                        right: '6%',
+                        left: `${EVENT_BLOCK_HORIZONTAL_INSET}px`,
+                        right: `${EVENT_BLOCK_HORIZONTAL_INSET}px`,
                         top: `${Math.max(0, top)}%`,
                         height: `${Math.max(8, height)}%`,
                         borderRadius: 4,
                         background: EVENT_COLORS[event.category] || EVENT_COLORS.other,
                         boxShadow: '0 1px 3px rgba(15, 23, 42, 0.25)',
+                        cursor: 'default',
+                        pointerEvents: 'auto',
                       }}
                     />
                   );
@@ -595,6 +744,201 @@ function WeekScheduleCalendar({ events }) {
       </div>
     </div>
   );
+}
+
+function AvailabilityGrid({ selectedSlots, onToggleSlot, onSetSlot, onClear }) {
+  const activeSlots = selectedSlots instanceof Set ? selectedSlots : new Set();
+  const [isDragging, setIsDragging] = useState(false);
+  const dragModeRef = useRef(null); // 'add' | 'remove' | null
+  const dragActiveRef = useRef(false);
+  const lastSlotRef = useRef(null);
+
+  useEffect(() => {
+    function stopDrag() {
+      if (!dragActiveRef.current) return;
+      dragActiveRef.current = false;
+      dragModeRef.current = null;
+      lastSlotRef.current = null;
+      setIsDragging(false);
+    }
+    window.addEventListener('pointerup', stopDrag);
+    window.addEventListener('pointercancel', stopDrag);
+    return () => {
+      window.removeEventListener('pointerup', stopDrag);
+      window.removeEventListener('pointercancel', stopDrag);
+    };
+  }, []);
+
+  const applySlotState = useCallback(
+    (slotId, shouldSelect, currentlyActive) => {
+      if (!slotId) return;
+      if (typeof onSetSlot === 'function') {
+        onSetSlot(slotId, shouldSelect);
+      } else if (typeof onToggleSlot === 'function') {
+        if (shouldSelect !== currentlyActive) {
+          onToggleSlot(slotId);
+        }
+      }
+    },
+    [onSetSlot, onToggleSlot],
+  );
+
+  const handleKeyToggle = (event, slotId) => {
+    if (event.key === ' ' || event.key === 'Enter') {
+      event.preventDefault();
+      if (typeof onToggleSlot === 'function') {
+        onToggleSlot(slotId);
+      }
+    }
+  };
+
+  const handlePointerDown = (event, slotId, currentlyActive) => {
+    if (!slotId) return;
+    event.preventDefault();
+    const shouldSelect = !currentlyActive;
+    dragModeRef.current = shouldSelect ? 'add' : 'remove';
+    dragActiveRef.current = true;
+    lastSlotRef.current = slotId;
+    setIsDragging(true);
+    applySlotState(slotId, shouldSelect, currentlyActive);
+  };
+
+  const handlePointerEnter = (slotId) => {
+    if (!dragActiveRef.current || !slotId) return;
+    if (lastSlotRef.current === slotId) return;
+    const mode = dragModeRef.current;
+    if (mode !== 'add' && mode !== 'remove') return;
+    lastSlotRef.current = slotId;
+    const currentlyActive = activeSlots.has(slotId);
+    const shouldSelect = mode === 'add';
+    applySlotState(slotId, shouldSelect, currentlyActive);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: THEME_VARS.text }}>
+          Weekly availability
+        </div>
+        <button
+          type="button"
+          onClick={onClear}
+          disabled={!activeSlots.size}
+          style={{
+            fontSize: 11,
+            padding: '2px 6px',
+            borderRadius: 4,
+            border: `1px solid ${THEME_VARS.borderSubtle}`,
+            background: THEME_VARS.surface,
+            color: activeSlots.size ? THEME_VARS.textMuted : THEME_VARS.disabledText,
+            cursor: activeSlots.size ? 'pointer' : 'not-allowed',
+          }}
+        >
+          Reset
+        </button>
+      </div>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `56px repeat(${DAY_DEFINITIONS.length}, minmax(0, 1fr))`,
+          columnGap: 0,
+          rowGap: 0,
+          fontSize: 10,
+          color: THEME_VARS.textMuted,
+          borderRadius: 6,
+          overflow: 'hidden',
+          border: `1px solid ${THEME_VARS.borderSubtle}`,
+        }}
+      >
+        <div />
+        {DAY_DEFINITIONS.map((day) => (
+          <div
+            key={`availability-header-${day.index}`}
+            style={{ textAlign: 'center', fontWeight: 600 }}
+          >
+            {day.label}
+          </div>
+        ))}
+        {AVAILABILITY_SLOT_MINUTES.map((minuteStart) => (
+          <Fragment key={`availability-row-${minuteStart}`}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                paddingRight: 2,
+                fontSize: 9,
+                color: THEME_VARS.textMuted,
+              }}
+            >
+              {formatMinutesToLabel(minuteStart)}
+            </div>
+            {DAY_DEFINITIONS.map((day) => {
+              const slotId = buildAvailabilitySlotId(day.index, minuteStart);
+              const active = activeSlots.has(slotId);
+              return (
+                <button
+                  key={slotId}
+                  type="button"
+                  onPointerDown={(event) => handlePointerDown(event, slotId, active)}
+                  onPointerEnter={() => handlePointerEnter(slotId)}
+                  onKeyDown={(event) => handleKeyToggle(event, slotId)}
+                  title={`${day.fullLabel || day.label} ${formatMinutesToLabel(minuteStart)}–${formatMinutesToLabel(minuteStart + AVAILABILITY_GRID_STEP)}`}
+                  style={{
+                    width: '100%',
+                    aspectRatio: '1 / 0.75',
+                    borderRadius: 0,
+                    border: 'none',
+                    background: active ? AVAILABILITY_SELECTED_BG : 'rgba(148, 163, 184, 0.08)',
+                    cursor: isDragging ? 'grabbing' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 0,
+                    color: 'transparent',
+                    transition: 'background 0.1s ease, border 0.1s ease',
+                  }}
+                  aria-pressed={active}
+                >
+                  {active ? '' : ''}
+                </button>
+              );
+            })}
+          </Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function eventFitsSelectedAvailability(event, allowedSlots) {
+  if (!(allowedSlots instanceof Set) || allowedSlots.size === 0) return true;
+  if (event.startMinutes < AVAILABILITY_GRID_START || event.endMinutes > AVAILABILITY_GRID_END) {
+    return false;
+  }
+  for (const slotStart of AVAILABILITY_SLOT_MINUTES) {
+    const slotEnd = slotStart + AVAILABILITY_GRID_STEP;
+    if (slotEnd <= event.startMinutes) continue;
+    if (slotStart >= event.endMinutes) break;
+    const slotId = buildAvailabilitySlotId(event.dayIndex, slotStart);
+    if (!allowedSlots.has(slotId)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function courseMatchesAvailability(course, allowedSlots) {
+  if (!(allowedSlots instanceof Set) || allowedSlots.size === 0) {
+    return true;
+  }
+  const scheduleLines = splitScheduleLines(course?.schedule);
+  const events = buildScheduleEvents(scheduleLines);
+  if (!events.length) {
+    // If the course has no schedule information, include by default.
+    return true;
+  }
+  return events.every((event) => eventFitsSelectedAvailability(event, allowedSlots));
 }
 
 function buildCourseDetailRows(course, scheduleLines) {
@@ -644,8 +988,7 @@ const createDefaultFilters = () => ({
   minFoundations: SCORE_STEP_VALUES[0],
   degree: "",
   level: "",
-  major: "",
-  minor: "",
+  availabilitySlots: "",
 });
 
 const FILTER_KEYS = Object.keys(createDefaultFilters());
@@ -656,17 +999,12 @@ function parseFiltersFromSearch(search) {
   const sp = new URLSearchParams(search);
   base.degree = sp.get('degree') || '';
   base.level = sp.get('level') || '';
-  base.major = sp.get('major') || '';
   base.type = sp.get('type') || '';
   base.semester = sp.get('semester') || '';
   if (base.semester.toLowerCase() === 'winter') base.semester = 'Fall';
   if (base.semester.toLowerCase() === 'summer') base.semester = 'Spring';
-  base.minor = sp.get('minor') || '';
   if (base.level && !base.semester) {
     base.semester = inferSemesterFromLevel(base.level) || '';
-  }
-  if (base.level.toLowerCase().includes('project')) {
-    base.minor = '';
   }
   const creditsMinParam = sp.get('creditsMin');
   if (creditsMinParam !== null) base.creditsMin = creditsMinParam;
@@ -689,6 +1027,7 @@ function parseFiltersFromSearch(search) {
   if (minVentureParam !== undefined) base.minVenture = snapToScoreStep(minVentureParam);
   const minFoundationsParam = parseScore(sp.get('minFoundations'));
   if (minFoundationsParam !== undefined) base.minFoundations = snapToScoreStep(minFoundationsParam);
+  base.availabilitySlots = sp.get('freeSlots') || '';
   return base;
 }
 
@@ -714,143 +1053,26 @@ function getDegreeOptions(tree) {
 
 function getLevelOptions(tree, degree) {
   if (!tree || !degree || !tree[degree]) return [];
-  const keys = Object.keys(tree[degree] || {});
-  const base = keys
-    .filter((lvl) => /^[A-Za-z]+\d+$/i.test(lvl))
-    .sort();
-  if (degree !== 'MA') {
-    return base;
+  const bucket = tree[degree];
+  if (Array.isArray(bucket)) {
+    return bucket
+      .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
   }
-  const result = base.slice();
-  for (const level of MA_PROJECT_LEVELS) {
-    if (!result.includes(level)) {
-      result.push(level);
-    }
+  if (bucket && typeof bucket === 'object') {
+    return Object.keys(bucket)
+      .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
   }
-  return result;
-}
-
-function collectMajorsFromBucket(bucket) {
-  const result = new Set();
-  if (!bucket || typeof bucket !== 'object') return result;
-  for (const value of Object.values(bucket)) {
-    if (Array.isArray(value)) {
-      for (const name of value) {
-        if (typeof name === 'string' && name.trim()) {
-          result.add(name.trim());
-        }
-      }
-    }
-  }
-  return result;
-}
-
-function getMajorOptions(tree, degree, level) {
-  if (!tree || typeof tree !== 'object') return [];
-  const majors = new Set();
-
-  if (degree === 'PhD') {
-    const list = Array.isArray(tree.PhD?.['Doctoral School'])
-      ? tree.PhD['Doctoral School']
-      : [];
-    for (const name of list) {
-      if (typeof name === 'string' && name.trim()) {
-        majors.add(name.trim());
-      }
-    }
-    return Array.from(majors).sort();
-  }
-
-  if (degree && level) {
-    const bucket = tree[degree];
-    const list = Array.isArray(bucket?.[level]) ? bucket[level] : [];
-    for (const name of list) {
-      if (typeof name === 'string' && name.trim()) {
-        majors.add(name.trim());
-      }
-    }
-    if (majors.size > 0) {
-      return Array.from(majors).sort();
-    }
-  }
-
-  if (degree) {
-    const bucket = tree[degree];
-    for (const name of collectMajorsFromBucket(bucket)) {
-      majors.add(name);
-    }
-    return Array.from(majors).sort();
-  }
-
-  for (const [deg, bucket] of Object.entries(tree)) {
-    if (deg === 'PhD') {
-      const list = Array.isArray(bucket?.edoc) ? bucket.edoc : [];
-      for (const name of list) {
-        if (typeof name === 'string' && name.trim()) {
-          majors.add(name.trim());
-        }
-      }
-    } else {
-      for (const name of collectMajorsFromBucket(bucket)) {
-        majors.add(name);
-      }
-    }
-  }
-
-  return Array.from(majors).sort();
+  return [];
 }
 
 function withValueOption(options, value) {
   if (!value) return options;
   if (options.includes(value)) return options;
   return [...options, value];
-}
-
-function getMinorOptions(tree, degree, level) {
-  if (!tree || degree !== 'MA') return [];
-  if (isMAProjectLevel(level)) return [];
-  const source = tree.MA || {};
-  const autumn = Array.isArray(source['Minor Fall Semester']) ? source['Minor Fall Semester'] : [];
-  const spring = Array.isArray(source['Minor Spring Semester']) ? source['Minor Spring Semester'] : [];
-  if (!level) {
-    return Array.from(new Set([...autumn, ...spring])).sort();
-  }
-  const match = level.match(/^MA(\d+)/i);
-  if (match) {
-    const idx = Number(match[1]);
-    if (Number.isFinite(idx)) {
-      return (idx % 2 === 1 ? autumn : spring).slice().sort();
-    }
-  }
-  if (level.toLowerCase().includes('autumn') || level.toLowerCase().includes('fall')) return autumn.slice().sort();
-  if (level.toLowerCase().includes('spring')) return spring.slice().sort();
-  return Array.from(new Set([...autumn, ...spring])).sort();
-}
-
-function adjustLevelForSemester(level, degree, semester) {
-  if (!level || !semester) return level;
-  const match = level.match(/^([A-Za-z]+)(\d+)$/);
-  if (match) {
-    const prefix = match[1];
-    let num = Number(match[2]);
-    if (Number.isFinite(num)) {
-      if (semester === 'Fall' && num % 2 === 0) {
-        num = Math.max(1, num - 1);
-      } else if (semester === 'Spring' && num % 2 === 1) {
-        num = num + 1;
-      }
-      return `${prefix}${num}`;
-    }
-  }
-  if (degree === 'MA' && level.toLowerCase().includes('minor')) {
-    if (semester === 'Fall' && level.toLowerCase().includes('spring')) {
-      return level.replace(/Spring/i, 'Fall');
-    }
-    if (semester === 'Spring' && (level.toLowerCase().includes('autumn') || level.toLowerCase().includes('fall'))) {
-      return level.replace(/Autumn|Fall/i, 'Spring');
-    }
-  }
-  return level;
 }
 
 function normalizeScore(value) {
@@ -1209,7 +1431,7 @@ function CoursesList() {
   const [pageSize] = useState(30);
   const [totalResults, setTotalResults] = useState(0);
   const [showFilters, setShowFilters] = useState(true);
-  const [programsTree, setProgramsTree] = useState(null);
+  const [studyPlansTree, setStudyPlansTree] = useState(null);
   const [levelsMap, setLevelsMap] = useState({});
   const [appliedFilters, setAppliedFilters] = useState(() => parseFiltersFromSearch(location.search));
   const [draftFilters, setDraftFilters] = useState(() => parseFiltersFromSearch(location.search));
@@ -1251,11 +1473,11 @@ function CoursesList() {
 
   useEffect(() => {
     let cancelled = false;
-    async function loadProgramsTree() {
+    async function loadStudyPlansTree() {
       try {
-        const response = await fetch('/programs_tree.json', { cache: 'no-store' });
+        const response = await fetch('/studyplans_tree.json', { cache: 'no-store' });
         if (!response.ok) {
-          throw new Error(`Failed to fetch programs_tree.json: ${response.status}`);
+          throw new Error(`Failed to fetch studyplans_tree.json: ${response.status}`);
         }
         const contentType = response.headers.get('content-type') || '';
         if (!contentType.includes('application/json')) {
@@ -1264,16 +1486,16 @@ function CoursesList() {
         }
         const json = await response.json();
         if (!cancelled) {
-          setProgramsTree(json);
+          setStudyPlansTree(json);
         }
       } catch (err) {
         if (!cancelled) {
-          setProgramsTree(null);
-          console.warn('Failed to load programs_tree.json', err);
+          setStudyPlansTree(null);
+          console.warn('Failed to load studyplans_tree.json', err);
         }
       }
     }
-    loadProgramsTree();
+    loadStudyPlansTree();
     return () => {
       cancelled = true;
     };
@@ -1321,8 +1543,6 @@ useEffect(() => {
 
     if (appliedFilters.degree) params.set('degree', appliedFilters.degree);
     if (appliedFilters.level) params.set('level', appliedFilters.level);
-    if (appliedFilters.major) params.set('major', appliedFilters.major);
-    if (appliedFilters.minor) params.set('minor', appliedFilters.minor);
     if (appliedFilters.type) params.set('type', appliedFilters.type);
     if (appliedFilters.semester) params.set('semester', appliedFilters.semester);
     if (appliedFilters.creditsMin !== '') params.set('creditsMin', appliedFilters.creditsMin);
@@ -1335,6 +1555,9 @@ useEffect(() => {
     setScoreParam('minProduct', appliedFilters.minProduct);
     setScoreParam('minVenture', appliedFilters.minVenture);
     setScoreParam('minFoundations', appliedFilters.minFoundations);
+    if (appliedFilters.availabilitySlots) {
+      params.set('freeSlots', appliedFilters.availabilitySlots);
+    }
 
     const nextSearch = params.toString();
     const next = nextSearch ? `?${nextSearch}` : '';
@@ -1349,8 +1572,8 @@ useEffect(() => {
   );
 
   const degreeOptions = useMemo(
-    () => withValueOption(getDegreeOptions(programsTree), draftFilters.degree),
-    [programsTree, draftFilters.degree],
+    () => withValueOption(getDegreeOptions(studyPlansTree), draftFilters.degree),
+    [studyPlansTree, draftFilters.degree],
   );
 
   const levelOptions = useMemo(
@@ -1362,26 +1585,57 @@ useEffect(() => {
           return withValueOption(supaLevels, draftFilters.level);
         }
       }
-      return withValueOption(getLevelOptions(programsTree, degree), draftFilters.level);
+      return withValueOption(getLevelOptions(studyPlansTree, degree), draftFilters.level);
     },
-    [levelsMap, programsTree, draftFilters.degree, draftFilters.level],
+    [levelsMap, studyPlansTree, draftFilters.degree, draftFilters.level],
   );
 
-  const majorOptions = useMemo(
-    () => withValueOption(getMajorOptions(programsTree, draftFilters.degree, draftFilters.level), draftFilters.major),
-    [programsTree, draftFilters.degree, draftFilters.level, draftFilters.major],
+  const levelDisabled = !draftFilters.degree || levelOptions.length === 0;
+
+  const availabilitySelectedSlots = useMemo(
+    () => decodeAvailabilitySlots(draftFilters.availabilitySlots),
+    [draftFilters.availabilitySlots],
   );
 
-  const minorOptions = useMemo(
-    () => withValueOption(getMinorOptions(programsTree, draftFilters.degree, draftFilters.level), draftFilters.minor),
-    [programsTree, draftFilters.degree, draftFilters.level, draftFilters.minor],
+  const updateAvailabilityFilters = useCallback(
+    (updater) => {
+      setDraftFilters((prev) => {
+        const nextSerialized = updater(prev.availabilitySlots || '');
+        if (prev.availabilitySlots === nextSerialized) {
+          return prev;
+        }
+        return { ...prev, availabilitySlots: nextSerialized };
+      });
+      setAppliedFilters((prev) => {
+        const nextSerialized = updater(prev.availabilitySlots || '');
+        if (prev.availabilitySlots === nextSerialized) {
+          return prev;
+        }
+        return { ...prev, availabilitySlots: nextSerialized };
+      });
+    },
+    [setDraftFilters, setAppliedFilters],
   );
 
-  const isPhD = draftFilters.degree === 'PhD';
-  const levelDisabled = !draftFilters.degree || isPhD || levelOptions.length === 0;
-  const majorDisabled = majorOptions.length === 0;
-  const skipMinorFilters = shouldSkipMinorQuestion(draftFilters.degree, draftFilters.level);
-  const minorDisabled = skipMinorFilters || !draftFilters.degree || minorOptions.length === 0;
+  const handleToggleAvailabilitySlot = useCallback(
+    (slotId) => {
+      if (!slotId) return;
+      updateAvailabilityFilters((current) => toggleAvailabilitySlotValue(current, slotId));
+    },
+    [updateAvailabilityFilters],
+  );
+
+  const handleSetAvailabilitySlot = useCallback(
+    (slotId, shouldSelect) => {
+      if (!slotId) return;
+      updateAvailabilityFilters((current) => setAvailabilitySlotValue(current, slotId, shouldSelect));
+    },
+    [updateAvailabilityFilters],
+  );
+
+  const handleClearAvailabilitySlots = useCallback(() => {
+    updateAvailabilityFilters(() => '');
+  }, [updateAvailabilityFilters]);
 
   const handleApplyFilters = () => {
     setPage(1);
@@ -1414,8 +1668,6 @@ useEffect(() => {
           creditsMin: appliedFilters.creditsMin !== "" ? Number(appliedFilters.creditsMin) : undefined,
           creditsMax: appliedFilters.creditsMax !== "" ? Number(appliedFilters.creditsMax) : undefined,
           level: appliedFilters.level || undefined,
-          major: appliedFilters.major || undefined,
-          minor: appliedFilters.minor || undefined,
           sortField: sortField || undefined,
           sortOrder: sortField ? sortOrder : undefined,
           sortKeys: sortKeys || undefined,
@@ -1424,13 +1676,22 @@ useEffect(() => {
           minProduct: appliedFilters.minProduct > 0 ? appliedFilters.minProduct : undefined,
           minVenture: appliedFilters.minVenture > 0 ? appliedFilters.minVenture : undefined,
           minFoundations: appliedFilters.minFoundations > 0 ? appliedFilters.minFoundations : undefined,
+          availabilitySlots: appliedFilters.availabilitySlots || undefined,
         };
         const data = await getCourses(params);
         console.log("API response:", data);
-        setCourses(data.items || []);
-        setTotalResults(Number(data.total || 0));
-        if (!data.items || data.items.length === 0) {
-          console.debug('No course results returned for current filters');
+        const rawItems = Array.isArray(data.items) ? data.items : [];
+        const availabilitySet = decodeAvailabilitySlots(appliedFilters.availabilitySlots);
+        const filteredItems = availabilitySet.size > 0
+          ? rawItems.filter((course) => courseMatchesAvailability(course, availabilitySet))
+          : rawItems;
+        setCourses(filteredItems);
+        const reportedTotal = availabilitySet.size > 0
+          ? filteredItems.length
+          : Number(data.total || rawItems.length || 0);
+        setTotalResults(reportedTotal);
+        if (!filteredItems.length) {
+          console.debug('No course results returned for current filters (after availability filtering)');
         }
       } catch (err) {
         setError(err?.message || "Failed to load courses");
@@ -1554,7 +1815,7 @@ useEffect(() => {
               Search
             </button>
             <div>
-              <div style={fieldLabelStyle}>Degree</div>
+              <div style={fieldLabelStyle}>Study program</div>
               <select
                 value={draftFilters.degree}
                 onChange={(e) => {
@@ -1563,27 +1824,23 @@ useEffect(() => {
                     ...prev,
                     degree: nextDegree,
                     level: '',
-                    major: '',
-                    minor: '',
                   }));
                   setAppliedFilters((prev) => ({
                     ...prev,
                     degree: nextDegree,
                     level: '',
-                    major: '',
-                    minor: '',
                   }));
                 }}
                 style={selectFieldStyle(false)}
               >
-                <option value="">Any degree</option>
+                <option value="">Any study program</option>
                 {degreeOptions.map((opt) => (
                   <option key={opt} value={opt}>{opt}</option>
                 ))}
               </select>
             </div>
             <div>
-              <div style={fieldLabelStyle}>Level</div>
+              <div style={fieldLabelStyle}>Faculty</div>
               <select
                 value={draftFilters.level}
                 onChange={(e) => {
@@ -1592,71 +1849,19 @@ useEffect(() => {
                   setDraftFilters((prev) => ({
                     ...prev,
                     level: nextLevel,
-                    major: '',
-                    minor: '',
                     semester: inferredSemester || prev.semester,
                   }));
                   setAppliedFilters((prev) => ({
                     ...prev,
                     level: nextLevel,
-                    major: '',
-                    minor: '',
                     semester: inferredSemester || prev.semester,
                   }));
                 }}
                 disabled={levelDisabled}
                 style={selectFieldStyle(levelDisabled)}
               >
-                <option value="">Any level</option>
+                <option value="">Any faculty</option>
                 {levelOptions.map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <div style={fieldLabelStyle}>Major</div>
-              <select
-                value={draftFilters.major}
-                onChange={(e) => {
-                  const nextMajor = e.target.value;
-                  setDraftFilters((prev) => ({
-                    ...prev,
-                    major: nextMajor,
-                  }));
-                  setAppliedFilters((prev) => ({
-                    ...prev,
-                    major: nextMajor,
-                  }));
-                }}
-                disabled={majorDisabled}
-                style={selectFieldStyle(majorDisabled)}
-              >
-                <option value="">Any major</option>
-                {majorOptions.map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <div style={fieldLabelStyle}>Minor</div>
-              <select
-                value={draftFilters.minor}
-                onChange={(e) => {
-                  const nextMinor = e.target.value;
-                  setDraftFilters((prev) => ({
-                    ...prev,
-                    minor: nextMinor,
-                  }));
-                  setAppliedFilters((prev) => ({
-                    ...prev,
-                    minor: nextMinor,
-                  }));
-                }}
-                disabled={minorDisabled}
-                style={selectFieldStyle(minorDisabled)}
-              >
-                <option value="">No minor preference</option>
-                {minorOptions.map((opt) => (
                   <option key={opt} value={opt}>{opt}</option>
                 ))}
               </select>
@@ -1694,7 +1899,13 @@ useEffect(() => {
                 </button>
               </div>
             </div>
-          <div>
+            <AvailabilityGrid
+              selectedSlots={availabilitySelectedSlots}
+              onToggleSlot={handleToggleAvailabilitySlot}
+              onSetSlot={handleSetAvailabilitySlot}
+              onClear={handleClearAvailabilitySlots}
+            />
+            <div>
             <div style={fieldLabelStyle}>Semester</div>
             <div style={{ display: "flex", gap: 8 }}>
               <button
@@ -1702,12 +1913,8 @@ useEffect(() => {
                 onClick={() => {
                   setDraftFilters((prev) => {
                     const nextSemester = prev.semester === "Fall" ? "" : "Fall";
-                    let nextLevel = prev.level;
-                    if (nextSemester) {
-                      nextLevel = adjustLevelForSemester(prev.level, prev.degree, nextSemester);
-                    }
-                    const next = { ...prev, semester: nextSemester, level: nextLevel };
-                    setAppliedFilters((applied) => ({ ...applied, semester: nextSemester, level: nextLevel }));
+                    const next = { ...prev, semester: nextSemester };
+                    setAppliedFilters((applied) => ({ ...applied, semester: nextSemester }));
                     return next;
                   });
                 }}
@@ -1720,12 +1927,8 @@ useEffect(() => {
                 onClick={() => {
                   setDraftFilters((prev) => {
                     const nextSemester = prev.semester === "Spring" ? "" : "Spring";
-                    let nextLevel = prev.level;
-                    if (nextSemester) {
-                      nextLevel = adjustLevelForSemester(prev.level, prev.degree, nextSemester);
-                    }
-                    const next = { ...prev, semester: nextSemester, level: nextLevel };
-                    setAppliedFilters((applied) => ({ ...applied, semester: nextSemester, level: nextLevel }));
+                    const next = { ...prev, semester: nextSemester };
+                    setAppliedFilters((applied) => ({ ...applied, semester: nextSemester }));
                     return next;
                   });
                 }}
@@ -1980,7 +2183,8 @@ useEffect(() => {
                           <small style={{ marginLeft: 8 }}>({c.course_code})</small>
                         )}
                       </h3>
-                      {renderProgramTags(c.available_programs)}
+                      {renderStudyPlanTags(c)}
+                      {renderProgramTags(c.available_programs, c.study_plan_tags)}
                       {renderLevelTags(c.available_levels)}
                       <div
                         style={{
@@ -2116,7 +2320,8 @@ useEffect(() => {
                         {c.course_code && (
                           <div style={{ fontSize: 12, opacity: 0.85 }}>{c.course_code}</div>
                         )}
-                        {renderProgramTags(c.available_programs)}
+                        {renderStudyPlanTags(c)}
+                        {renderProgramTags(c.available_programs, c.study_plan_tags)}
                         {renderLevelTags(c.available_levels)}
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {buildCourseDetailRows(c, scheduleLines)}

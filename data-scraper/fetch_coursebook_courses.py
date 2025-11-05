@@ -18,6 +18,7 @@ from lxml import html as lh
 COURSEBOOK_JSON = Path(__file__).with_name("data").joinpath("coursebook_url.json")
 COURSES_CSV = Path(__file__).with_name("data").joinpath("coursebook_courses.csv")
 PROGRAMS_CSV = Path(__file__).with_name("data").joinpath("coursebook_programs.csv")
+STUDYPLANS_CSV = Path(__file__).with_name("data").joinpath("coursebook_studyplans.csv")
 
 REQUEST_HEADERS = {
     "User-Agent": (
@@ -51,17 +52,24 @@ WORKLOAD_WEEK_KEYWORDS = (
 SEMESTER_WEEKS = 14
 
 
-def load_program_urls() -> List[str]:
-    """Load the program URLs from the JSON file."""
+def load_program_urls() -> List[Dict[str, str]]:
+    """Load the program URLs and associated metadata from the JSON file."""
     if not COURSEBOOK_JSON.exists():
         print(f"[error] Missing {COURSEBOOK_JSON}", file=sys.stderr)
         sys.exit(1)
     data = json.loads(COURSEBOOK_JSON.read_text(encoding="utf-8"))
-    urls: List[str] = []
+    urls: List[Dict[str, str]] = []
     for entry in data:
         href = entry.get("href")
-        if href:
-            urls.append(str(href))
+        if not href:
+            continue
+        urls.append(
+            {
+                "href": str(href),
+                "study_program": normalize_ws(entry.get("study_program", "")),
+                "study_faculty": normalize_ws(entry.get("study_faculty", "")),
+            }
+        )
     return urls
 
 
@@ -76,7 +84,14 @@ def fetch_html(url: str) -> str:
         return ""
 
 
-def parse_course_entries(base_url: str, html_text: str) -> Iterable[Dict[str, str]]:
+def parse_course_entries(
+    base_url: str,
+    html_text: str,
+    study_program: str = "",
+    study_faculty: str = "",
+    study_block_override: str | None = None,
+    visited_urls: set[str] | None = None,
+) -> Iterable[Dict[str, str]]:
     """Parse the accordion course listings from the page HTML."""
     if not html_text.strip():
         return []
@@ -84,20 +99,20 @@ def parse_course_entries(base_url: str, html_text: str) -> Iterable[Dict[str, st
     tree = lh.fromstring(html_text)
     entries: List[Dict[str, str]] = []
 
-    course_nodes = tree.xpath('//div[contains(@class, "line")]//div[contains(@class, "cours") and @data-title]')
-    if not course_nodes:
-        # Fallback: look for cours-name anchors directly.
-        course_nodes = tree.xpath('//div[contains(@class, "cours-name")]/a/..')
+    if visited_urls is None:
+        visited_urls = set()
+    visited_urls.add(base_url)
 
-    for node in course_nodes:
+    processed_nodes: set = set()
+
+    def process_course_node(node, block_label: str) -> None:
         anchor = node.xpath('.//div[contains(@class, "cours-name")]/a')
         if not anchor:
-            continue
-        anchor = anchor[0]
-        href = anchor.get("href") or ""
-        href = href.strip()
+            return
+        anchor_el = anchor[0]
+        href = (anchor_el.get("href") or "").strip()
         if not href:
-            continue
+            return
         course_url = urljoin(base_url, href)
 
         cours_info_node = node.xpath('.//div[contains(@class, "cours-info")]')
@@ -113,17 +128,64 @@ def parse_course_entries(base_url: str, html_text: str) -> Iterable[Dict[str, st
                 if match:
                     section = match.group(1).upper()
 
+        inherited_block = study_block_override if study_block_override is not None else block_label
+        block_indicator = block_label or inherited_block or ""
+        block_indicator_lc = block_indicator.lower()
+        should_follow = ("transverse block hss" in block_indicator_lc) or section.upper() == "SHS"
+
+        if should_follow:
+            if course_url in visited_urls:
+                return
+            visited_urls.add(course_url)
+            nested_html = fetch_html(course_url)
+            nested_entries = parse_course_entries(
+                course_url,
+                nested_html,
+                study_program=study_program,
+                study_faculty=study_faculty,
+                study_block_override=inherited_block,
+                visited_urls=visited_urls,
+            )
+            entries.extend(nested_entries)
+            return
+
         if not course_id:
-            # Skip entries that do not expose a course identifier in the listing.
-            continue
+            return
 
         entries.append(
             {
                 "course_id": course_id,
                 "section": section,
                 "course_url": course_url,
+                "study_program": study_program,
+                "study_faculty": study_faculty,
+                "study_block": inherited_block,
             }
         )
+
+    plan_nodes = tree.xpath('//div[contains(@class, "study-plan")]')
+    for plan in plan_nodes:
+        heading_texts = plan.xpath('./h4//text()') or plan.xpath('./h3//text()')
+        block_label = normalize_ws(" ".join(t.strip() for t in heading_texts if t.strip()))
+        course_nodes = plan.xpath('.//div[contains(@class, "cours") and @data-title]')
+        for node in course_nodes:
+            if node in processed_nodes:
+                continue
+            processed_nodes.add(node)
+            process_course_node(node, block_label)
+
+    if not entries:
+        course_nodes = tree.xpath('//div[contains(@class, "line")]//div[contains(@class, "cours") and @data-title]')
+        if not course_nodes:
+            course_nodes = tree.xpath('//div[contains(@class, "cours-name")]/a/..')
+        for node in course_nodes:
+            process_course_node(node, "")
+    else:
+        fallback_nodes = tree.xpath('//div[contains(@class, "line")]//div[contains(@class, "cours") and @data-title]')
+        for node in fallback_nodes:
+            if node in processed_nodes:
+                continue
+            process_course_node(node, "")
 
     return entries
 
@@ -487,6 +549,9 @@ def write_courses_csv(entries: Iterable[Dict[str, str]]) -> None:
                 "course_key",
                 "course_name",
                 "section",
+                "study_program",
+                "study_faculty",
+                "study_block",
                 "course_url",
                 "teacher",
                 "language",
@@ -600,21 +665,80 @@ def write_programs_csv(entries: Iterable[Dict[str, str]], valid_keys: Iterable[s
     print(f"[ok] Wrote {len(rows)} program entries to {PROGRAMS_CSV}")
 
 
+def write_studyplans_csv(entries: Iterable[Dict[str, str]]) -> None:
+    COURSES_CSV.parent.mkdir(parents=True, exist_ok=True)
+    unique_entries: Dict[tuple[str, str, str, str], Dict[str, str]] = {}
+    for entry in entries:
+        key = (
+            normalize_ws(entry.get("course_key", "")),
+            normalize_ws(entry.get("study_program", "")),
+            normalize_ws(entry.get("study_faculty", "")),
+            normalize_ws(entry.get("study_block", "")),
+        )
+        if not key[0]:
+            continue
+        unique_entries[key] = {
+            "course_key": key[0],
+            "study_program": key[1],
+            "study_faculty": key[2],
+            "study_block": key[3],
+        }
+    rows = list(unique_entries.values())
+    with STUDYPLANS_CSV.open("w", encoding="utf-8", newline="") as fh:
+        writer = csv.DictWriter(
+            fh,
+            fieldnames=[
+                "course_key",
+                "study_program",
+                "study_faculty",
+                "study_block",
+            ],
+        )
+        writer.writeheader()
+        writer.writerows(rows)
+    print(f"[ok] Wrote {len(rows)} study plan entries to {STUDYPLANS_CSV}")
+
+
 def main() -> None:
-    program_urls = load_program_urls()
-    if not program_urls:
+    program_sources = load_program_urls()
+    if not program_sources:
         print("[warn] No program URLs found to crawl", file=sys.stderr)
         return
 
     collected: List[Dict[str, str]] = []
-    for idx, url in enumerate(program_urls, start=1):
-        print(f"[info] Fetching program ({idx}/{len(program_urls)}): {url}")
+    total_programs = len(program_sources)
+    for idx, source in enumerate(program_sources, start=1):
+        url = source.get("href", "")
+        if not url:
+            continue
+        print(f"[info] Fetching program ({idx}/{total_programs}): {url}")
         html_text = fetch_html(url)
-        courses = list(parse_course_entries(url, html_text))
+        courses = list(
+            parse_course_entries(
+                url,
+                html_text,
+                study_program=source.get("study_program", ""),
+                study_faculty=source.get("study_faculty", ""),
+            )
+        )
         print(f"[info] Found {len(courses)} courses in {url}")
         collected.extend(courses)
 
     unique_courses = dedupe(collected)
+
+    studyplan_rows: List[Dict[str, str]] = []
+    for entry in collected:
+        course_key = make_course_key(entry.get("course_id", ""), entry.get("course_url", ""))
+        if not course_key:
+            continue
+        studyplan_rows.append(
+            {
+                "course_key": course_key,
+                "study_program": normalize_ws(entry.get("study_program", "")),
+                "study_faculty": normalize_ws(entry.get("study_faculty", "")),
+                "study_block": normalize_ws(entry.get("study_block", "")),
+            }
+        )
 
     enriched_courses: List[Dict[str, str]] = []
     program_rows: List[Dict[str, str]] = []
@@ -656,10 +780,27 @@ def main() -> None:
         if all_programs_have_workload and len(normalized_workloads) == 1:
             course_workload = format_workload_value(normalized_workloads.pop())
 
+        normalized_study_program = normalize_ws(course.get("study_program", ""))
+        normalized_study_faculty = normalize_ws(course.get("study_faculty", ""))
+        normalized_study_block = normalize_ws(course.get("study_block", ""))
+
+        unique_program_names = {
+            normalize_ws(program.get("program_name", ""))
+            for program in program_entries
+            if normalize_ws(program.get("program_name", ""))
+        }
+        propagate_study_context = len(unique_program_names) <= 1
+
+        course_study_program = normalized_study_program if propagate_study_context else ""
+        course_study_faculty = normalized_study_faculty if propagate_study_context else ""
+        course_study_block = normalized_study_block if propagate_study_context else ""
         course_row = {
             "course_key": course_key,
             "course_name": detail_info.get("course_name", ""),
             "section": normalize_ws(course.get("section", "")),
+            "study_program": course_study_program,
+            "study_faculty": course_study_faculty,
+            "study_block": course_study_block,
             "course_url": course.get("course_url", ""),
             "teacher": json.dumps(detail_info.get("teacher", []), ensure_ascii=False),
             "language": detail_info.get("language", ""),
@@ -678,6 +819,7 @@ def main() -> None:
 
     write_courses_csv(enriched_courses)
     write_programs_csv(program_rows, [c["course_key"] for c in enriched_courses])
+    write_studyplans_csv(studyplan_rows)
 
 
 if __name__ == "__main__":

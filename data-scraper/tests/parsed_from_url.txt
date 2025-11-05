@@ -2,9 +2,7 @@
 <html lang="en" class="tablesaw-enhanced">
 
 <head>
-<meta name="isa_raw_url" content="http://isa.epfl.ch/imoniteur_ISAP/!itffichecours.htm?ww_i_matiere=3520364522&ww_x_anneeAcad=2025-2026&ww_i_section=946228&ww_i_niveau=6683147&ww_c_langue=en">        <meta name="description" content="The course focuses on the development of real-word AI/ML products. It is intended for students who have acquired a theoretical background in AI/ML and are interested in applying that toward developing AI/ML-oriented products.">
-        <link rel="canonical" href="https://edu.epfl.ch/coursebook/en/ai-product-management-CS-500">
-<title>AI product management - CS-500 - EPFL</title>
+<meta name="isa_raw_url" content="http://isa.epfl.ch/pe/plan_etude_bama_prop_in_en.html"><title>Propedeutics - Computer Science - EPFL</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -19,9 +17,7 @@
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-PJGBG5R');</script>
-    <link rel="stylesheet" href="/assets/css/graph-search-widget.css">
-</head>
+})(window,document,'script','dataLayer','GTM-PJGBG5R');</script></head>
 
 
 <body>
@@ -85,7 +81,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div>
 
         <nav class="nav-lang nav-lang-short ml-auto">
-            <ul><li><a aria-label="Français" href="/studyplan/fr/master/systemes-de-communication-master/coursebook/ai-product-management-CS-500">FR</a></li><li><span aria-label="English" class="active">EN</span></li></ul>
+            <ul><li><a aria-label="Français" href="/studyplan/fr/propedeutique/informatique/">FR</a></li><li><span aria-label="English" class="active">EN</span></li></ul>
         </nav>
     </div>
 </header>
@@ -114,17 +110,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         </a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="/studyplan/en/master/">
-                            Master Cycle
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="/studyplan/en/master/communication-systems-master-program/">
-                            Communication Systems - master program
+                        <a href="/studyplan/en/propedeutics/">
+                            Propedeutics
                         </a>
                     </li>
                     <li class="breadcrumb-item active">
-                        AI product management
+                        Computer Science
                     </li>
         </ol>
     </nav>
@@ -133,353 +124,143 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <div class="nav-toggle-layout nav-aside-layout">
             <div class="w-100 pb-3">
                 <main id="main" role="main" class="content container-grid">
-                    <div class="container mt-5">
+                    <div class="container-full px-3 px-md-5 px-xxl-6 mt-5">
                         <header class="page-header d-xl-flex justify-content-xl-between align-items-xl-center mb-5">
-                            <h1 class="mb-4 mb-xl-0">AI product management</h1>
-
-                            <div class="mr-0">
-                            <a href="https://isa.epfl.ch/imoniteur_ISAP/!GEDPUBLICREPORTS.pdf?ww_i_reportModel=1696552884&ww_i_reportModelXsl=1696552963&ww_i_itemplan=4403968263&ww_c_langue=en">
+                            <h2 class="mb-4 mb-xl-0">Computer Science 2025-26</h2>
+                            <a href="http://isa.epfl.ch/pe/plan_etude_bama_prop_in_en.pdf">
                                 <button class="btn btn-sm btn-secondary">
                                     <svg class="icon feather mb-1" aria-hidden="true">
                                         <use xlink:href="#download"></use>
                                     </svg>
-                                    Download the coursebook (PDF)
+                                    Download the study plan (PDF)
                                 </button>
                             </a>
-                            </div>
                         </header>
-
-                        <div class="row">
-                            <div class="course-details col-xl-7">
-                                <div class="course-summary mb-5">
-                                    <p>CS-500 / <strong>6 credits</strong></p>
-                                    <p><strong>Teacher(s): </strong> <a href='https://people.epfl.ch/186754?lang=en'>Kaboli Amin</a>, <a href='https://people.epfl.ch/183631?lang=en'>Roshan Zamir Amir</a></p>
-                                    <p><strong>Language:</strong> English</p>
-                                        <p><strong>Withdrawal:</strong> It is not allowed to withdraw from this subject after the registration deadline.</p>
-                                </div>
-                                <hr>
-                                    <div class="mt-5">
-                                                <h2 class="h5">Summary</h2>
-                                                <p>The course focuses on the development of real-word AI/ML products. It is intended for students who have acquired a theoretical background in AI/ML and are interested in applying that toward developing AI/ML-oriented products.</p>
-                                    </div>
-                                    <div class="mt-5">
-                                                <h2 class="h5">Content</h2>
-                                            <div class="collapse collapse-partial" id="course-content">
-                                                <p><p>AI is set to transform several industry sectors, and there is high demand for AI product managers. AI Product Management (AIPM) is a complex role that requires an understanding of both AI and product management. This course will enable students to identify opportunities for developing new AI products, understand when they should use AI in an existing product/process, manage the development of AI products, and launch AI products successfully. The lectures will introduce general product management to the students, and the guest lectures, by leading figures in AI industries, explain how the general product management skills are applied to the development and delivery of AI products.</p> <p>&#160;</p> <p><strong>Module 1: Introduction to AI Product Management (AIPM)</strong></p> <ul>
-<li>The rise of AIPM: what is it and why are AI product managers becoming essential?</li>
-<li>Core challenges: What makes AIPM uniquely complex? </li>
-<li>Success in AIPM: What defines a successful AI product/project?</li>
-</ul> <p><strong>Module 2: AI Product Discovery</strong></p> <ul>
-<li>Identify the problem clearly: Understand customer needs, user profiles, value proposition, and competitor landscape.</li>
-<li>Address critical risks early: Analyze and test risks related to value, usability, feasibility, and viability.<strong><br></strong></li>
-<li>Build and test the right MVP: Identify the problem, prioritize assumptions, set success criteria, choose MVP type, deliver, and iterate. </li>
-<li>Refining AI Product Strategy: Use insights from discovery to re-shape the vision, startegy, define the roadmap, and document the product journey (PRD). </li>
-</ul> <p><strong>Module 3: AI Product Development</strong></p> <ul>
-<li>Master agile and iterative development </li>
-<li>Align design, testing, and development of AI systems</li>
-<li>Manage data readiness and feasibility</li>
-<li>Foster team dynamics and ethical development practices </li>
-<li>Communicate effectively with stakeholders</li>
-</ul> <p><strong>Module 4: AI Product Delivery</strong></p> <ul>
-<li>Planning and executing a successful AI product launch</li>
-<li>Market AI capabilities effectively </li>
-<li>Ensure monitoring, user adoption, and continuous improvement</li>
-<li>Address governance, trust, and responsible AI</li>
-</ul> <ul>
-</ul></p>
-                                            </div>
-                                            <button class="collapsed btn btn-light btn-block btn-sm mt-3" aria-expanded="false" data-toggle="collapse" data-target="#course-content" aria-controls="course-content">
-                                                Show more
-                                                <svg class="icon" aria-hidden="true"><use xlink:href="#icon-triangle"></use></svg>
-                                            </button>
-                                    </div>
-                                    <div class="mt-5">
-                                                <h2 class="h5">Keywords</h2>
-                                                <p><p>Artificial Intelligence (AI), AI product managers, Innovation</p></p>
-                                    </div>
-                                    <div class="mt-5">
-                                                <h2 class="h5">Learning Prerequisites</h2>
-                                                <h2 class="h6">Required courses</h2>
-                                                <p><p>CS-233 Introduction to machine learning or CS-433 Machinie learning or equivalent course on the basics of machine learning and deep learning</p></p>
-                                                <h2 class="h6">Important concepts to start the course</h2>
-                                                <p><ul>
-<li>Python programming</li>
-<li>Bascis of deep learning and machine learning</li>
-<li>Basics of probability and statistics</li>
-</ul></p>
-                                    </div>
-                                    <div class="mt-5">
-                                                <h2 class="h5">Learning Outcomes</h2>
-                                                <p>By the end of the course, the student must be able to:<br></p>
-                                                <p><ul><li>and understand opportunities for an AI product or using AI within an existing product</li><li>the development of AI features</li><li>Launch AI products successfully</li></ul></p>
-                                    </div>
-                                    <div class="mt-5">
-                                                <h2 class="h5">Transversal skills</h2>
-                                                <p><ul><li>Demonstrate the capacity for critical thinking</li><li>Evaluate one's own performance in the team, receive and respond appropriately to feedback.</li><li>Communicate effectively, being understood, including across different languages and cultures.</li><li>Set objectives and design an action plan to reach those objectives.</li><li>Chair a meeting to achieve a particular agenda, maximising participation.</li><li>Resolve conflicts in ways that are productive for the task and the people concerned.</li><li>Make an oral presentation.</li><li>Take account of the social and human dimensions of the engineering profession.</li></ul></p>
-                                    </div>
-                                    <div class="mt-5">
-                                                <h2 class="h5">Teaching methods</h2>
-                                                <p><ul>
-<li>Formal lectures</li>
-<li>Group activities</li>
-<li>Class discussions</li>
-<li>Simulation games</li>
-<li>Hands-on exercises</li>
-<li>Project-based learning</li>
-<li>Real-world case studies</li>
-<li>Guest lectures by leading academic and industry figuers</li>
-</ul> <p>&#160;</p></p>
-                                    </div>
-                                    <div class="mt-5">
-                                                <h2 class="h5">Expected student activities</h2>
-                                                <p><ul>
-<li><strong>Individual</strong> : Case evaluations, self-study, class discussions</li>
-<li><strong>In-group</strong> : In-class exercises, projects, simulations games</li>
-<li><strong>Presentation</strong> : Weekly presentations of assignments in coaching sessions</li>
-</ul></p>
-                                    </div>
-                                    <div class="mt-5">
-                                                <h2 class="h5">Assessment methods</h2>
-                                                <p><p>Continuous evaluation of case reports, proejcts, individual and group presentations, class discussions, during the semester. More precisely :</p> <p><strong>25% </strong>Weekly in-class work and engagement</p> <p><strong>45% </strong>Class assignments, presentations, projects, and case reports</p> <p><strong>30% </strong>Final (final report and presentation and understanding of the case)</p></p>
-                                    </div>
-                                    <div class="mt-5">
-                                                <h2 class="h5">Supervision</h2>
-                                                <p><table><tbody><tr><td>
-Office hours
-      </td><td>
-Yes
-      </td></tr><tr><td>
-Assistants
-      </td><td>
-Yes
-      </td></tr><tr><td>
-Forum
-      </td><td>
-Yes
-      </td></tr></tbody></table></p>
-                                    </div>
-                                    <div class="mt-5">
-                                                <h2 class="h5">Resources</h2>
-                                                <h2 class="h6">Bibliography</h2>
-                                                <p><ul>
-<li>Cagan, M. (2017).&#160;<em>How to Create Tech Products Customers Love. </em>Wiley</li>
-<li><a target="_blank">Kahneman, D., Sibony, O., &amp; Sunstein, C. R. (2021).&#160;<i>Noise: A flaw in human judgment</i>. Little, Brown.</a></li>
-<li>Iansiti, M., &amp; Lakhani, K. R. (2020).&#160;<i>Competing in the age of AI: strategy and leadership when algorithms and networks run the world</i>. Harvard Business Press.</li>
-</ul></p>
-                                                <h2 class="h6">Ressources en bibliothèque</h2>
-                                                <p><ul><li><a href='https://slsp-epfl.primo.exlibrisgroup.com/discovery/search?query=course_code,contains,%22CS-500%202025-2026%22,AND&tab=41SLSP_EPF_MyInst_and_CI&search_scope=MyInst_and_CI&vid=41SLSP_EPF:prod&lang=fr&mode=advanced&offset=0'>Find the references at the Library</a></li></ul></p>
-                                                <h2 class="h6">Moodle Link</h2>
-                                                <p><ul><li><link><a class="moodle_resource_link" href="https://go.epfl.ch/CS-500">https://go.epfl.ch/CS-500</a></link></li></ul></p>
-                                    </div>
-                            </div>
-                            <div class="course-infos col-xl-4 offset-xl-1 mt-5 mt-lg-0">
-                                <div class="study-plans">
-                                    <h2 class="h5">In the programs</h2>
-
-                                    <button class="collapse-title collapse-title-desktop " type="button" data-toggle="collapse" data-target="#bama_cyclemaster-in_1" aria-expanded="true" aria-controls="bama_cyclemaster-in_1">
-                                        Computer Science<br>
-                                        <span class="d-block font-weight-normal">2025-2026  Master semester 1</span>
-                                    </button>
-                                    <div class="collapse-item collapse-item-desktop show" id="bama_cyclemaster-in_1" style="">
-                                        <ul class="list-bullet">
-                                                <li><strong>Semester:</strong> Fall</li>
-                                                <li><strong>Exam form:</strong> During the semester (winter session)</li>
-                                                <li><strong>Subject examined:</strong> AI product management</li>
-                                                <li><strong>Courses:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Exercises:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Project:</strong> 3 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Type:</strong> optional</li>
-                                        </ul>
-                                    </div>
-
-                                    <button class="collapse-title collapse-title-desktop  collapsed" type="button" data-toggle="collapse" data-target="#bama_cyclemaster-in_2" aria-expanded="false" aria-controls="bama_cyclemaster-in_2">
-                                        Computer Science<br>
-                                        <span class="d-block font-weight-normal">2025-2026  Master semester 3</span>
-                                    </button>
-                                    <div class="collapse-item collapse-item-desktop collapse" id="bama_cyclemaster-in_2" style="">
-                                        <ul class="list-bullet">
-                                                <li><strong>Semester:</strong> Fall</li>
-                                                <li><strong>Exam form:</strong> During the semester (winter session)</li>
-                                                <li><strong>Subject examined:</strong> AI product management</li>
-                                                <li><strong>Courses:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Exercises:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Project:</strong> 3 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Type:</strong> optional</li>
-                                        </ul>
-                                    </div>
-
-                                    <button class="collapse-title collapse-title-desktop  collapsed" type="button" data-toggle="collapse" data-target="#bama_cyclemaster-sc_epfl_3" aria-expanded="false" aria-controls="bama_cyclemaster-sc_epfl_3">
-                                        Communication Systems - master program<br>
-                                        <span class="d-block font-weight-normal">2025-2026  Master semester 1</span>
-                                    </button>
-                                    <div class="collapse-item collapse-item-desktop collapse" id="bama_cyclemaster-sc_epfl_3" style="">
-                                        <ul class="list-bullet">
-                                                <li><strong>Semester:</strong> Fall</li>
-                                                <li><strong>Exam form:</strong> During the semester (winter session)</li>
-                                                <li><strong>Subject examined:</strong> AI product management</li>
-                                                <li><strong>Courses:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Exercises:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Project:</strong> 3 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Type:</strong> optional</li>
-                                        </ul>
-                                    </div>
-
-                                    <button class="collapse-title collapse-title-desktop  collapsed" type="button" data-toggle="collapse" data-target="#bama_cyclemaster-sc_epfl_4" aria-expanded="false" aria-controls="bama_cyclemaster-sc_epfl_4">
-                                        Communication Systems - master program<br>
-                                        <span class="d-block font-weight-normal">2025-2026  Master semester 3</span>
-                                    </button>
-                                    <div class="collapse-item collapse-item-desktop collapse" id="bama_cyclemaster-sc_epfl_4" style="">
-                                        <ul class="list-bullet">
-                                                <li><strong>Semester:</strong> Fall</li>
-                                                <li><strong>Exam form:</strong> During the semester (winter session)</li>
-                                                <li><strong>Subject examined:</strong> AI product management</li>
-                                                <li><strong>Courses:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Exercises:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Project:</strong> 3 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Type:</strong> optional</li>
-                                        </ul>
-                                    </div>
-
-                                    <button class="collapse-title collapse-title-desktop  collapsed" type="button" data-toggle="collapse" data-target="#bama_cyclemaster-in_cs_5" aria-expanded="false" aria-controls="bama_cyclemaster-in_cs_5">
-                                        Computer Science - Cybersecurity<br>
-                                        <span class="d-block font-weight-normal">2025-2026  Master semester 1</span>
-                                    </button>
-                                    <div class="collapse-item collapse-item-desktop collapse" id="bama_cyclemaster-in_cs_5" style="">
-                                        <ul class="list-bullet">
-                                                <li><strong>Semester:</strong> Fall</li>
-                                                <li><strong>Exam form:</strong> During the semester (winter session)</li>
-                                                <li><strong>Subject examined:</strong> AI product management</li>
-                                                <li><strong>Courses:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Exercises:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Project:</strong> 3 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Type:</strong> optional</li>
-                                        </ul>
-                                    </div>
-
-                                    <button class="collapse-title collapse-title-desktop  collapsed" type="button" data-toggle="collapse" data-target="#bama_cyclemaster-in_cs_6" aria-expanded="false" aria-controls="bama_cyclemaster-in_cs_6">
-                                        Computer Science - Cybersecurity<br>
-                                        <span class="d-block font-weight-normal">2025-2026  Master semester 3</span>
-                                    </button>
-                                    <div class="collapse-item collapse-item-desktop collapse" id="bama_cyclemaster-in_cs_6" style="">
-                                        <ul class="list-bullet">
-                                                <li><strong>Semester:</strong> Fall</li>
-                                                <li><strong>Exam form:</strong> During the semester (winter session)</li>
-                                                <li><strong>Subject examined:</strong> AI product management</li>
-                                                <li><strong>Courses:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Exercises:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Project:</strong> 3 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Type:</strong> optional</li>
-                                        </ul>
-                                    </div>
-
-                                    <button class="collapse-title collapse-title-desktop  collapsed" type="button" data-toggle="collapse" data-target="#bama_cyclemaster-sc_ds_7" aria-expanded="false" aria-controls="bama_cyclemaster-sc_ds_7">
-                                        Data Science<br>
-                                        <span class="d-block font-weight-normal">2025-2026  Master semester 1</span>
-                                    </button>
-                                    <div class="collapse-item collapse-item-desktop collapse" id="bama_cyclemaster-sc_ds_7" style="">
-                                        <ul class="list-bullet">
-                                                <li><strong>Semester:</strong> Fall</li>
-                                                <li><strong>Exam form:</strong> During the semester (winter session)</li>
-                                                <li><strong>Subject examined:</strong> AI product management</li>
-                                                <li><strong>Courses:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Exercises:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Project:</strong> 3 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Type:</strong> optional</li>
-                                        </ul>
-                                    </div>
-
-                                    <button class="collapse-title collapse-title-desktop  collapsed" type="button" data-toggle="collapse" data-target="#bama_cyclemaster-sc_ds_8" aria-expanded="false" aria-controls="bama_cyclemaster-sc_ds_8">
-                                        Data Science<br>
-                                        <span class="d-block font-weight-normal">2025-2026  Master semester 3</span>
-                                    </button>
-                                    <div class="collapse-item collapse-item-desktop collapse" id="bama_cyclemaster-sc_ds_8" style="">
-                                        <ul class="list-bullet">
-                                                <li><strong>Semester:</strong> Fall</li>
-                                                <li><strong>Exam form:</strong> During the semester (winter session)</li>
-                                                <li><strong>Subject examined:</strong> AI product management</li>
-                                                <li><strong>Courses:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Exercises:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Project:</strong> 3 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Type:</strong> optional</li>
-                                        </ul>
-                                    </div>
-
-                                    <button class="collapse-title collapse-title-desktop  collapsed" type="button" data-toggle="collapse" data-target="#bama_cyclemaster-dh_9" aria-expanded="false" aria-controls="bama_cyclemaster-dh_9">
-                                        Digital Humanities<br>
-                                        <span class="d-block font-weight-normal">2025-2026  Master semester 1</span>
-                                    </button>
-                                    <div class="collapse-item collapse-item-desktop collapse" id="bama_cyclemaster-dh_9" style="">
-                                        <ul class="list-bullet">
-                                                <li><strong>Semester:</strong> Fall</li>
-                                                <li><strong>Exam form:</strong> During the semester (winter session)</li>
-                                                <li><strong>Subject examined:</strong> AI product management</li>
-                                                <li><strong>Courses:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Exercises:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Project:</strong> 3 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Type:</strong> optional</li>
-                                        </ul>
-                                    </div>
-
-                                    <button class="collapse-title collapse-title-desktop  collapsed" type="button" data-toggle="collapse" data-target="#bama_cyclemaster-dh_10" aria-expanded="false" aria-controls="bama_cyclemaster-dh_10">
-                                        Digital Humanities<br>
-                                        <span class="d-block font-weight-normal">2025-2026  Master semester 3</span>
-                                    </button>
-                                    <div class="collapse-item collapse-item-desktop collapse" id="bama_cyclemaster-dh_10" style="">
-                                        <ul class="list-bullet">
-                                                <li><strong>Semester:</strong> Fall</li>
-                                                <li><strong>Exam form:</strong> During the semester (winter session)</li>
-                                                <li><strong>Subject examined:</strong> AI product management</li>
-                                                <li><strong>Courses:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Exercises:</strong> 2 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Project:</strong> 3 Hour(s) per week x 14 weeks</li>
-                                                <li><strong>Type:</strong> optional</li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                <div class="course-schedule mt-5">
-                                    <h2 class="h5">Reference week</h2>
-                                    <table aria-hidden="true" class="semaineDeRef"><tbody><tr><td class='time'>&nbsp;</td><td>Mo</td><td>Tu</td><td>We</td><td>Th</td><td>Fr</td></tr><tr><td class="time">8-9</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">9-10</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">10-11</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">11-12</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">12-13</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">13-14</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">14-15</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class="pt-4 pb-3 taken cours"><a href="https://plan.epfl.ch/?room==ELA 2">ELA2</a></td><td>&nbsp;</td></tr><tr><td class="time">15-16</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class="pt-4 pb-3 taken exercice"><a href="https://plan.epfl.ch/?room==ELA 2">ELA2</a><br><a href="https://plan.epfl.ch/?room==DIA 004">DIA004</a></td><td>&nbsp;</td></tr><tr><td class="time">16-17</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class="pt-4 pb-3 taken cours"><a href="https://plan.epfl.ch/?room==ELA 2">ELA2</a></td><td>&nbsp;</td></tr><tr><td class="time">17-18</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class="pt-4 pb-3 taken exercice"><a href="https://plan.epfl.ch/?room==INM 202">INM202</a><br><a href="https://plan.epfl.ch/?room==INM 203">INM203</a><br><a href="https://plan.epfl.ch/?room==INM 11">INM11</a><br><a href="https://plan.epfl.ch/?room==ELA 2">ELA2</a><br><a href="https://plan.epfl.ch/?room==ELD 120">ELD120</a></td><td>&nbsp;</td></tr><tr><td class="time">18-19</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">19-20</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">20-21</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td class="time">21-22</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></tbody></table>
-                                    <div class="coursebook-week-caption mt-4" role="presentation" aria-hidden="true">
-                                        <p>Légendes:</p>
-                                        <p class="caption caption-cours">
-                                            <span class="caption-icon"></span>
-                                            Lecture
-                                        </p>
-                                        <p class="caption caption-exercice">
-                                            <span class="caption-icon"></span>
-                                            Exercise, TP
-                                        </p>
-                                        <p class="caption caption-projet">
-                                            <span class="caption-icon"></span>
-                                            Project, Lab, other
-                                        </p>
-                                    </div>
-
-                                    <!-- accessible content for screen readers -->
-                                    <div class="coursebook-week-caption sr-only"><p>Thursday, 14h -&nbsp;15h: Lecture <a href="https://plan.epfl.ch/?room==ELA 2">ELA2</a></p><p>Thursday, 15h -&nbsp;16h:  Exercise, TP <a href="https://plan.epfl.ch/?room==ELA 2">ELA2</a><br><a href="https://plan.epfl.ch/?room==DIA 004">DIA004</a></p><p>Thursday, 16h -&nbsp;17h: Lecture <a href="https://plan.epfl.ch/?room==ELA 2">ELA2</a></p><p>Thursday, 17h -&nbsp;18h:  Exercise, TP <a href="https://plan.epfl.ch/?room==INM 202">INM202</a><br><a href="https://plan.epfl.ch/?room==INM 203">INM203</a><br><a href="https://plan.epfl.ch/?room==INM 11">INM11</a><br><a href="https://plan.epfl.ch/?room==ELA 2">ELA2</a><br><a href="https://plan.epfl.ch/?room==ELD 120">ELD120</a></p></div>
-                                </div>
-
-                            <div class="my-5" id="relatedcourses">
-                                <h2 class="h5 mb-2">Related courses</h2>
-                                <p class="text-muted text-sm font-italic mb-4">Results from
-                                    <a href="https://graphsearch.epfl.ch">graphsearch.epfl.ch</a>.
-                                </p>
-                                <graph-widget-course-courses
-                                    course-id="CS-500"
-                                    locale="en"
-                                    limit="5"
-                                >
-                                </graph-widget-course-courses>
-                            </div>
-
-                            </div>
-                        </div>
-
+                        <div class="study-plan study-plan-2-semesters table-like mb-5"><h4>Block 1: first semester average</h4><div class="line-up"><div class="first-line"><div class="cours-title"><div class="titre">Courses</div></div><div  class="langue"><div class="title">Language</div></div><div  class="bachlor"><div class="titre_bachlor bold">Bachelor 1</div></div><div  class="bachlor"><div class="titre_bachlor bold">Bachelor 2</div></div><div  class="examen"><div class="titre_bachlor bold">Exam</div></div><div  class="credit"><div class="titre_bachlor bold">Credits / Coefficient</div></div></div><div class="clear"></div></div><div class="line-down"><div class="line"><div data-title="Advanced information, computation, communication I" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/advanced-information-computation-communication-i-CS-101">Advanced information, computation, communication I</a> <i>(This course focuses on the foundational, discrete mathematics core of advanced computation.)</i></div><div class="cours-info">CS-101 / Section IN</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=124369&amp;lang=en&amp;cvlang=en" >Urbanke</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="English">EN</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text"><ul><li>Courses: 4h</li><li>Exercises: 2h</li></ul></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Winter session</b><br/><span>Written</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">7</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div><div class="line-down"><div class="line"><div data-title="Analysis I" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/analysis-i-MATH-101-E">Analysis I</a></div><div class="cours-info">MATH-101(e) / Section MA</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=167946&amp;lang=en&amp;cvlang=en" >Lachowska</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="French">FR</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text"><ul><li>Courses: 4h</li><li>Exercises: 2h</li></ul></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Winter session</b><br/><span>Written</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">6</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div><div class="line-down"><div class="line"><div data-title="Analysis I (English)" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/analysis-i-english-MATH-101-EN">Analysis I (English)</a></div><div class="cours-info">MATH-101(en) / Section MA</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=364405&amp;lang=en&amp;cvlang=en" >Monin</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="English">EN</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text"><ul><li>Courses: 4h</li><li>Exercises: 2h</li></ul></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Winter session</b><br/><span>Written</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">6</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div><div class="line-down"><div class="line"><div data-title="Analysis I (flipped classroom)" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/analysis-i-flipped-classroom-MATH-101-PI">Analysis I (flipped classroom)</a> <i>(Cours en classe inversée, merci de consulter https://go.epfl.ch/classes-inversees avant de vous inscrire)</i></div><div class="cours-info">MATH-101(pi) / Section MA</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=101466&amp;lang=en&amp;cvlang=en" >Friedli</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="French">FR</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text"><ul><li>Courses: 4h</li><li>Exercises: 2h</li></ul></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Winter session</b><br/><span>Written</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">6</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div><div class="line-down"><div class="line"><div data-title="Analysis I (German)" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/analysis-i-german-MATH-101-DE">Analysis I (German)</a> <i>(Pas donné en 2025-26)</i></div><div class="cours-info">MATH-101(de) / Section MA</div><div class="enseignement-name"></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="German">DE</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text"><ul><li>Courses: 4h</li><li>Exercises: 2h</li></ul></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Winter session</b><br/><span>Written</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">6</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div><div class="line-down"><div class="line"><div data-title="General physics : mechanics (English)" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/general-physics-mechanics-english-PHYS-101-EN">General physics : mechanics (English)</a></div><div class="cours-info">PHYS-101(en) / Section PH</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=255427&amp;lang=en&amp;cvlang=en" >Baquero Ruiz</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="English">EN</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text"><ul><li>Courses: 4h</li><li>Exercises: 2h</li></ul></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Winter session</b><br/><span>Written</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">6</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div><div class="line-down"><div class="line"><div data-title="General physics : mechanics (english flipped classroom)" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/general-physics-mechanics-english-flipped-classroom-PHYS-101-N">General physics : mechanics (english flipped classroom)</a> <i>(Cours en classe inversée, merci de consulter https://go.epfl.ch/classes-inversees avant de vous inscrire)</i></div><div class="cours-info">PHYS-101(n) / Section PH</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=329709&amp;lang=en&amp;cvlang=en" >Tolley</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="English">EN</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text"><ul><li>Courses: 4h</li><li>Exercises: 2h</li></ul></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Winter session</b><br/><span>Written</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">6</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div><div class="line-down"><div class="line"><div data-title="General physics : mechanics (flipped classroom)" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/general-physics-mechanics-flipped-classroom-PHYS-101-L">General physics : mechanics (flipped classroom)</a> <i>(Cours en classe inversée, merci de consulter https://go.epfl.ch/classes-inversees avant de vous inscrire)</i></div><div class="cours-info">PHYS-101(l) / Section PH</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=178548&amp;lang=en&amp;cvlang=en" >Hébert</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="French">FR</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text"><ul><li>Courses: 4h</li><li>Exercises: 2h</li></ul></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Winter session</b><br/><span>Written</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">6</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div><div class="line-down"><div class="line"><div data-title="General physics : mechanics (IN)" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/general-physics-mechanics-in-PHYS-101-C">General physics : mechanics (IN)</a></div><div class="cours-info">PHYS-101(c) / Section PH</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=172230&amp;lang=en&amp;cvlang=en" >Galland</a>, <a href="http://people.epfl.ch/cgi-bin/people?id=132653&amp;lang=en&amp;cvlang=en" >Rusponi</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="French">FR</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text"><ul><li>Courses: 4h</li><li>Exercises: 2h</li></ul></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Winter session</b><br/><span>Written</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">6</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div><div class="line-down"><div class="line"><div data-title="Linear Algebra" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/linear-algebra-MATH-111-E">Linear Algebra</a></div><div class="cours-info">MATH-111(e) / Section MA</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=321951&amp;lang=en&amp;cvlang=en" >Boumal</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="French">FR</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text"><ul><li>Courses: 4h</li><li>Exercises: 2h</li></ul></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Winter session</b><br/><span>Written</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">6</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div><div class="line-down"><div class="line"><div data-title="Linear algebra (english)" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/linear-algebra-english-MATH-111-EN">Linear algebra (english)</a></div><div class="cours-info">MATH-111(en) / Section MA</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=393556&amp;lang=en&amp;cvlang=en" >Negut</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="English">EN</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text"><ul><li>Courses: 4h</li><li>Exercises: 2h</li></ul></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Winter session</b><br/><span>Written</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">6</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div><div class="line-down"><div class="line"><div data-title="Linear algebra (flipped classroom)" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/linear-algebra-flipped-classroom-MATH-111-PI">Linear algebra (flipped classroom)</a> <i>(Cours en classe inversée, merci de consulter https://go.epfl.ch/classes-inversees avant de vous inscrire
+)</i></div><div class="cours-info">MATH-111(pi) / Section MA</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=121157&amp;lang=en&amp;cvlang=en" >Deparis</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="French">FR</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text"><ul><li>Courses: 4h</li><li>Exercises: 2h</li></ul></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Winter session</b><br/><span>Written</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">6</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div></div><div class="study-plan study-plan-2-semesters table-like mb-5"><h4>Block 1 (Propédeutique)</h4><div class="line-up"><div class="first-line"><div class="cours-title"><div class="titre">Courses</div></div><div  class="langue"><div class="title">Language</div></div><div  class="bachlor"><div class="titre_bachlor bold">Bachelor 1</div></div><div  class="bachlor"><div class="titre_bachlor bold">Bachelor 2</div></div><div  class="examen"><div class="titre_bachlor bold">Exam</div></div><div  class="credit"><div class="titre_bachlor bold">Credits / Coefficient</div></div></div><div class="clear"></div></div><div class="line-down"><div class="line"><div data-title="Advanced information, computation, communication II" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/advanced-information-computation-communication-ii-COM-102">Advanced information, computation, communication II</a></div><div class="cours-info">COM-102 / Section IN</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=122796&amp;lang=en&amp;cvlang=en" >Gastpar</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="English">EN</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text"><ul><li>Courses: 4h</li><li>Exercises: 2h</li></ul></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Summer session</b><br/><span>Written</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">7</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div><div class="line-down"><div class="line"><div data-title="Analysis II" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/analysis-ii-MATH-106-E">Analysis II</a></div><div class="cours-info">MATH-106(e) / Section MA</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=167946&amp;lang=en&amp;cvlang=en" >Lachowska</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="French">FR</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text"><ul><li>Courses: 4h</li><li>Exercises: 2h</li></ul></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Summer session</b><br/><span>Written</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">6</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div><div class="line-down"><div class="line"><div data-title="Analysis II (English)" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/analysis-ii-english-MATH-106-EN">Analysis II (English)</a></div><div class="cours-info">MATH-106(en) / Section MA</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=347153&amp;lang=en&amp;cvlang=en" >Richter</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="English">EN</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text"><ul><li>Courses: 4h</li><li>Exercises: 2h</li></ul></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Summer session</b><br/><span>Written</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">6</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div></div><div class="study-plan study-plan-2-semesters table-like mb-5"><h4>Block 2 (Propédeutique)</h4><div class="line-up"><div class="first-line"><div class="cours-title"><div class="titre">Courses</div></div><div  class="langue"><div class="title">Language</div></div><div  class="bachlor"><div class="titre_bachlor bold">Bachelor 1</div></div><div  class="bachlor"><div class="titre_bachlor bold">Bachelor 2</div></div><div  class="examen"><div class="titre_bachlor bold">Exam</div></div><div  class="credit"><div class="titre_bachlor bold">Credits / Coefficient</div></div></div><div class="clear"></div></div><div class="line-down"><div class="line"><div data-title="Fundamentals of digital systems" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/fundamentals-of-digital-systems-CS-173">Fundamentals of digital systems</a></div><div class="cours-info">CS-173 / Section IN</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=208436&amp;lang=en&amp;cvlang=en" >Stojilovic</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="English">EN</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text"><ul><li>Courses: 3h</li><li>Exercises: 4h</li></ul></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Summer session</b><br/><span>Written</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">7</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div><div class="line-down"><div class="line"><div data-title="Introduction to programming" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/introduction-to-programming-CS-107">Introduction to programming</a></div><div class="cours-info">CS-107 / Section IN</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=323954&amp;lang=en&amp;cvlang=en" >Pires</a>, <a href="http://people.epfl.ch/cgi-bin/people?id=106336&amp;lang=en&amp;cvlang=en" >Sam</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="French">FR</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text"><ul><li>Courses: 2h</li><li>Exercises: 2h</li><li>Lab: 1h</li></ul></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Winter session</b><br/><span>During the semester</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">5</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div><div class="line-down"><div class="line"><div data-title="Practice of object-oriented programming" class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/computer-science/coursebook/practice-of-object-oriented-programming-CS-108">Practice of object-oriented programming</a></div><div class="cours-info">CS-108 / Section IN</div><div class="enseignement-name"><a href="http://people.epfl.ch/cgi-bin/people?id=103610&amp;lang=en&amp;cvlang=en" >Schinz</a></div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="French">FR</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text"><ul><li>Courses: 2h</li><li>Exercises: 2h</li><li>Course based project: 6h</li></ul></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Summer session</b><br/><span>During the semester</span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">9</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div><div class="line-down"><div class="line"><div data-title="Sustainability: Propedeutic BA2 " class="cours"><div class="cours-name"><a href="/studyplan/en/propedeutics/humanities-and-social-sciences-program">Sustainability: Propedeutic BA2 </a></div><div class="cours-info"> / Section SHS</div><div class="enseignement-name">Divers enseignants</div></div><div data-title="Language" class="langue"><div class="langue"><abbr title="French">FR</abbr></div></div><div data-title="Bachelor 1" class="bachlor local-color-light bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Bachelor 2" class="bachlor local-color bachlor-color"><div class="schedule-text no-course"><span>-</span></div></div><div data-title="Exam" class="examen"><div class="exam-text"><b>Summer session</b><br/><span></span></div></div><div data-title="Credits" class="credit red-color"><div class="credit-time">2</div></div><button class="btn-collapse">
+              <span class="show">afficher</span>
+              <span class="">masquer</span>
+              <svg viewBox="0 0 10 5" xmlns="http://www.w3.org/2000/svg" class="icon">
+                <path d="M.235.162h9.757l-4.879 4.77z" fill="#ffffff" fill-rule="evenodd"/>
+              </svg>
+            </button></div></div></div>
                     </div>
                     <!-- footer -->
                 </main>
             </div>
+            <aside class="nav-aside-wrapper">
+                <nav id="nav-aside" class="nav-aside" role="navigation" aria-describedby="nav-aside-title">
+                    <ul><li class="active" id="bama_prop"><a href="/studyplan/en/propedeutics/">Propedeutics</a><ul><li><a href="/studyplan/en/propedeutics/architecture/" title="Architecture">Architecture</a></li><li><a href="/studyplan/en/propedeutics/chemistry-and-chemical-engineering/" title="Chemistry and Chemical Engineering">Chemistry and Chemical Engineering</a></li><li><a href="/studyplan/en/propedeutics/civil-engineering/" title="Civil Engineering">Civil Engineering</a></li><li><a href="/studyplan/en/propedeutics/communication-systems/" title="Communication Systems">Communication Systems</a></li><li><strong><a href="/studyplan/en/propedeutics/computer-science/" title="Computer Science">Computer Science</a></strong></li><li><a href="/studyplan/en/propedeutics/electrical-and-electronics-engineering/" title="Electrical and Electronics Engineering">Electrical and Electronics Engineering</a></li><li><a href="/studyplan/en/propedeutics/environmental-sciences-and-engineering/" title="Environmental Sciences and Engineering">Environmental Sciences and Engineering</a></li><li><a href="/studyplan/en/propedeutics/humanities-and-social-sciences-program/" title="Humanities and Social Sciences Program">Humanities and Social Sciences Program</a></li><li><a href="/studyplan/en/propedeutics/life-sciences-engineering/" title="Life Sciences Engineering">Life Sciences Engineering</a></li><li><a href="/studyplan/en/propedeutics/materials-science-and-engineering/" title="Materials Science and Engineering">Materials Science and Engineering</a></li><li><a href="/studyplan/en/propedeutics/mathematics/" title="Mathematics">Mathematics</a></li><li><a href="/studyplan/en/propedeutics/mechanical-engineering/" title="Mechanical Engineering">Mechanical Engineering</a></li><li><a href="/studyplan/en/propedeutics/microengineering/" title="Microengineering">Microengineering</a></li><li><a href="/studyplan/en/propedeutics/physics/" title="Physics">Physics</a></li></ul></li><li class="" id="bama_cyclebachelor"><a href="/studyplan/en/bachelor/">Bachelor Cycle</a></li><li class="" id="bama_cyclemaster"><a href="/studyplan/en/master/">Master Cycle</a></li><li class="" id="min_"><a href="/studyplan/en/minor/">Minor</a></li><li class="" id="edoc"><a href="/studyplan/en/doctoral_school/">Doctoral School</a></li></ul>
+                </nav>
+            </aside>
         </div>
         <!-- footer -->
         <div class="bg-gray-100 pt-5">
@@ -579,18 +360,5 @@ Yes
     featherSvgPath = 'https://web2018.epfl.ch/8.1.0/icons/feather-sprite.svg';
 </script>
   
-<script src="https://web2018.epfl.ch/8.1.0/js/elements.min.js"></script><script src="https://cdn.jsdelivr.net/gh/epflgraph/graphsearch_widgets@v1.0.2/dist/index.js" type="module"></script>
-<script>
-  // Hide Related courses if errors.
-  jQuery(function(){
-    setTimeout(function() {
-      const sr = jQuery('graph-widget-course-courses')[0].shadowRoot
-      const l = jQuery(sr).find('graph-widget-section').length
-      if (l === 0) {
-        jQuery('#relatedcourses').hide();
-      }
-    }, 1000)
-  });
-</script>
-</body>
+<script src="https://web2018.epfl.ch/8.1.0/js/elements.min.js"></script></body>
 </html>
