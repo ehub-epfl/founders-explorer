@@ -1866,7 +1866,7 @@ useEffect(() => {
               </select>
             </div>
             <div>
-              <div style={fieldLabelStyle}>Faculty</div>
+              <div style={fieldLabelStyle}>Study Plan</div>
               <select
                 value={draftFilters.level}
                 onChange={(e) => {
@@ -1886,7 +1886,7 @@ useEffect(() => {
                 disabled={levelDisabled}
                 style={selectFieldStyle(levelDisabled)}
               >
-                <option value="">Any faculty</option>
+                <option value="">Any study plan</option>
                 {levelOptions.map((opt) => (
                   <option key={opt} value={opt}>{opt}</option>
                 ))}
