@@ -1,7 +1,7 @@
 // src/pages/CoursesList.jsx
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getCourses, getLevelsByDegree } from "../api/courses_api";
+import { getCourses, getLevelsByDegree, getPeopleProfilesByCardUrls } from "../api/courses_api";
 import submitCourseRating from "../api/submit_rating";
 import { inferSemesterFromLevel } from "../utils/levels";
 
@@ -1441,6 +1441,32 @@ function CoursesList() {
   const [paretoPref, setParetoPref] = useState({ credits: 'max', workload: 'min' }); // 'max'|'min' for each
   const [submissionStates, setSubmissionStates] = useState({});
   const [ratingValues, setRatingValues] = useState({});
+  const [graphOpen, setGraphOpen] = useState(false);
+  const [graphCourse, setGraphCourse] = useState(null);
+  const [graphProfiles, setGraphProfiles] = useState([]);
+
+  const openRelationGraph = useCallback(async (course) => {
+    try {
+      const urls = (Array.isArray(course?.teachers) ? course.teachers : [])
+        .map((t) => (typeof t?.url === 'string' ? t.url.trim() : ''))
+        .filter(Boolean);
+      const profiles = await getPeopleProfilesByCardUrls(urls);
+      setGraphCourse(course);
+      setGraphProfiles(Array.isArray(profiles) ? profiles : []);
+      setGraphOpen(true);
+    } catch (err) {
+      console.warn('Failed to open relation graph', err);
+      setGraphCourse(course || null);
+      setGraphProfiles([]);
+      setGraphOpen(true);
+    }
+  }, []);
+
+  const closeRelationGraph = useCallback(() => {
+    setGraphOpen(false);
+    setGraphCourse(null);
+    setGraphProfiles([]);
+  }, []);
 
   const toggleSortField = useCallback((field) => {
     setSortOrder((prevOrder) => (sortField === field ? (prevOrder === 'desc' ? 'asc' : 'desc') : 'desc'));
@@ -2165,7 +2191,7 @@ useEffect(() => {
                         minWidth: 0,
                       }}
                     >
-                      <h3 style={{ margin: 0 }}>
+                      <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
                         <a
                           href={courseUrl || '#'}
                           target={courseUrl ? '_blank' : '_self'}
@@ -2182,6 +2208,24 @@ useEffect(() => {
                         {c.course_code && (
                           <small style={{ marginLeft: 8 }}>({c.course_code})</small>
                         )}
+                        <button
+                          type="button"
+                          onClick={() => openRelationGraph(c)}
+                          title="Show relation graph"
+                          style={{
+                            marginLeft: 8,
+                            padding: '2px 6px',
+                            fontSize: 12,
+                            lineHeight: '16px',
+                            border: `1px solid ${THEME_VARS.border}`,
+                            borderRadius: 4,
+                            background: THEME_VARS.surface,
+                            color: THEME_VARS.text,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Graph
+                        </button>
                       </h3>
                       {renderStudyPlanTags(c)}
                       {renderProgramTags(c.available_programs, c.study_plan_tags)}
@@ -2302,7 +2346,7 @@ useEffect(() => {
                           minWidth: 0,
                         }}
                       >
-                        <h3 style={{ margin: 0, fontSize: 16, lineHeight: '20px' }}>
+                        <h3 style={{ margin: 0, fontSize: 16, lineHeight: '20px', display: 'flex', alignItems: 'center', gap: 6 }}>
                           <a
                             href={courseUrl || '#'}
                             target={courseUrl ? '_blank' : '_self'}
@@ -2316,6 +2360,24 @@ useEffect(() => {
                           >
                             {c.course_name}
                           </a>
+                          <button
+                            type="button"
+                            onClick={() => openRelationGraph(c)}
+                            title="Show relation graph"
+                            style={{
+                              marginLeft: 8,
+                              padding: '2px 6px',
+                              fontSize: 11,
+                              lineHeight: '16px',
+                              border: `1px solid ${THEME_VARS.border}`,
+                              borderRadius: 4,
+                              background: THEME_VARS.surface,
+                              color: THEME_VARS.text,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Graph
+                          </button>
                         </h3>
                         {c.course_code && (
                           <div style={{ fontSize: 12, opacity: 0.85 }}>{c.course_code}</div>
@@ -2366,8 +2428,180 @@ useEffect(() => {
           })()}
         </div>
       </div>
+    {graphOpen && (
+      <RelationGraphModal course={graphCourse} profiles={graphProfiles} onClose={closeRelationGraph} />
+    )}
     </div>
   );
 }
 
 export default CoursesList;
+
+function RelationGraphModal({ course, profiles, onClose }) {
+  const width = 720;
+  const height = 520;
+  const cx = width / 2;
+  const cy = height / 2;
+  const r1 = 120; // teachers ring (reduced distance)
+  const r2 = 240; // labs ring
+  const TEACHER_R = 28; // professor node radius (larger)
+  const BOX_W = 260; // info panel width for wrapped text
+  const BOX_H = 220; // info panel height (scrolls if content overflows)
+  const BOX_MARGIN = 8;
+
+  const teachers = Array.isArray(course?.teachers) ? course.teachers : [];
+  const nTeachers = Math.max(teachers.length, 1);
+  const profileByUrl = new Map((profiles || []).filter(Boolean).map((p) => [p.card_url || '', p]));
+
+  const labSet = new Map();
+  for (const p of profiles || []) {
+    const url = (p?.lab_url || '').trim();
+    if (!url) continue;
+    if (!labSet.has(url)) {
+      let label = url;
+      try { label = new URL(url).hostname; } catch (e) {}
+      labSet.set(url, { id: url, label });
+    }
+  }
+  const labs = Array.from(labSet.values());
+
+  const teacherPositions = new Map();
+  teachers.forEach((t, i) => {
+    const angle = (2 * Math.PI * i) / nTeachers - Math.PI / 2;
+    teacherPositions.set(t, { x: cx + r1 * Math.cos(angle), y: cy + r1 * Math.sin(angle) });
+  });
+
+  const nLabs = Math.max(labs.length, 1);
+  const labPositions = new Map();
+  labs.forEach((lab, i) => {
+    const angle = (2 * Math.PI * i) / nLabs - Math.PI / 2;
+    labPositions.set(lab.id, { x: cx + r2 * Math.cos(angle), y: cy + r2 * Math.sin(angle) });
+  });
+
+  const edges = [];
+  for (const t of teachers) {
+    const tp = teacherPositions.get(t);
+    if (tp) edges.push({ x1: cx, y1: cy, x2: tp.x, y2: tp.y, kind: 'course-teacher' });
+    const profile = t?.url ? profileByUrl.get(t.url) : null;
+    if (profile && profile.lab_url && labPositions.has(profile.lab_url)) {
+      const lp = labPositions.get(profile.lab_url);
+      if (tp && lp) edges.push({ x1: tp.x, y1: tp.y, x2: lp.x, y2: lp.y, kind: 'teacher-lab' });
+    }
+  }
+
+  const overlayStyle = {
+    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000,
+    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
+  };
+  const modalStyle = {
+    background: 'var(--color-surface)', color: 'var(--color-text)', borderRadius: 10,
+    boxShadow: '0 10px 30px rgba(0,0,0,0.35)', width, maxWidth: '95vw', maxHeight: '90vh', overflow: 'auto',
+  };
+  const headerStyle = {
+    padding: '10px 12px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+  };
+  const bodyStyle = { padding: 12 };
+
+  return (
+    <div style={overlayStyle} onClick={onClose}>
+      <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+        <div style={headerStyle}>
+          <div style={{ fontWeight: 600 }}>{course?.course_name || 'Course'}</div>
+          <button onClick={onClose} style={{ padding: '4px 8px', border: '1px solid var(--color-border)', borderRadius: 6, background: 'var(--color-surface)' }}>Close</button>
+        </div>
+        <div style={bodyStyle}>
+          <svg width={width} height={height} role="img" aria-label="Relation graph">
+            {/* edges */}
+            {edges.map((e, idx) => (
+              <line key={idx} x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} stroke={e.kind === 'course-teacher' ? '#94a3b8' : '#cbd5e1'} strokeWidth={1.5} />
+            ))}
+            {/* center course node */}
+            <circle cx={cx} cy={cy} r={24} fill="#2563eb" />
+            <text x={cx} y={cy + 42} textAnchor="middle" fontSize={12} fill="#111">Course</text>
+            {/* teacher nodes */}
+            {teachers.map((t, i) => {
+              const p = teacherPositions.get(t);
+              const label = t?.name || 'Teacher';
+              const profile = t?.url ? profileByUrl.get(t.url) : null;
+              const photo = profile?.photo_url;
+              const title = profile?.title || '';
+              const email = profile?.email || '';
+              const intro = (profile?.introduction_summary || '');
+              const href = (typeof t?.url === 'string' && t.url.trim()) ? t.url.trim() : null;
+              const dirRight = p.x < cx; // place text on the side away from center
+              const linkOffset = TEACHER_R + 6;
+              // Compute wrapped panel placement, clamped to viewport
+              const panelX = dirRight
+                ? Math.min(p.x + TEACHER_R + 12, width - BOX_MARGIN - BOX_W)
+                : Math.max(p.x - TEACHER_R - 12 - BOX_W, BOX_MARGIN);
+              const panelY = Math.max(BOX_MARGIN, Math.min(p.y - 22, height - BOX_H - BOX_MARGIN));
+              const branchX = dirRight ? panelX : panelX + BOX_W;
+              const branchY = p.y;
+              const node = (
+                <g key={`t-${i}`} style={{ cursor: href ? 'pointer' : 'default' }}>
+                  {/* avatar (photo clipped to circle) or fallback circle */}
+                  {photo ? (
+                    <g>
+                      <defs>
+                        <clipPath id={`clip-t-${i}`}>
+                          <circle cx={p.x} cy={p.y} r={TEACHER_R} />
+                        </clipPath>
+                      </defs>
+                      <image
+                        href={photo}
+                        x={p.x - TEACHER_R}
+                        y={p.y - TEACHER_R}
+                        width={TEACHER_R * 2}
+                        height={TEACHER_R * 2}
+                        preserveAspectRatio="xMidYMid slice"
+                        clipPath={`url(#clip-t-${i})`}
+                      />
+                      <circle cx={p.x} cy={p.y} r={TEACHER_R} fill="none" stroke="#065f46" strokeWidth={2} />
+                    </g>
+                  ) : (
+                    <circle cx={p.x} cy={p.y} r={TEACHER_R} fill="#10b981" stroke="#065f46" strokeWidth={2} />
+                  )}
+                  {/* teacher name label */}
+                  <text x={p.x} y={p.y - (TEACHER_R + 6)} textAnchor="middle" fontSize={11} fill="#111" style={{ pointerEvents: 'none' }}>{label}</text>
+                  {/* branch with wrapped details: title, intro, email */}
+                  {(title || intro || email) && (
+                    <g>
+                      <line x1={p.x + (dirRight ? linkOffset : -linkOffset)} y1={p.y} x2={branchX} y2={branchY} stroke="#94a3b8" strokeWidth={1} />
+                      <foreignObject x={panelX} y={panelY} width={BOX_W} height={BOX_H} requiredExtensions="http://www.w3.org/1999/xhtml">
+                        <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontSize: 11, lineHeight: 1.25, color: '#111', background: 'rgba(255,255,255,0.92)', padding: 6, border: '1px solid #e5e7eb', borderRadius: 6, wordWrap: 'break-word', overflowY: 'auto', maxHeight: BOX_H }}>
+                          {title && <div style={{ fontWeight: 600, marginBottom: 2 }}>{title}</div>}
+                          {intro && <div style={{ color: '#334155', marginBottom: 2 }}>{intro}</div>}
+                          {email && <div style={{ color: '#2563eb' }}>{email}</div>}
+                        </div>
+                      </foreignObject>
+                    </g>
+                  )}
+                </g>
+              );
+              return href ? (
+                <a key={`a-${i}`} href={href} target="_blank" rel="noreferrer">
+                  {node}
+                </a>
+              ) : node;
+            })}
+            {/* lab nodes */}
+            {labs.map((lab, i) => {
+              const p = labPositions.get(lab.id);
+              return (
+                <g key={`l-${i}`}>
+                  <circle cx={p.x} cy={p.y} r={14} fill="#f59e0b" />
+                  <text x={p.x} y={p.y - 20} textAnchor="middle" fontSize={10} fill="#111" style={{ pointerEvents: 'none' }}>{lab.label}</text>
+                </g>
+              );
+            })}
+          </svg>
+          <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
+            <span style={{ marginRight: 12 }}>• Blue: course</span>
+            <span style={{ marginRight: 12 }}>• Green: teachers</span>
+            <span>• Orange: labs (from people profile)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

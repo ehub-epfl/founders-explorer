@@ -3,7 +3,7 @@ the data scraper.
 
 The script reads the course and program CSV files, upserts rows into the
 `coursebook_courses` table, and refreshes matching rows in
-`coursebook_teachers` and `coursebook_programs`.  It talks to Supabase via
+`people_profiles`, `course_people_profiles`, and `coursebook_programs`. It talks to Supabase via
 the PostgREST endpoint using the service-role key so the requests are
 idempotent and consistent with the schema defined in `init_postgres.sql`.
 """
@@ -32,6 +32,9 @@ DEFAULT_STUDYPLANS_CSV = (
 )
 DEFAULT_ENTRE_SCORES_CSV = (
     RepositoryPath / "data-scraper" / "data" / "coursebook_entre_scores.csv"
+)
+DEFAULT_PEOPLE_PROFILES_CSV = (
+    RepositoryPath / "data-scraper" / "data" / "people_profiles_with_summary.csv"
 )
 ENV_PATH = Path(__file__).resolve().with_name(".env")
 
@@ -295,6 +298,43 @@ def read_studyplan_rows(path: Path) -> List[dict]:
     return studyplans
 
 
+def read_people_profiles_rows(path: Path) -> List[dict]:
+    """Read people_profiles.csv produced by the scraper and map to DB columns.
+
+    CSV columns expected: name, card_url, email, title, lab_url, introduction_snippet, photo_url
+    DB columns:           name, card_url, email, title, lab_url, photo_url, introduction_summary
+    """
+    profiles: List[dict] = []
+    if not path.exists():
+        return profiles
+    # Allow very large CSV fields (long summaries)
+    try:
+        csv.field_size_limit(max(csv.field_size_limit(), 10 * 1024 * 1024))
+    except Exception:
+        try:
+            csv.field_size_limit(10 * 1024 * 1024)
+        except Exception:
+            pass
+    with path.open("r", encoding="utf-8", newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            name = (row.get("name") or "").strip()
+            if not name:
+                continue
+            profiles.append(
+                {
+                    "name": name,
+                    "card_url": (row.get("card_url") or "").strip() or None,
+                    "email": (row.get("email") or "").strip() or None,
+                    "title": (row.get("title") or "").strip() or None,
+                    "lab_url": (row.get("lab_url") or "").strip() or None,
+                    "photo_url": (row.get("photo_url") or "").strip() or None,
+                    "introduction_summary": (row.get("introduction_summary") or "").strip() or None,
+                }
+            )
+    return profiles
+
+
 # ---- Utilities ---------------------------------------------------------
 def chunked(sequence: Sequence, size: int) -> Iterable[Sequence]:
     for index in range(0, len(sequence), size):
@@ -359,35 +399,77 @@ def delete_existing_children(
         client.delete_where(table, filters)
 
 
-def upsert_teachers(
+def upsert_people_profiles(client: SupabaseClient, profiles: Sequence[dict]) -> None:
+    if not profiles:
+        return
+    for chunk in chunked(list(profiles), 500):
+        client.upsert(
+            "people_profiles",
+            rows=chunk,
+            on_conflict="name,card_url",
+        )
+
+
+def map_people_ids(
+    client: SupabaseClient, names: Sequence[str], urls: Sequence[str]
+) -> Tuple[Dict[str, int], Dict[str, int]]:
+    by_url: Dict[str, int] = {}
+    by_name: Dict[str, int] = {}
+    url_values = [u for u in sorted(set(urls)) if u]
+    name_values = [n for n in sorted(set(names)) if n]
+    for chunk in chunked(url_values, 150):
+        filters = build_in_filter("card_url", chunk, quote=True)
+        rows = client.select("people_profiles", select="id,card_url", filters=filters)
+        for r in rows:
+            if r.get("card_url") and isinstance(r.get("id"), int):
+                by_url[r["card_url"]] = r["id"]
+    for chunk in chunked(name_values, 150):
+        filters = build_in_filter("name", chunk, quote=True)
+        rows = client.select("people_profiles", select="id,name", filters=filters)
+        for r in rows:
+            if r.get("name") and isinstance(r.get("id"), int):
+                by_name[r["name"]] = r["id"]
+    return by_url, by_name
+
+
+def upsert_course_people_links(
     client: SupabaseClient,
     teacher_rows: Sequence[dict],
     course_id_map: Dict[str, int],
 ) -> None:
-    payload = []
+    if not teacher_rows:
+        return
+    urls = [row.get("teacher_url") or "" for row in teacher_rows]
+    names = [row.get("teacher_name") or "" for row in teacher_rows]
+    url_map, name_map = map_people_ids(client, names, urls)
+
+    payload: List[dict] = []
     for row in teacher_rows:
-        course_key = row["course_key"]
-        course_id = course_id_map.get(course_key)
+        course_id = course_id_map.get(row["course_key"])  # type: ignore[index]
         if not course_id:
             continue
-        payload.append(
-            {
-                "course_id": course_id,
-                "teacher_name": row["teacher_name"],
-                "teacher_url": row["teacher_url"],
-            }
-        )
+        person_id = None
+        url = (row.get("teacher_url") or "").strip()
+        name = (row.get("teacher_name") or "").strip()
+        if url and url in url_map:
+            person_id = url_map[url]
+        elif name and name in name_map:
+            person_id = name_map[name]
+        if not person_id:
+            continue
+        payload.append({"course_id": course_id, "person_id": person_id})
+
     if payload:
         delete_existing_children(
             client,
-            "coursebook_teachers",
+            "course_people_profiles",
             [row["course_id"] for row in payload],
         )
         for chunk in chunked(payload, 500):
             client.upsert(
-                "coursebook_teachers",
+                "course_people_profiles",
                 rows=chunk,
-                on_conflict="course_id,teacher_name",
+                on_conflict="course_id,person_id",
             )
 
 
@@ -478,6 +560,14 @@ def upsert_studyplans(
 
 def main() -> int:
     load_env(ENV_PATH)
+    # Bump CSV field limit globally to handle large text columns
+    try:
+        csv.field_size_limit(max(csv.field_size_limit(), 10 * 1024 * 1024))
+    except Exception:
+        try:
+            csv.field_size_limit(10 * 1024 * 1024)
+        except Exception:
+            pass
     supabase_url = os.environ.get("SUPABASE_URL")
     service_role_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
     courses_csv = Path(
@@ -506,6 +596,9 @@ def main() -> int:
     if not studyplans_csv.exists():
         print(f"error: {studyplans_csv} does not exist.", file=sys.stderr)
         return 1
+    people_csv = Path(
+        os.environ.get("PEOPLE_PROFILES_CSV", DEFAULT_PEOPLE_PROFILES_CSV)
+    )
 
     if entre_scores_csv.exists():
         scores = read_score_rows(entre_scores_csv)
@@ -519,10 +612,12 @@ def main() -> int:
     courses, teachers = read_course_rows(courses_csv, scores)
     programs = read_program_rows(programs_csv)
     studyplans = read_studyplan_rows(studyplans_csv)
+    people_profiles = read_people_profiles_rows(people_csv)
 
     print(
-        f"Loaded {len(courses)} courses, {len(teachers)} teacher entries, "
-        f"{len(programs)} program rows, and {len(studyplans)} study plan rows."
+        f"Loaded {len(courses)} courses, {len(teachers)} teacher mentions, "
+        f"{len(programs)} program rows, {len(studyplans)} study plan rows, "
+        f"and {len(people_profiles)} people profiles."
     )
 
     client = SupabaseClient(supabase_url, service_role_key)
@@ -550,8 +645,11 @@ def main() -> int:
             file=sys.stderr,
         )
 
-    upsert_teachers(client, teachers, course_id_map)
-    print("Teachers synced.")
+    upsert_people_profiles(client, people_profiles)
+    print("People profiles synced.")
+
+    upsert_course_people_links(client, teachers, course_id_map)
+    print("Course→people links synced.")
 
     upsert_programs(client, programs, course_id_map)
     print("Programs synced.")

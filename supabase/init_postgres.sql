@@ -86,16 +86,42 @@ create index if not exists coursebook_courses_key_trgm_idx
     on coursebook_courses using gin (course_key extensions.gin_trgm_ops);
 
 
-create table if not exists coursebook_teachers (
-    id            bigserial primary key,
-    course_id     bigint      not null references coursebook_courses (id) on delete cascade,
-    teacher_name  text        not null,
-    teacher_url   text,
-    unique (course_id, teacher_name)
+create table if not exists people_profiles (
+    id                     bigserial primary key,
+    name                   text        not null,
+    card_url               text,
+    email                  text,
+    title                  text,
+    lab_url                text,
+    photo_url              text,
+    introduction_summary   text
 );
 
-create index if not exists coursebook_teachers_name_trgm_idx
-    on coursebook_teachers using gin (teacher_name extensions.gin_trgm_ops);
+create index if not exists people_profiles_name_trgm_idx
+    on people_profiles using gin (name extensions.gin_trgm_ops);
+
+-- Ensure upserts can match existing profiles deterministically
+do $$ begin
+    if not exists (
+        select 1 from pg_indexes where schemaname = current_schema() and indexname = 'people_profiles_unique_name_url_idx'
+    ) then
+        execute 'create unique index people_profiles_unique_name_url_idx on people_profiles (name, card_url)';
+    end if;
+end $$;
+
+-- Link table: a course can have multiple teachers (people_profiles)
+create table if not exists course_people_profiles (
+    id          bigserial primary key,
+    course_id   bigint  not null references coursebook_courses (id) on delete cascade,
+    person_id   bigint  not null references people_profiles (id) on delete cascade,
+    unique (course_id, person_id)
+);
+
+create index if not exists course_people_profiles_course_id_idx
+    on course_people_profiles (course_id);
+
+create index if not exists course_people_profiles_person_id_idx
+    on course_people_profiles (person_id);
 
 
 create table if not exists coursebook_programs (
@@ -195,15 +221,16 @@ left join lateral (
     select
         jsonb_agg(
             jsonb_build_object(
-                'name', t.teacher_name,
-                'url',  coalesce(t.teacher_url, '')
+                'name', p.name,
+                'url',  coalesce(p.card_url, '')
             )
-            order by t.teacher_name
+            order by p.name
         ) as teachers,
-        array_agg(distinct t.teacher_name) as teacher_names,
-        coalesce(string_agg(distinct t.teacher_name, ' '), '') as teacher_names_text
-    from coursebook_teachers t
-    where t.course_id = c.id
+        array_agg(distinct p.name) as teacher_names,
+        coalesce(string_agg(distinct p.name, ' '), '') as teacher_names_text
+    from course_people_profiles cp
+    join people_profiles p on p.id = cp.person_id
+    where cp.course_id = c.id
 ) as t_data on true
 left join lateral (
     select

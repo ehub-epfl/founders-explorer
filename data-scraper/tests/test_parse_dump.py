@@ -5,7 +5,7 @@ import requests
 def test_fetch_and_dump_from_url():
     """Fetch the provided URL and dump the response text to a file for eyeballing (no parsing)."""
     url = (
-        "https://edu.epfl.ch/studyplan/en/propedeutics/computer-science/"
+        "https://people.epfl.ch/jo.taillieu?lang=en"
         )
     headers = {
         "User-Agent": (

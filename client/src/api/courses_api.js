@@ -233,6 +233,22 @@ export async function getLevelsByDegree() {
   return grouped;
 }
 
+export async function getPeopleProfilesByCardUrls(cardUrls = []) {
+  const urls = Array.isArray(cardUrls) ? cardUrls.filter((u) => typeof u === 'string' && u.trim()) : [];
+  if (!urls.length) return [];
+  const { supabaseUrl, supabaseAnonKey } = resolveSupabaseConfig();
+  const supabase = ensureSupabaseClient(supabaseUrl, supabaseAnonKey);
+  const { data, error } = await supabase
+    .from('people_profiles')
+    .select('id,name,card_url,title,lab_url,photo_url,introduction_summary')
+    .in('card_url', urls);
+  if (error) {
+    console.warn('Supabase people_profiles fetch failed', error);
+    return [];
+  }
+  return Array.isArray(data) ? data : [];
+}
+
 function normalizeCourseRecord(row) {
   const teachers = Array.isArray(row?.teachers) ? row.teachers : [];
   const programs = Array.isArray(row?.programs) ? row.programs : [];
