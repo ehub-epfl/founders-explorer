@@ -37,16 +37,22 @@ export function signUpWithPassword(email, password) {
 
 export async function signOut() {
   try {
-    return await supabase.auth.signOut({ scope: 'global' });
+    await supabase.auth.signOut({ scope: 'global' });
   } catch (err) {
     const code = err?.code || err?.error || '';
-    // If Supabase already dropped the session (session_not_found), clear local state so UI can still log out.
-    if (code === 'session_not_found' || /session_not_found/i.test(String(err?.message || ''))) {
+    const message = String(err?.message || '');
+
+    // Treat missing sessions as already-logged-out and just clean local state.
+    if (code === 'session_not_found' || /session_not_found/i.test(message)) {
       console.warn('Supabase session not found on logout; clearing local session only.');
-      return supabase.auth.signOut({ scope: 'local' });
+    } else {
+      // Only rethrow unexpected errors.
+      throw err;
     }
-    throw err;
   }
+
+  // Always clear local session state so the UI reliably reflects a logged-out user.
+  await supabase.auth.signOut({ scope: 'local' });
 }
 
 export function requestPasswordReset(email) {

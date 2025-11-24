@@ -1135,12 +1135,14 @@ function ScoreSummary({
     skills: normalizeScore(course?.score_skills),
     product: normalizeScore(course?.score_product),
     venture: normalizeScore(course?.score_venture),
-    foundations: normalizeScore(course?.score_foundations),
-  };
+  foundations: normalizeScore(course?.score_foundations),
+};
+
+  const SCORE_FALLBACK = SCORE_STEP_VALUES[0] ?? 0;
 
   const snapValueOrDefault = (value) => {
     const numeric = Number(value);
-    return snapToScoreStep(Number.isFinite(numeric) ? numeric : SCORE_STEP_VALUES[0]);
+    return snapToScoreStep(Number.isFinite(numeric) ? numeric : SCORE_FALLBACK);
   };
 
   const withSnappedValues = (candidate) => ({
@@ -1152,12 +1154,12 @@ function ScoreSummary({
   });
 
   const defaultValues = useMemo(() => ({
-    relevance: snapValueOrDefault(base.relevance),
-    skills: snapValueOrDefault(base.skills),
-    product: snapValueOrDefault(base.product),
-    venture: snapValueOrDefault(base.venture),
-    foundations: snapValueOrDefault(base.foundations),
-  }), [base.relevance, base.skills, base.product, base.venture, base.foundations]);
+    relevance: SCORE_STEP_VALUES[0],
+    skills: SCORE_STEP_VALUES[0],
+    product: SCORE_STEP_VALUES[0],
+    venture: SCORE_STEP_VALUES[0],
+    foundations: SCORE_STEP_VALUES[0],
+  }), []);
 
   const createEmptyComments = useCallback(() => ({
     relevance: '',
@@ -1330,7 +1332,6 @@ function ScoreSummary({
               gap: 4,
               padding: '8px 10px',
               borderRadius: 8,
-              border: `1px dashed ${THEME_VARS.borderSubtle}`,
               minWidth: 120,
               background: THEME_VARS.surface,
             }}
