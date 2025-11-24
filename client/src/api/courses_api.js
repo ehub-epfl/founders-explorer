@@ -381,6 +381,7 @@ function normalizeCourseRecord(row) {
     type: typeof row?.type === 'string' ? row.type : null,
     semester: typeof row?.semester === 'string' ? row.semester : null,
     schedule: typeof row?.schedule === 'string' ? row.schedule : '',
+    schedule_matrix: Array.isArray(row?.schedule_matrix) ? row.schedule_matrix : null,
     teachers: normalizedTeachers,
     teacher_names: teacherNames,
     teacher_names_text: typeof row?.teacher_names_text === 'string' ? row.teacher_names_text : '',

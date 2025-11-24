@@ -13,9 +13,10 @@ from __future__ import annotations
 import csv
 import json
 import os
+import re
 import sys
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import requests
 
@@ -37,6 +38,64 @@ DEFAULT_PEOPLE_PROFILES_CSV = (
     RepositoryPath / "data-scraper" / "data" / "people_profiles_with_summary.csv"
 )
 ENV_PATH = Path(__file__).resolve().with_name(".env")
+
+SCHEDULE_GRID_START_MIN = 8 * 60  # 08:00
+SCHEDULE_GRID_END_MIN = 20 * 60  # 20:00
+SCHEDULE_GRID_STEP_MIN = 60
+SCHEDULE_SLOT_STARTS = list(
+    range(SCHEDULE_GRID_START_MIN, SCHEDULE_GRID_END_MIN, SCHEDULE_GRID_STEP_MIN)
+)
+SCHEDULE_MATRIX_ROWS = len(SCHEDULE_SLOT_STARTS)
+SCHEDULE_MATRIX_COLS = 7
+SCHEDULE_DAY_KEYS = [
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+]
+
+DAY_INDEX_LOOKUP = {
+    "monday": 0,
+    "mon": 0,
+    "lundi": 0,
+    "lun": 0,
+    "tuesday": 1,
+    "tue": 1,
+    "mardi": 1,
+    "mar": 1,
+    "wednesday": 2,
+    "wed": 2,
+    "mercredi": 2,
+    "mer": 2,
+    "thursday": 3,
+    "thu": 3,
+    "thurs": 3,
+    "jeudi": 3,
+    "jeu": 3,
+    "friday": 4,
+    "fri": 4,
+    "vendredi": 4,
+    "ven": 4,
+    "saturday": 5,
+    "sat": 5,
+    "samedi": 5,
+    "sam": 5,
+    "sunday": 6,
+    "sun": 6,
+    "dimanche": 6,
+    "dim": 6,
+}
+
+SCHEDULE_RANGE_RE = re.compile(
+    r"^(?P<day>[A-Za-zÀ-ÿ]+)[,]?\s+"
+    r"(?P<start>\d{1,2}(?::\d{2})?|\d{1,2}h\d{0,2})\s*[–—-]\s*"
+    r"(?P<end>\d{1,2}(?::\d{2})?|\d{1,2}h\d{0,2})"
+    r"(?:\s*[:,-]\s*(?P<label>.*))?$",
+    re.IGNORECASE,
+)
 
 
 class SupabaseError(RuntimeError):
@@ -158,6 +217,117 @@ def _compute_vb_average(row: dict) -> Optional[float]:
     return round(average, 2)
 
 
+_TIME_TOKEN_RE = re.compile(r"^\s*(\d{1,2})(?::?(\d{0,2}))?\s*$")
+
+
+def _empty_schedule_matrix() -> List[List[int]]:
+    return [[0 for _ in range(SCHEDULE_MATRIX_COLS)] for _ in range(SCHEDULE_MATRIX_ROWS)]
+
+
+def _validate_schedule_matrix(matrix: Any) -> Optional[List[List[int]]]:
+    if not isinstance(matrix, list):
+        return None
+    if len(matrix) != SCHEDULE_MATRIX_ROWS:
+        return None
+    normalized: List[List[int]] = []
+    for row in matrix:
+        if not isinstance(row, list) or len(row) != SCHEDULE_MATRIX_COLS:
+            return None
+        normalized.append([1 if int(val) else 0 for val in row])
+    return normalized
+
+
+def _parse_schedule_matrix_field(value: Any) -> Optional[List[List[int]]]:
+    if value is None:
+        return None
+    if isinstance(value, list):
+        return _validate_schedule_matrix(value)
+    if isinstance(value, str) and value.strip():
+        try:
+            parsed = json.loads(value)
+            return _validate_schedule_matrix(parsed)
+        except Exception:
+            return None
+    return None
+
+
+def _build_matrix_from_day_columns(row: dict) -> Optional[List[List[int]]]:
+    day_columns: List[List[int]] = []
+    for day_key in SCHEDULE_DAY_KEYS:
+        raw = row.get(day_key)
+        if raw is None:
+            day_columns.append([])
+            continue
+        parsed: List[int] = []
+        if isinstance(raw, str) and raw.strip():
+            try:
+                parsed = [int(val) for val in json.loads(raw)]
+            except Exception:
+                parsed = [int(val) for val in re.split(r"[\\s,]+", raw.strip()) if val]
+        elif isinstance(raw, list):
+            parsed = [int(val) for val in raw]
+        day_columns.append(parsed)
+
+    if all(len(col) == 0 for col in day_columns):
+        return None
+
+    matrix = _empty_schedule_matrix()
+    for row_idx in range(SCHEDULE_MATRIX_ROWS):
+        for day_idx, col in enumerate(day_columns):
+            if row_idx < len(col):
+                matrix[row_idx][day_idx] = 1 if int(col[row_idx]) else 0
+    return matrix
+
+
+def _parse_time_token(token: str) -> Optional[int]:
+    cleaned = (token or "").lower().replace("h", ":").replace(".", ":")
+    cleaned = re.sub(r"\s+", "", cleaned)
+    match = _TIME_TOKEN_RE.match(cleaned)
+    if not match:
+        return None
+    hours = int(match.group(1))
+    minutes_str = match.group(2) or "0"
+    minutes = int(minutes_str) if minutes_str else 0
+    if hours < 0 or hours > 24 or minutes < 0 or minutes >= 60:
+        return None
+    return hours * 60 + minutes
+
+
+def build_schedule_matrix(schedule_text: str) -> List[List[int]]:
+    """Convert schedule lines into a 12x7 hour/day occupancy matrix."""
+
+    matrix = _empty_schedule_matrix()
+    if not isinstance(schedule_text, str) or not schedule_text.strip():
+        return matrix
+
+    for raw_line in schedule_text.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        match = SCHEDULE_RANGE_RE.match(line)
+        if not match:
+            continue
+        day_token = (match.group("day") or "").strip().lower()
+        day_index = DAY_INDEX_LOOKUP.get(day_token)
+        if day_index is None:
+            continue
+        start_minutes = _parse_time_token(match.group("start"))
+        end_minutes = _parse_time_token(match.group("end"))
+        if start_minutes is None or end_minutes is None:
+            continue
+        if end_minutes <= start_minutes:
+            continue
+        for row_idx, slot_start in enumerate(SCHEDULE_SLOT_STARTS):
+            slot_end = slot_start + SCHEDULE_GRID_STEP_MIN
+            if slot_end <= start_minutes:
+                continue
+            if slot_start >= end_minutes:
+                break
+            matrix[row_idx][day_index] = 1
+
+    return matrix
+
+
 def read_score_rows(path: Path) -> Dict[str, dict]:
     if not path.exists():
         return {}
@@ -198,6 +368,13 @@ def read_course_rows(path: Path, scores: Dict[str, dict]) -> Tuple[List[dict], L
             if intro_score is None:
                 intro_score = 0
 
+            schedule_text = (row.get("schedule") or "").strip()
+            schedule_matrix = (
+                _parse_schedule_matrix_field(row.get("schedule_matrix"))
+                or _build_matrix_from_day_columns(row)
+                or build_schedule_matrix(schedule_text)
+            )
+
             courses.append(
                 {
                     "course_key": course_key,
@@ -212,7 +389,8 @@ def read_course_rows(path: Path, scores: Dict[str, dict]) -> Tuple[List[dict], L
                     "workload": workload_value,
                     "semester": (row.get("semester") or "").strip() or None,
                     "course_type": (row.get("type") or "").strip() or None,
-                    "schedule": row.get("schedule", "").strip(),
+                    "schedule": schedule_text,
+                    "schedule_matrix": schedule_matrix,
                     "description": (row.get("description") or "").strip(),
                     "keywords": (row.get("keywords") or "").strip(),
                     "entre_score": entre_score,

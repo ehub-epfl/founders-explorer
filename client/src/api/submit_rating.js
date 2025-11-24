@@ -52,7 +52,28 @@ function roundScore(n) {
  * @param {string} [params.turnstileToken]  // optional, if you enable Cloudflare Turnstile
  * @returns {{course_code:string, course_id:string, score_relevance:number, score_personal:number, score_product:number, score_venture:number, score_intro:number, turnstileToken?:string}}
  */
-function buildPayload({ course_code, course_id, score_relevance, score_personal, score_product, score_venture, score_intro, turnstileToken }) {
+function truncateText(value, limit = 2000) {
+  if (typeof value !== 'string') return '';
+  const trimmed = value.trim();
+  if (trimmed.length <= limit) return trimmed;
+  return trimmed.slice(0, limit);
+}
+
+function buildPayload({
+  course_code,
+  course_id,
+  score_relevance,
+  score_personal,
+  score_product,
+  score_venture,
+  score_intro,
+  comment_relevance = '',
+  comment_personal = '',
+  comment_product = '',
+  comment_venture = '',
+  comment_intro = '',
+  turnstileToken,
+}) {
   const normalizedCode = typeof course_code === 'string' ? course_code.trim() : String(course_code ?? '').trim()
   if (!normalizedCode) {
     throw new Error('course_code is required');
@@ -74,6 +95,11 @@ function buildPayload({ course_code, course_id, score_relevance, score_personal,
     score_product: roundScore(score_product),
     score_venture: roundScore(score_venture),
     score_intro: roundScore(score_intro),
+    comment_relevance: truncateText(comment_relevance),
+    comment_personal: truncateText(comment_personal),
+    comment_product: truncateText(comment_product),
+    comment_venture: truncateText(comment_venture),
+    comment_intro: truncateText(comment_intro),
     ...(turnstileToken ? { turnstileToken } : {}),
   };
 }

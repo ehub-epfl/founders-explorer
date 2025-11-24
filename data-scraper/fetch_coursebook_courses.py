@@ -34,6 +34,13 @@ SCHEDULE_LINE_RE = re.compile(
     r"^(?P<day>[A-Za-zÀ-ÿ]+),\s*(?P<start>\d{1,2})h\s*-\s*(?P<end>\d{1,2})h:\s*(?P<rest>.+)$",
     re.IGNORECASE,
 )
+SCHEDULE_RANGE_RE = re.compile(
+    r"^(?P<day>[A-Za-zÀ-ÿ]+)[,]?\s+"
+    r"(?P<start>\d{1,2}(?::\d{2})?|\d{1,2}h\d{0,2})\s*[–—-]\s*"
+    r"(?P<end>\d{1,2}(?::\d{2})?|\d{1,2}h\d{0,2})"
+    r"(?:\s*[:,-]\s*(?P<label>.*))?$",
+    re.IGNORECASE,
+)
 CREDITS_PATTERNS = (
     re.compile(r"(\d+(?:[.,]\d+)?)\s*(?:credits?|crédits?|ects?)", re.IGNORECASE),
     re.compile(r"coefficient\s*/?\s*(?:credits?|crédits?)\s*(\d+(?:[.,]\d+)?)", re.IGNORECASE),
@@ -50,6 +57,52 @@ WORKLOAD_WEEK_KEYWORDS = (
     "par semaine",
 )
 SEMESTER_WEEKS = 14
+SCHEDULE_GRID_START_MIN = 8 * 60  # 08:00
+SCHEDULE_GRID_END_MIN = 20 * 60  # 20:00
+SCHEDULE_GRID_STEP_MIN = 60
+SCHEDULE_SLOT_STARTS = list(range(SCHEDULE_GRID_START_MIN, SCHEDULE_GRID_END_MIN, SCHEDULE_GRID_STEP_MIN))
+SCHEDULE_MATRIX_ROWS = len(SCHEDULE_SLOT_STARTS)
+SCHEDULE_MATRIX_COLS = 7
+SCHEDULE_DAY_KEYS = [
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+]
+DAY_INDEX_LOOKUP = {
+    "monday": 0,
+    "mon": 0,
+    "lundi": 0,
+    "lun": 0,
+    "tuesday": 1,
+    "tue": 1,
+    "mardi": 1,
+    "mar": 1,
+    "wednesday": 2,
+    "wed": 2,
+    "mercredi": 2,
+    "mer": 2,
+    "thursday": 3,
+    "thu": 3,
+    "thurs": 3,
+    "jeudi": 3,
+    "jeu": 3,
+    "friday": 4,
+    "fri": 4,
+    "vendredi": 4,
+    "ven": 4,
+    "saturday": 5,
+    "sat": 5,
+    "samedi": 5,
+    "sam": 5,
+    "sunday": 6,
+    "sun": 6,
+    "dimanche": 6,
+    "dim": 6,
+}
 
 
 def load_program_urls() -> List[Dict[str, str]]:
@@ -515,6 +568,7 @@ def parse_course_detail(course: Dict[str, str], html_text: str) -> Dict[str, str
     teacher = extract_teachers(tree)
     language = extract_language(tree)
     schedule = extract_schedule(tree)
+    schedule_matrix = build_schedule_matrix(schedule)
     credits = extract_credits(tree)
     summary = extract_section_text(tree, ("Summary", "Résumé"))
     content = extract_section_text(tree, ("Content", "Contenu"))
@@ -531,6 +585,7 @@ def parse_course_detail(course: Dict[str, str], html_text: str) -> Dict[str, str
         "teacher": teacher,
         "language": language,
         "schedule": schedule,
+        "schedule_matrix": schedule_matrix,
         "description": description,
         "keywords": keywords,
         "credits": credits,
@@ -560,6 +615,7 @@ def write_courses_csv(entries: Iterable[Dict[str, str]]) -> None:
                 "semester",
                 "type",
                 "schedule",
+                "schedule_matrix",
                 "description",
                 "keywords",
             ],
@@ -591,6 +647,60 @@ def simplify_semester(label: str) -> str:
 
 
 _PAREN_CONTENT = re.compile(r"\s*\([^)]*\)")
+_TIME_TOKEN_RE = re.compile(r"^\s*(\d{1,2})(?::?(\d{0,2}))?\s*$")
+
+
+def _parse_time_token(token: str) -> int | None:
+    cleaned = (token or "").lower().replace("h", ":").replace(".", ":")
+    cleaned = re.sub(r"\s+", "", cleaned)
+    match = _TIME_TOKEN_RE.match(cleaned)
+    if not match:
+        return None
+    hours = int(match.group(1))
+    minutes_raw = match.group(2) or "0"
+    minutes = int(minutes_raw) if minutes_raw else 0
+    if hours < 0 or hours > 24 or minutes < 0 or minutes >= 60:
+        return None
+    return hours * 60 + minutes
+
+
+def _empty_schedule_matrix() -> list[list[int]]:
+    return [[0 for _ in range(SCHEDULE_MATRIX_COLS)] for _ in range(SCHEDULE_MATRIX_ROWS)]
+
+
+def build_schedule_matrix(schedule_text: str) -> list[list[int]]:
+    """Convert schedule text into a 12x7 occupancy matrix."""
+
+    matrix = _empty_schedule_matrix()
+    if not isinstance(schedule_text, str) or not schedule_text.strip():
+        return matrix
+
+    for raw_line in schedule_text.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        match = SCHEDULE_RANGE_RE.match(line)
+        if not match:
+            continue
+        day_token = normalize_ws(match.group("day")).lower()
+        day_index = DAY_INDEX_LOOKUP.get(day_token)
+        if day_index is None:
+            continue
+        start_minutes = _parse_time_token(match.group("start"))
+        end_minutes = _parse_time_token(match.group("end"))
+        if start_minutes is None or end_minutes is None:
+            continue
+        if end_minutes <= start_minutes:
+            continue
+        for row_idx, slot_start in enumerate(SCHEDULE_SLOT_STARTS):
+            slot_end = slot_start + SCHEDULE_GRID_STEP_MIN
+            if slot_end <= start_minutes:
+                continue
+            if slot_start >= end_minutes:
+                break
+            matrix[row_idx][day_index] = 1
+
+    return matrix
 
 
 def normalize_semester_term(label: str) -> str:
@@ -809,6 +919,7 @@ def main() -> None:
             "semester": course_semester,
             "type": course_type,
             "schedule": detail_info.get("schedule", ""),
+            "schedule_matrix": json.dumps(detail_info.get("schedule_matrix", []), ensure_ascii=False),
             "description": detail_info.get("description", ""),
             "keywords": detail_info.get("keywords", ""),
         }

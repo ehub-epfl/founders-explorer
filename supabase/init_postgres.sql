@@ -52,6 +52,12 @@ create table if not exists coursebook_courses (
     semester        text,
     course_type     text,
     schedule        text        not null default '',
+    schedule_matrix smallint[]  not null default array_fill(0::smallint, ARRAY[12,7]),
+    constraint coursebook_courses_schedule_matrix_dims check (
+        array_ndims(schedule_matrix) = 2
+            and array_length(schedule_matrix, 1) = 12
+            and array_length(schedule_matrix, 2) = 7
+    ),
     description     text        not null default '',
     keywords        text        not null default '',
     entre_score     integer,
@@ -176,9 +182,50 @@ create table if not exists course_ratings (
     score_product       smallint    not null check (score_product between 0 and 100),
     score_venture       smallint    not null check (score_venture between 0 and 100),
     score_intro         smallint    not null check (score_intro between 0 and 100),
+    comment_relevance   text        not null default '' check (char_length(comment_relevance) <= 2000),
+    comment_personal    text        not null default '' check (char_length(comment_personal) <= 2000),
+    comment_product     text        not null default '' check (char_length(comment_product) <= 2000),
+    comment_venture     text        not null default '' check (char_length(comment_venture) <= 2000),
+    comment_intro       text        not null default '' check (char_length(comment_intro) <= 2000),
     ip_hash             text,
     ua                  text
 );
+
+-- Backfill-safe schema updates for course_ratings
+do $$
+begin
+    if not exists (select 1 from information_schema.columns where table_name = 'course_ratings' and column_name = 'comment_relevance') then
+        alter table course_ratings add column comment_relevance text not null default '';
+    end if;
+    if not exists (select 1 from information_schema.columns where table_name = 'course_ratings' and column_name = 'comment_personal') then
+        alter table course_ratings add column comment_personal text not null default '';
+    end if;
+    if not exists (select 1 from information_schema.columns where table_name = 'course_ratings' and column_name = 'comment_product') then
+        alter table course_ratings add column comment_product text not null default '';
+    end if;
+    if not exists (select 1 from information_schema.columns where table_name = 'course_ratings' and column_name = 'comment_venture') then
+        alter table course_ratings add column comment_venture text not null default '';
+    end if;
+    if not exists (select 1 from information_schema.columns where table_name = 'course_ratings' and column_name = 'comment_intro') then
+        alter table course_ratings add column comment_intro text not null default '';
+    end if;
+
+    if not exists (select 1 from pg_constraint where conname = 'course_ratings_comment_relevance_len_check') then
+        alter table course_ratings add constraint course_ratings_comment_relevance_len_check check (char_length(comment_relevance) <= 2000);
+    end if;
+    if not exists (select 1 from pg_constraint where conname = 'course_ratings_comment_personal_len_check') then
+        alter table course_ratings add constraint course_ratings_comment_personal_len_check check (char_length(comment_personal) <= 2000);
+    end if;
+    if not exists (select 1 from pg_constraint where conname = 'course_ratings_comment_product_len_check') then
+        alter table course_ratings add constraint course_ratings_comment_product_len_check check (char_length(comment_product) <= 2000);
+    end if;
+    if not exists (select 1 from pg_constraint where conname = 'course_ratings_comment_venture_len_check') then
+        alter table course_ratings add constraint course_ratings_comment_venture_len_check check (char_length(comment_venture) <= 2000);
+    end if;
+    if not exists (select 1 from pg_constraint where conname = 'course_ratings_comment_intro_len_check') then
+        alter table course_ratings add constraint course_ratings_comment_intro_len_check check (char_length(comment_intro) <= 2000);
+    end if;
+end $$;
 
 create index if not exists course_ratings_course_id_idx
     on course_ratings (course_id);
@@ -204,6 +251,7 @@ select
     c.semester,
     c.course_type as type,
     c.schedule,
+    c.schedule_matrix,
     c.description,
     c.keywords,
     c.entre_score,

@@ -71,6 +71,11 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       score_product,
       score_venture,
       score_intro,
+      comment_relevance,
+      comment_personal,
+      comment_product,
+      comment_venture,
+      comment_intro,
       // turnstileToken,
     } = json as Record<string, unknown>;
 
@@ -88,6 +93,20 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
         JSON.stringify({ error: 'scores must be numbers between 0 and 100: score_relevance, score_personal, score_product, score_venture, score_intro' })
       );
     }
+
+    const normalizeComment = (value: unknown) => {
+      if (typeof value !== 'string') return '';
+      const trimmed = value.trim();
+      return trimmed.slice(0, 2000);
+    };
+
+    const comments = {
+      comment_relevance: normalizeComment(comment_relevance),
+      comment_personal: normalizeComment(comment_personal),
+      comment_product: normalizeComment(comment_product),
+      comment_venture: normalizeComment(comment_venture),
+      comment_intro: normalizeComment(comment_intro),
+    };
 
     // Optional Turnstile verification:
     // if (env.TURNSTILE_SECRET) { /* verify token here */ }
@@ -124,6 +143,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
         score_product: roundScore(score_product as number),
         score_venture: roundScore(score_venture as number),
         score_intro: roundScore(score_intro as number),
+        ...comments,
         ip_hash,
         ua,
       }),
