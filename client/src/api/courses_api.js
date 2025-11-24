@@ -186,10 +186,6 @@ export async function getCourses(options = {}) {
     throw new Error(`Supabase request failed: ${error.message}`);
   }
 
-  if (typeof console !== 'undefined') {
-    const itemsCount = Array.isArray(data) ? data.length : 0;
-    console.log(`[supabase] Retrieved ${itemsCount} rows from ${VIEW} (page ${resolvedPage}, total ${count ?? 'unknown'})`);
-  }
 
   const items = (Array.isArray(data) ? data : []).map(normalizeCourseRecord);
 

@@ -14,10 +14,6 @@ export default defineConfig(async ({ mode }) => {
     injectIntoProcess(publicDevVars)
   }
 
-  if (mode === 'development') {
-    await printSupabaseSnapshot(publicDevVars)
-  }
-
   const server =
     mode === 'development'
       ? {
@@ -80,46 +76,4 @@ function pick(source, keys) {
     if (key in source) out[key] = source[key]
   }
   return out
-}
-
-async function printSupabaseSnapshot(vars) {
-  const url = vars.SUPABASE_URL
-  const anonKey = vars.SUPABASE_ANON_KEY
-  if (!url || !anonKey) {
-    console.warn('[supabase] Missing SUPABASE_URL or SUPABASE_ANON_KEY; skipping snapshot')
-    return
-  }
-
-  try {
-    const endpoint = new URL('/rest/v1/coursebook_course_summary', url.replace(/\/$/, ''))
-    endpoint.searchParams.set('select', '*')
-
-    const response = await fetch(endpoint, {
-      headers: {
-        apikey: anonKey,
-        Authorization: `Bearer ${anonKey}`,
-      },
-    })
-
-    if (!response.ok) {
-      const errText = await safeReadText(response)
-      console.error(`[supabase] Snapshot fetch failed: HTTP ${response.status} ${response.statusText}${errText ? ` - ${errText}` : ''}`)
-      return
-    }
-
-    const data = await response.json()
-    const total = Array.isArray(data) ? data.length : 0
-    console.log(`[supabase] Retrieved ${total} rows from coursebook_course_summary`)
-    console.log(JSON.stringify(data, null, 2))
-  } catch (err) {
-    console.error('[supabase] Snapshot fetch threw an error:', err?.message || err)
-  }
-}
-
-async function safeReadText(response) {
-  try {
-    return await response.text()
-  } catch (err) {
-    return ''
-  }
 }

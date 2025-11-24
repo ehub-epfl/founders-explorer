@@ -1705,7 +1705,6 @@ useEffect(() => {
           availabilitySlots: appliedFilters.availabilitySlots || undefined,
         };
         const data = await getCourses(params);
-        console.log("API response:", data);
         const rawItems = Array.isArray(data.items) ? data.items : [];
         const availabilitySet = decodeAvailabilitySlots(appliedFilters.availabilitySlots);
         const filteredItems = availabilitySet.size > 0
@@ -1716,9 +1715,6 @@ useEffect(() => {
           ? filteredItems.length
           : Number(data.total || rawItems.length || 0);
         setTotalResults(reportedTotal);
-        if (!filteredItems.length) {
-          console.debug('No course results returned for current filters (after availability filtering)');
-        }
       } catch (err) {
         setError(err?.message || "Failed to load courses");
       } finally {
