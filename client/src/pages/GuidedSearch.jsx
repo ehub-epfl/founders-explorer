@@ -45,17 +45,17 @@ function GuidedSearch() {
 
     // Submit handler
     const handleSubmit = (data = formData) => {
-        const degree = (data.program || '').trim();
-        const level = (data.semester || '').trim();
+        const studyProgram = (data.program || '').trim();
+        const studyPlan = (data.semester || '').trim();
         const major = (data.major || '').trim();
         const minor = (data.minor || '').trim();
-        const inferredSemester = inferSemesterFromLevel(level);
+        const inferredSemester = inferSemesterFromLevel(studyPlan);
 
         const params = new URLSearchParams();
-        if (degree) params.set('degree', degree);
-        if (level) params.set('level', level);
+        if (studyProgram) params.set('study_program', studyProgram);
+        if (studyPlan) params.set('study_plan', studyPlan);
         if (major) params.set('major', major);
-        if (degree === 'MA' && minor) params.set('minor', minor);
+        if (studyProgram === 'MA' && minor) params.set('minor', minor);
         if (inferredSemester) params.set('semester', inferredSemester);
 
         const qs = params.toString();

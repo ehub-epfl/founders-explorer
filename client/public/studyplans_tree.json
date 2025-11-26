@@ -1,20 +1,5 @@
 {
-  "Propedeutics": [
-    "Architecture",
-    "Chemistry and Chemical Engineering",
-    "Civil Engineering",
-    "Communication Systems",
-    "Computer Science",
-    "Electrical and Electronics Engineering",
-    "Environmental Sciences and Engineering",
-    "Life Sciences Engineering",
-    "Materials Science and Engineering",
-    "Mathematics",
-    "Mechanical Engineering",
-    "Microengineering",
-    "Physics"
-  ],
-  "BA": [
+  "Bachelor Cycle": [
     "Architecture",
     "Chemical Engineering",
     "Chemistry",
@@ -32,7 +17,33 @@
     "Physics",
     "Projeter ensemble ENAC"
   ],
-  "MA": [
+  "Doctoral School": [
+    "Advanced Manufacturing",
+    "Architecture and Sciences of the City",
+    "Biotechnology and Bioengineering",
+    "Block Courses",
+    "Chemistry and Chemical Engineering",
+    "Civil and Environmental Engineering",
+    "Computational and Quantitative Biology",
+    "Computer and Communication Sciences",
+    "Digital humanities",
+    "Electrical Engineering",
+    "Energy",
+    "Finance",
+    "Joint EPFL - ETH Zurich Doctoral Program in the Learning Sciences",
+    "Management of technology",
+    "Materials Science and Engineering",
+    "Mathematics",
+    "Mechanics",
+    "Microsystems and Microelectronics",
+    "Molecular Life Sciences",
+    "Neuroscience",
+    "Photonics",
+    "Physics",
+    "Robotics, Control and Intelligent Systems",
+    "Transversal Skills Courses"
+  ],
+  "Master Cycle": [
     "Applied Mathematics",
     "Applied Physics",
     "Architecture",
@@ -65,7 +76,7 @@
     "Sustainable Management and Technology",
     "Urban systems"
   ],
-  "MA Minor": [
+  "Minor": [
     "Biomedical technologies minor",
     "Biotechnology minor",
     "Civil engineering minor",
@@ -97,30 +108,19 @@
     "Systems Engineering minor",
     "Territories in transformation and climate minor"
   ],
-  "Doctoral School": [
-    "Advanced Manufacturing",
-    "Architecture and Sciences of the City",
-    "Biotechnology and Bioengineering",
-    "Block Courses",
+  "Propedeutics": [
+    "Architecture",
     "Chemistry and Chemical Engineering",
-    "Civil and Environmental Engineering",
-    "Computational and Quantitative Biology",
-    "Computer and Communication Sciences",
-    "Digital humanities",
-    "Electrical Engineering",
-    "Energy",
-    "Finance",
-    "Joint EPFL - ETH Zurich Doctoral Program in the Learning Sciences",
-    "Management of technology",
+    "Civil Engineering",
+    "Communication Systems",
+    "Computer Science",
+    "Electrical and Electronics Engineering",
+    "Environmental Sciences and Engineering",
+    "Life Sciences Engineering",
     "Materials Science and Engineering",
     "Mathematics",
-    "Mechanics",
-    "Microsystems and Microelectronics",
-    "Molecular Life Sciences",
-    "Neuroscience",
-    "Photonics",
-    "Physics",
-    "Robotics, Control and Intelligent Systems",
-    "Transversal Skills Courses"
+    "Mechanical Engineering",
+    "Microengineering",
+    "Physics"
   ]
 }

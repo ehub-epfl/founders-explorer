@@ -3,7 +3,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 const VIEW = 'coursebook_course_summary';
-const PROGRAMS_TABLE = 'coursebook_programs';
+const STUDYPLANS_TABLE = 'coursebook_studyplans';
 
 let cachedClient = null;
 let cachedClientKey = '';
@@ -46,8 +46,8 @@ export async function getCourses(options = {}) {
     q,
     type,
     semester,
-    degree,
-    level,
+    study_program,
+    study_plan,
     creditsMin,
     creditsMax,
     section,
@@ -119,11 +119,17 @@ export async function getCourses(options = {}) {
     query = query.lte('credits', maxCredits);
   }
 
-  const programCourseIds = await collectCourseIdsForProgramFilters(supabase, {
-    type,
-    semester,
-    degree,
-    level,
+  const normalizedType = normalizeProgramType(type);
+  if (normalizedType) {
+    query = query.eq('type', normalizedType);
+  }
+
+  const normalizedStudyProgram = normalizeStudyProgramValue(study_program);
+  const normalizedStudyPlan = normalizeStudyPlanValue(study_plan);
+
+  const programCourseIds = await collectCourseIdsForStudyPlanFilters(supabase, {
+    study_program: normalizedStudyProgram,
+    study_plan: normalizedStudyPlan,
   });
 
   if (programCourseIds && programCourseIds.length === 0) {
@@ -197,29 +203,37 @@ export async function getCourses(options = {}) {
   };
 }
 
-export async function getLevelsByDegree() {
+export async function getStudyPlansByProgram() {
   const { supabaseUrl, supabaseAnonKey } = resolveSupabaseConfig();
   const supabase = ensureSupabaseClient(supabaseUrl, supabaseAnonKey);
 
   const { data, error } = await supabase
-    .from(PROGRAMS_TABLE)
-    .select('semester');
+    .from(VIEW)
+    .select('study_plans,study_program,study_faculty');
 
   if (error) {
-    throw new Error(`Supabase levels fetch failed: ${error.message}`);
+    throw new Error(`Supabase study plan fetch failed: ${error.message}`);
   }
 
   const grouped = {};
-  for (const row of data || []) {
-    if (!row) continue;
-    const labelRaw = typeof row.semester === 'string' ? row.semester.trim() : '';
-    if (!labelRaw) continue;
-    const degreeMatch = labelRaw.match(/^[A-Za-z]+/);
-    const degree = degreeMatch ? degreeMatch[0].toUpperCase() : 'OTHER';
-    const list = grouped[degree] || (grouped[degree] = []);
-    if (!list.includes(labelRaw)) {
-      list.push(labelRaw);
+
+  const upsertPlan = (programRaw, facultyRaw) => {
+    const program = canonicalizeProgramName(programRaw);
+    const faculty = normalizeStudyPlanValue(facultyRaw);
+    if (!program || !faculty) return;
+    const list = grouped[program] || (grouped[program] = []);
+    const existingKeys = new Set(list.map((entry) => entry.toLowerCase()));
+    if (!existingKeys.has(faculty.toLowerCase())) {
+      list.push(faculty);
     }
+  };
+
+  for (const row of data || []) {
+    const plans = Array.isArray(row?.study_plans) ? row.study_plans : [];
+    for (const plan of plans) {
+      upsertPlan(plan?.study_program, plan?.study_faculty);
+    }
+    upsertPlan(row?.study_program, row?.study_faculty);
   }
 
   for (const key of Object.keys(grouped)) {
@@ -577,82 +591,13 @@ function normalizeScoreValue(value) {
   return Math.round(num);
 }
 
-async function collectCourseIdsForProgramFilters(client, filters) {
-  const {
-    type,
-    semester,
-    degree,
-    level,
-  } = filters || {};
+function normalizeStudyProgramValue(value) {
+  return canonicalizeProgramName(value);
+}
 
-  const normalizedType = normalizeProgramType(type);
-  const normalizedLevel = typeof level === 'string' ? level.trim() : '';
-  const normalizedSeason = normalizeSeasonValue(semester);
-  const degreeRaw = typeof degree === 'string' ? degree.trim() : '';
-  const normalizedDegree = degreeRaw.toUpperCase();
-
-  const requirementSets = [];
-
-  if (normalizedType || normalizedLevel || normalizedSeason || normalizedDegree) {
-    requirementSets.push(async () => {
-      let query = client
-        .from(PROGRAMS_TABLE)
-        .select('course_id');
-
-      if (normalizedType) {
-        query = query.eq('program_type', normalizedType);
-      }
-
-      if (normalizedLevel) {
-        const isLevelCode = /^[A-Za-z]+\d+$/i.test(normalizedLevel);
-        if (isLevelCode) {
-          query = query.eq('level', normalizedLevel);
-        } else {
-          query = query.ilike('program_name', normalizedLevel);
-        }
-      } else if (normalizedDegree) {
-        if (normalizedDegree === 'PHD' || degreeRaw === 'Doctoral School') {
-          query = query.eq('level', 'Doctoral School');
-        } else if (normalizedDegree === 'BA' || normalizedDegree === 'MA') {
-          query = query.ilike('level', `${normalizedDegree}%`);
-        } else if (normalizedDegree === 'MA MINOR') {
-          query = query.ilike('program_name', '%minor%');
-        } else if (normalizedDegree === 'PROPEDEUTICS') {
-          query = query.ilike('program_name', 'Propedeutics');
-        } else {
-          query = query.ilike('program_name', degreeRaw);
-        }
-      }
-
-      if (normalizedSeason) {
-        query = query.eq('semester', normalizedSeason);
-      }
-
-      const { data, error } = await query;
-      if (error) {
-        throw new Error(`Supabase program-filter fetch failed: ${error.message}`);
-      }
-      return extractCourseIdSet(data);
-    });
-  }
-
-  if (requirementSets.length === 0) {
-    return null;
-  }
-
-  let result = null;
-  for (const fetchSet of requirementSets) {
-    const ids = await fetchSet();
-    if (ids.size === 0) {
-      return [];
-    }
-    result = result ? intersectCourseIdSets(result, ids) : ids;
-    if (result.size === 0) {
-      return [];
-    }
-  }
-
-  return result ? Array.from(result) : [];
+function normalizeStudyPlanValue(value) {
+  if (typeof value !== 'string') return '';
+  return value.trim();
 }
 
 function normalizeProgramType(value) {
@@ -664,25 +609,37 @@ function normalizeProgramType(value) {
   return '';
 }
 
-function extractCourseIdSet(rows) {
-  const set = new Set();
-  for (const row of rows || []) {
+async function collectCourseIdsForStudyPlanFilters(client, filters) {
+  const { study_program, study_plan } = filters || {};
+  if (!study_program && !study_plan) {
+    return null;
+  }
+
+  let query = client.from(STUDYPLANS_TABLE).select('course_id');
+
+  if (study_program) {
+    query = query.eq('study_program', study_program);
+  }
+  if (study_plan) {
+    query = query.eq('study_faculty', study_plan);
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    throw new Error(`Supabase study plan filter fetch failed: ${error.message}`);
+  }
+
+  const ids = new Set();
+  for (const row of data || []) {
     const id = row?.course_id;
     if (typeof id === 'number') {
-      set.add(id);
+      ids.add(id);
     }
   }
-  return set;
-}
 
-function intersectCourseIdSets(a, b) {
-  const smaller = a.size <= b.size ? a : b;
-  const larger = a.size > b.size ? a : b;
-  const result = new Set();
-  for (const value of smaller) {
-    if (larger.has(value)) {
-      result.add(value);
-    }
+  if (ids.size === 0) {
+    return [];
   }
-  return result;
+
+  return Array.from(ids);
 }

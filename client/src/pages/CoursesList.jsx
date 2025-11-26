@@ -1,7 +1,7 @@
 // src/pages/CoursesList.jsx
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getCourses, getLevelsByDegree, getPeopleProfilesByCardUrls } from "../api/courses_api";
+import { getCourses, getPeopleProfilesByCardUrls, getStudyPlansByProgram } from "../api/courses_api";
 import submitCourseRating from "../api/submit_rating";
 import { inferSemesterFromLevel } from "../utils/levels";
 
@@ -253,6 +253,16 @@ function renderLevelTags(levels) {
           </span>
         );
       })}
+    </div>
+  );
+}
+
+function renderDescription(course) {
+  const text = typeof course?.description === 'string' ? course.description.trim() : '';
+  if (!text) return null;
+  return (
+    <div style={{ marginTop: 6, lineHeight: 1.5, color: THEME_VARS.text }}>
+      {text}
     </div>
   );
 }
@@ -1018,8 +1028,8 @@ const createDefaultFilters = () => ({
   minProduct: SCORE_STEP_VALUES[0],
   minVenture: SCORE_STEP_VALUES[0],
   minFoundations: SCORE_STEP_VALUES[0],
-  degree: "",
-  level: "",
+  study_program: "",
+  study_plan: "",
   availabilitySlots: "",
 });
 
@@ -1029,14 +1039,14 @@ function parseFiltersFromSearch(search) {
   const base = createDefaultFilters();
   if (!search) return base;
   const sp = new URLSearchParams(search);
-  base.degree = sp.get('degree') || '';
-  base.level = sp.get('level') || '';
+  base.study_program = sp.get('study_program') || '';
+  base.study_plan = sp.get('study_plan') || '';
   base.type = sp.get('type') || '';
   base.semester = sp.get('semester') || '';
   if (base.semester.toLowerCase() === 'winter') base.semester = 'Fall';
   if (base.semester.toLowerCase() === 'summer') base.semester = 'Spring';
-  if (base.level && !base.semester) {
-    base.semester = inferSemesterFromLevel(base.level) || '';
+  if (base.study_plan && !base.semester) {
+    base.semester = inferSemesterFromLevel(base.study_plan) || '';
   }
   const creditsMinParam = sp.get('creditsMin');
   if (creditsMinParam !== null) base.creditsMin = creditsMinParam;
@@ -1083,9 +1093,9 @@ function getDegreeOptions(tree) {
   return Object.keys(tree);
 }
 
-function getLevelOptions(tree, degree) {
-  if (!tree || !degree || !tree[degree]) return [];
-  const bucket = tree[degree];
+function getStudyPlanOptions(tree, studyProgram) {
+  if (!tree || !studyProgram || !tree[studyProgram]) return [];
+  const bucket = tree[studyProgram];
   if (Array.isArray(bucket)) {
     return bucket
       .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
@@ -1603,7 +1613,7 @@ function CoursesList() {
   const [totalResults, setTotalResults] = useState(0);
   const [showFilters, setShowFilters] = useState(true);
   const [studyPlansTree, setStudyPlansTree] = useState(null);
-  const [levelsMap, setLevelsMap] = useState({});
+  const [studyPlansMap, setStudyPlansMap] = useState({});
   const [appliedFilters, setAppliedFilters] = useState(() => parseFiltersFromSearch(location.search));
   const [draftFilters, setDraftFilters] = useState(() => parseFiltersFromSearch(location.search));
   const [sortField, setSortField] = useState("");
@@ -1615,6 +1625,7 @@ function CoursesList() {
   const [graphOpen, setGraphOpen] = useState(false);
   const [graphCourse, setGraphCourse] = useState(null);
   const [graphProfiles, setGraphProfiles] = useState([]);
+  const [graphCoursesList, setGraphCoursesList] = useState([]);
 
   const openRelationGraph = useCallback(async (course) => {
     try {
@@ -1624,14 +1635,16 @@ function CoursesList() {
       const profiles = await getPeopleProfilesByCardUrls(urls);
       setGraphCourse(course);
       setGraphProfiles(Array.isArray(profiles) ? profiles : []);
+      setGraphCoursesList(Array.isArray(courses) ? courses : []);
       setGraphOpen(true);
     } catch (err) {
       console.warn('Failed to open relation graph', err);
       setGraphCourse(course || null);
       setGraphProfiles([]);
+      setGraphCoursesList(Array.isArray(courses) ? courses : []);
       setGraphOpen(true);
     }
-  }, []);
+  }, [courses]);
 
   const closeRelationGraph = useCallback(() => {
     setGraphOpen(false);
@@ -1700,31 +1713,31 @@ function CoursesList() {
 
   useEffect(() => {
     let active = true;
-    async function loadLevels() {
+    async function loadStudyPlans() {
       try {
-        const map = await getLevelsByDegree();
+        const map = await getStudyPlansByProgram();
         if (active) {
-          setLevelsMap(map);
+          setStudyPlansMap(map);
         }
       } catch (err) {
-        console.warn('Failed to load degree levels from Supabase', err);
+        console.warn('Failed to load study plans from Supabase', err);
       }
     }
-    loadLevels();
+    loadStudyPlans();
     return () => {
       active = false;
     };
   }, []);
 
   useEffect(() => {
-    const inferred = inferSemesterFromLevel(appliedFilters.level);
+    const inferred = inferSemesterFromLevel(appliedFilters.study_plan);
     const fallback = appliedFilters.semester || '';
     const finalSemester = inferred || fallback;
     if (finalSemester && finalSemester !== appliedFilters.semester) {
       setAppliedFilters((prev) => ({ ...prev, semester: finalSemester }));
       setDraftFilters((prev) => ({ ...prev, semester: finalSemester }));
     }
-  }, [appliedFilters.level]);
+  }, [appliedFilters.study_plan]);
 
 useEffect(() => {
     const parsed = parseFiltersFromSearch(location.search);
@@ -1738,8 +1751,8 @@ useEffect(() => {
   useEffect(() => {
     const params = new URLSearchParams();
 
-    if (appliedFilters.degree) params.set('degree', appliedFilters.degree);
-    if (appliedFilters.level) params.set('level', appliedFilters.level);
+    if (appliedFilters.study_program) params.set('study_program', appliedFilters.study_program);
+    if (appliedFilters.study_plan) params.set('study_plan', appliedFilters.study_plan);
     if (appliedFilters.type) params.set('type', appliedFilters.type);
     if (appliedFilters.semester) params.set('semester', appliedFilters.semester);
     if (appliedFilters.creditsMin !== '') params.set('creditsMin', appliedFilters.creditsMin);
@@ -1768,26 +1781,31 @@ useEffect(() => {
     [draftFilters.query, appliedFilters.query],
   );
 
-  const degreeOptions = useMemo(
-    () => withValueOption(getDegreeOptions(studyPlansTree), draftFilters.degree),
-    [studyPlansTree, draftFilters.degree],
-  );
+  const studyProgramOptions = useMemo(() => {
+    const treeOptions = getDegreeOptions(studyPlansTree);
+    const supaOptions = Object.keys(studyPlansMap || {});
+    const merged = [...treeOptions];
+    for (const option of supaOptions) {
+      if (!merged.includes(option)) merged.push(option);
+    }
+    return withValueOption(merged, draftFilters.study_program);
+  }, [studyPlansMap, studyPlansTree, draftFilters.study_program]);
 
-  const levelOptions = useMemo(
+  const studyPlanOptions = useMemo(
     () => {
-      const degree = draftFilters.degree;
-      if (degree) {
-        const supaLevels = levelsMap[degree.toUpperCase()];
-        if (supaLevels && supaLevels.length) {
-          return withValueOption(supaLevels, draftFilters.level);
+      const studyProgram = draftFilters.study_program;
+      if (studyProgram) {
+        const supaPlans = studyPlansMap[studyProgram];
+        if (supaPlans && supaPlans.length) {
+          return withValueOption(supaPlans, draftFilters.study_plan);
         }
       }
-      return withValueOption(getLevelOptions(studyPlansTree, degree), draftFilters.level);
+      return withValueOption(getStudyPlanOptions(studyPlansTree, studyProgram), draftFilters.study_plan);
     },
-    [levelsMap, studyPlansTree, draftFilters.degree, draftFilters.level],
+    [studyPlansMap, studyPlansTree, draftFilters.study_program, draftFilters.study_plan],
   );
 
-  const levelDisabled = !draftFilters.degree || levelOptions.length === 0;
+  const studyPlanDisabled = !draftFilters.study_program || studyPlanOptions.length === 0;
 
   const availabilitySelectedSlots = useMemo(
     () => decodeAvailabilitySlots(draftFilters.availabilitySlots),
@@ -1865,10 +1883,10 @@ useEffect(() => {
           q: appliedFilters.query || undefined,
           type: appliedFilters.type || undefined,
           semester: appliedFilters.semester || undefined,
-          degree: appliedFilters.degree || undefined,
+          study_program: appliedFilters.study_program || undefined,
           creditsMin: appliedFilters.creditsMin !== "" ? Number(appliedFilters.creditsMin) : undefined,
           creditsMax: appliedFilters.creditsMax !== "" ? Number(appliedFilters.creditsMax) : undefined,
-          level: appliedFilters.level || undefined,
+          study_plan: appliedFilters.study_plan || undefined,
           sortField: sortField || undefined,
           sortOrder: sortField ? sortOrder : undefined,
           sortKeys: sortKeys || undefined,
@@ -2034,24 +2052,24 @@ useEffect(() => {
             <div>
               <div style={fieldLabelStyle}>Study program</div>
               <select
-                value={draftFilters.degree}
+                value={draftFilters.study_program}
                 onChange={(e) => {
-                  const nextDegree = e.target.value;
+                  const nextProgram = e.target.value;
                   setDraftFilters((prev) => ({
                     ...prev,
-                    degree: nextDegree,
-                    level: '',
+                    study_program: nextProgram,
+                    study_plan: '',
                   }));
                   setAppliedFilters((prev) => ({
                     ...prev,
-                    degree: nextDegree,
-                    level: '',
+                    study_program: nextProgram,
+                    study_plan: '',
                   }));
                 }}
                 style={selectFieldStyle(false)}
               >
                 <option value="">Any study program</option>
-                {degreeOptions.map((opt) => (
+                {studyProgramOptions.map((opt) => (
                   <option key={opt} value={opt}>{opt}</option>
                 ))}
               </select>
@@ -2059,26 +2077,26 @@ useEffect(() => {
             <div>
               <div style={fieldLabelStyle}>Study Plan</div>
               <select
-                value={draftFilters.level}
+                value={draftFilters.study_plan}
                 onChange={(e) => {
-                  const nextLevel = e.target.value;
-                  const inferredSemester = inferSemesterFromLevel(nextLevel);
+                  const nextPlan = e.target.value;
+                  const inferredSemester = inferSemesterFromLevel(nextPlan);
                   setDraftFilters((prev) => ({
                     ...prev,
-                    level: nextLevel,
+                    study_plan: nextPlan,
                     semester: inferredSemester || prev.semester,
                   }));
                   setAppliedFilters((prev) => ({
                     ...prev,
-                    level: nextLevel,
+                    study_plan: nextPlan,
                     semester: inferredSemester || prev.semester,
                   }));
                 }}
-                disabled={levelDisabled}
-                style={selectFieldStyle(levelDisabled)}
+                disabled={studyPlanDisabled}
+                style={selectFieldStyle(studyPlanDisabled)}
               >
                 <option value="">Any study plan</option>
-                {levelOptions.map((opt) => (
+                {studyPlanOptions.map((opt) => (
                   <option key={opt} value={opt}>{opt}</option>
                 ))}
               </select>
@@ -2421,6 +2439,7 @@ useEffect(() => {
                       {renderStudyPlanTags(c)}
                       {renderProgramTags(c.available_programs, c.study_plan_tags)}
                       {renderLevelTags(c.available_levels)}
+                      {renderDescription(c)}
                       <div
                         style={{
                           display: 'flex',
@@ -2576,6 +2595,7 @@ useEffect(() => {
                         {renderStudyPlanTags(c)}
                         {renderProgramTags(c.available_programs, c.study_plan_tags)}
                         {renderLevelTags(c.available_levels)}
+                        {renderDescription(c)}
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {buildCourseDetailRows(c, scheduleLines)}
                         </ul>
@@ -2620,7 +2640,12 @@ useEffect(() => {
         </div>
       </div>
     {graphOpen && (
-      <RelationGraphModal course={graphCourse} profiles={graphProfiles} onClose={closeRelationGraph} />
+      <RelationGraphModal
+        course={graphCourse}
+        profiles={graphProfiles}
+        allCourses={graphCoursesList}
+        onClose={closeRelationGraph}
+      />
     )}
     </div>
   );
@@ -2628,7 +2653,7 @@ useEffect(() => {
 
 export default CoursesList;
 
-function RelationGraphModal({ course, profiles, onClose }) {
+function RelationGraphModal({ course, profiles, onClose, allCourses }) {
   const width = 720;
   const height = 520;
   const cx = width / 2;
@@ -2636,6 +2661,7 @@ function RelationGraphModal({ course, profiles, onClose }) {
   const r1 = 120; // teachers ring (reduced distance)
   const r2 = 240; // labs ring
   const TEACHER_R = 28; // professor node radius (larger)
+  const COURSE_NODE_R = 12;
   const BOX_W = 260; // info panel width for wrapped text
   const BOX_H = 220; // info panel height (scrolls if content overflows)
   const BOX_MARGIN = 8;
@@ -2669,7 +2695,41 @@ function RelationGraphModal({ course, profiles, onClose }) {
     labPositions.set(lab.id, { x: cx + r2 * Math.cos(angle), y: cy + r2 * Math.sin(angle) });
   });
 
+  const teacherKey = (t) => {
+    if (t?.url) return `url:${t.url.trim().toLowerCase()}`;
+    if (t?.name) return `name:${t.name.trim().toLowerCase()}`;
+    return '';
+  };
+
+  const teacherCoursesMap = new Map();
+  const relatedCourses = Array.isArray(allCourses) ? allCourses : [];
+  for (const t of teachers) {
+    const key = teacherKey(t);
+    if (!key) continue;
+    const matches = [];
+    for (const c of relatedCourses) {
+      if (!Array.isArray(c?.teachers)) continue;
+      if (course?.id && c.id === course.id) continue;
+      const match = c.teachers.some((entry) => {
+        const entryKey = teacherKey(entry);
+        if (!entryKey) return false;
+        if (entry?.url && t?.url) {
+          return entry.url.trim().toLowerCase() === t.url.trim().toLowerCase();
+        }
+        return entryKey === key;
+      });
+      if (match) {
+        matches.push({
+          course_key: c.course_key || c.course_code || c.id || '',
+          course_name: c.course_name || '',
+        });
+      }
+    }
+    teacherCoursesMap.set(t, matches);
+  }
+
   const edges = [];
+  const courseNodes = [];
   for (const t of teachers) {
     const tp = teacherPositions.get(t);
     if (tp) edges.push({ x1: cx, y1: cy, x2: tp.x, y2: tp.y, kind: 'course-teacher' });
@@ -2678,6 +2738,26 @@ function RelationGraphModal({ course, profiles, onClose }) {
       const lp = labPositions.get(profile.lab_url);
       if (tp && lp) edges.push({ x1: tp.x, y1: tp.y, x2: lp.x, y2: lp.y, kind: 'teacher-lab' });
     }
+  }
+
+  for (const t of teachers) {
+    const tp = teacherPositions.get(t);
+    if (!tp) continue;
+    const related = teacherCoursesMap.get(t) || [];
+    const nodesForTeacher = related.slice(0, 6);
+    nodesForTeacher.forEach((courseRef, idx2) => {
+      const offsetAngle = ((idx2 / Math.max(1, nodesForTeacher.length)) * Math.PI) - Math.PI / 2;
+      const dist = TEACHER_R + 50;
+      const nx = tp.x + dist * Math.cos(offsetAngle);
+      const ny = tp.y + dist * Math.sin(offsetAngle);
+      edges.push({ x1: tp.x, y1: tp.y, x2: nx, y2: ny, kind: 'teacher-course' });
+      courseNodes.push({
+        key: `${t?.name || 'teacher'}-${courseRef.course_key || idx2}`,
+        x: nx,
+        y: ny,
+        course_key: courseRef.course_key || courseRef.course_name || 'course',
+      });
+    });
   }
 
   const overlayStyle = {
@@ -2703,9 +2783,16 @@ function RelationGraphModal({ course, profiles, onClose }) {
         <div style={bodyStyle}>
           <svg width={width} height={height} role="img" aria-label="Relation graph">
             {/* edges */}
-            {edges.map((e, idx) => (
-              <line key={idx} x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} stroke={e.kind === 'course-teacher' ? '#94a3b8' : '#cbd5e1'} strokeWidth={1.5} />
-            ))}
+            {edges.map((e, idx) => {
+              const stroke = e.kind === 'course-teacher'
+                ? '#94a3b8'
+                : e.kind === 'teacher-lab'
+                  ? '#cbd5e1'
+                  : '#0ea5e9';
+              return (
+                <line key={idx} x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} stroke={stroke} strokeWidth={1.5} />
+              );
+            })}
             {/* center course node */}
             <circle cx={cx} cy={cy} r={24} fill="#2563eb" />
             <text x={cx} y={cy + 42} textAnchor="middle" fontSize={12} fill="#111">Course</text>
@@ -2775,6 +2862,15 @@ function RelationGraphModal({ course, profiles, onClose }) {
                 </a>
               ) : node;
             })}
+            {/* related course nodes */}
+            {courseNodes.map((n) => (
+              <g key={n.key}>
+                <circle cx={n.x} cy={n.y} r={COURSE_NODE_R} fill="#e0f2fe" stroke="#0ea5e9" strokeWidth={1} />
+                <text x={n.x} y={n.y + 4} textAnchor="middle" fontSize={9} fill="#0f172a">
+                  {n.course_key || 'course'}
+                </text>
+              </g>
+            ))}
             {/* lab nodes */}
             {labs.map((lab, i) => {
               const p = labPositions.get(lab.id);
