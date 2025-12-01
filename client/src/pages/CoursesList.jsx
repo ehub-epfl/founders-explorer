@@ -239,13 +239,35 @@ function ScoreLegendRow({ resultsDisplay }) {
   );
 }
 
-const selectFieldStyle = (disabled = false) => ({
+const capsuleInputStyle = (disabled = false) => ({
   width: '100%',
-  padding: '6px 8px',
-  border: `1px solid ${THEME_VARS.border}`,
-  borderRadius: 4,
-  background: disabled ? THEME_VARS.disabledBg : THEME_VARS.surface,
-  color: disabled ? THEME_VARS.disabledText : THEME_VARS.text,
+  padding: '6px 16px',
+  borderRadius: 999,
+  border: `1px solid ${disabled ? THEME_VARS.borderSubtle : '#000000'}`,
+  background: disabled ? THEME_VARS.disabledBg : '#FFFFFF',
+  color: disabled ? THEME_VARS.disabledText : '#000000',
+  fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  fontWeight: 300,
+  fontSize: 14,
+  lineHeight: '145%',
+  letterSpacing: '-0.005em',
+  outlineColor: '#000000',
+  caretColor: '#000000',
+});
+
+const selectFieldStyle = (disabled = false) => ({
+  ...capsuleInputStyle(false),
+  color: disabled ? '#9CA3AF' : '#000000',
+  borderColor: '#000000',
+  opacity: disabled ? 0.65 : 1,
+  cursor: disabled ? 'not-allowed' : 'pointer',
+  appearance: 'none',
+  WebkitAppearance: 'none',
+  backgroundImage: 'linear-gradient(45deg, transparent 50%, #000 50%), linear-gradient(135deg, #000 50%, transparent 50%)',
+  backgroundPosition: 'calc(100% - 18px) calc(50% - 2px), calc(100% - 12px) calc(50% - 2px)',
+  backgroundSize: '6px 6px, 6px 6px',
+  backgroundRepeat: 'no-repeat',
+  paddingRight: 36,
 });
 
 const chipButtonStyle = (active = false) => ({
@@ -256,6 +278,51 @@ const chipButtonStyle = (active = false) => ({
   color: THEME_VARS.text,
   cursor: 'pointer',
 });
+
+const filterCapsuleButtonStyle = ({ active = false, variant = 'outline', disabled = false } = {}) => {
+  let background = '#FFFFFF';
+  let color = '#000000';
+  let borderColor = '#000000';
+
+  if (variant === 'solid' || active) {
+    background = '#000000';
+    color = '#FFFFFF';
+    borderColor = '#000000';
+  } else if (variant === 'ghost') {
+    background = 'transparent';
+    color = '#000000';
+    borderColor = 'rgba(0, 0, 0, 0.35)';
+  }
+
+  if (disabled) {
+    background = '#F3F4F6';
+    color = '#9CA3AF';
+    borderColor = '#E5E7EB';
+  }
+
+  return {
+    boxSizing: 'border-box',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '0 18px',
+    minHeight: 32,
+    borderRadius: 999,
+    border: `1px solid ${borderColor}`,
+    background,
+    color,
+    fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    fontStyle: 'normal',
+    fontWeight: 300,
+    fontSize: 14,
+    lineHeight: '145%',
+    letterSpacing: '-0.005em',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.7 : 1,
+    transition: 'background 0.2s ease, color 0.2s ease, border-color 0.2s ease',
+    outlineColor: '#000000',
+  };
+};
 
 const primaryActionStyle = (enabled = true) => ({
   padding: '8px 12px',
@@ -268,7 +335,13 @@ const primaryActionStyle = (enabled = true) => ({
   width: '100%',
 });
 
-const fieldLabelStyle = { fontSize: 12, marginBottom: 4, color: THEME_VARS.textMuted };
+const fieldLabelStyle = {
+  fontSize: 11,
+  marginBottom: 4,
+  color: THEME_VARS.textMuted,
+  textTransform: 'lowercase',
+  fontStyle: 'italic',
+};
 const filterPanelStyle = {
   width: '100%',
   boxSizing: 'border-box',
@@ -1007,13 +1080,10 @@ function AvailabilityGrid({ selectedSlots, onToggleSlot, onSetSlot, onClear }) {
           onClick={onClear}
           disabled={!activeSlots.size}
           style={{
-            fontSize: 11,
-            padding: '2px 6px',
-            borderRadius: 4,
-            border: `1px solid ${THEME_VARS.borderSubtle}`,
-            background: THEME_VARS.surface,
-            color: activeSlots.size ? THEME_VARS.textMuted : THEME_VARS.disabledText,
-            cursor: activeSlots.size ? 'pointer' : 'not-allowed',
+            ...filterCapsuleButtonStyle({ variant: 'outline', disabled: !activeSlots.size }),
+            padding: '0 12px',
+            minHeight: 26,
+            fontSize: 12,
           }}
         >
           Reset
@@ -2312,17 +2382,17 @@ useEffect(() => {
                   <button
                     type="button"
                     onClick={handleClearFilters}
-                    style={{
-                      background: THEME_VARS.surfaceMuted,
-                      border: `1px solid ${THEME_VARS.border}`,
-                      color: THEME_VARS.text,
-                      padding: '4px 8px',
-                      borderRadius: 4,
-                    }}
+                    style={filterCapsuleButtonStyle({ variant: 'outline' })}
                   >
                     Clear filters
                   </button>
-                  <button onClick={() => setShowFilters(false)}>Hide</button>
+                  <button
+                    type="button"
+                    onClick={() => setShowFilters(false)}
+                    style={filterCapsuleButtonStyle({ variant: 'ghost' })}
+                  >
+                    Hide
+                  </button>
                 </div>
               </div>
               <div style={{ display: "grid", gap: "0.75rem" }}>
@@ -2339,12 +2409,15 @@ useEffect(() => {
                     placeholder="Search name/code/prof"
                     value={draftFilters.query}
                     onChange={(e) => setDraftFilters((f) => ({ ...f, query: e.target.value }))}
-                    style={{ width: '100%' }}
+                    style={capsuleInputStyle(false)}
                   />
                   <button
                     type="submit"
                     disabled={!filtersDirty}
-                    style={primaryActionStyle(filtersDirty)}
+                    style={{
+                      ...filterCapsuleButtonStyle({ variant: 'solid', disabled: !filtersDirty }),
+                      width: '100%',
+                    }}
                   >
                     Search
                   </button>
@@ -2414,7 +2487,7 @@ useEffect(() => {
                           return next;
                         });
                       }}
-                      style={chipButtonStyle(draftFilters.type === "optional")}
+                      style={filterCapsuleButtonStyle({ active: draftFilters.type === "optional" })}
                     >
                       Optional
                     </button>
@@ -2428,7 +2501,7 @@ useEffect(() => {
                           return next;
                         });
                       }}
-                      style={chipButtonStyle(draftFilters.type === "mandatory")}
+                      style={filterCapsuleButtonStyle({ active: draftFilters.type === "mandatory" })}
                     >
                       Mandatory
                     </button>
@@ -2453,7 +2526,7 @@ useEffect(() => {
                           return next;
                         });
                       }}
-                      style={chipButtonStyle(draftFilters.semester === "Fall")}
+                      style={filterCapsuleButtonStyle({ active: draftFilters.semester === "Fall" })}
                     >
                       Fall
                     </button>
@@ -2467,7 +2540,7 @@ useEffect(() => {
                           return next;
                         });
                       }}
-                      style={chipButtonStyle(draftFilters.semester === "Spring")}
+                      style={filterCapsuleButtonStyle({ active: draftFilters.semester === "Spring" })}
                     >
                       Spring
                     </button>
@@ -2485,7 +2558,7 @@ useEffect(() => {
                         setDraftFilters((prev) => ({ ...prev, creditsMin: value }));
                         setAppliedFilters((prev) => ({ ...prev, creditsMin: value }));
                       }}
-                      style={{ width: '100%' }}
+                      style={capsuleInputStyle(false)}
                     />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -2499,7 +2572,7 @@ useEffect(() => {
                         setDraftFilters((prev) => ({ ...prev, creditsMax: value }));
                         setAppliedFilters((prev) => ({ ...prev, creditsMax: value }));
                       }}
-                      style={{ width: '100%' }}
+                      style={capsuleInputStyle(false)}
                     />
                   </div>
                 </div>

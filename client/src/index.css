@@ -107,7 +107,7 @@ button:hover {
 
 button:focus,
 button:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
+  outline: 3px solid #000000;
   outline-offset: 2px;
 }
 
@@ -134,8 +134,13 @@ input:not([type="range"]):focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent);
+  border-color: #000000;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.15);
+}
+
+::selection {
+  background: #000000;
+  color: #ffffff;
 }
 
 table {
