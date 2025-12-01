@@ -56,8 +56,10 @@ const MIN_SCORE_SLIDERS = [
 ];
 
 const TAG_COLORS = [
-  '#2563eb', '#059669', '#f97316', '#a855f7', '#ec4899',
-  '#14b8a6', '#facc15', '#ef4444', '#6366f1', '#10b981',
+  '#56423D',
+  '#BEA6A0',
+  '#916361',
+  '#4A271E',
 ];
 
 const DETAIL_ROW_STYLE = {
@@ -119,12 +121,123 @@ const SCORE_LABELS_ABBR = Object.freeze({
 });
 
 const SCORE_COLORS = Object.freeze({
-  relevance: '#0ea5e9',
-  skills: '#2563eb',
-  product: '#10b981',
-  venture: '#f59e0b',
-  foundations: '#a855f7',
+  relevance: '#FF006F',
+  skills: '#FFBCD9',
+  product: '#6D4B9A',
+  venture: '#4A62FF',
+  foundations: '#5AB7D4',
 });
+
+const SCORE_LEGEND_ITEMS = [
+  { key: 'relevance', label: SCORE_LABELS_FULL.relevance, color: SCORE_COLORS.relevance },
+  { key: 'skills', label: SCORE_LABELS_FULL.skills, color: SCORE_COLORS.skills },
+  { key: 'product', label: SCORE_LABELS_FULL.product, color: SCORE_COLORS.product },
+  { key: 'venture', label: SCORE_LABELS_FULL.venture, color: SCORE_COLORS.venture },
+  { key: 'foundations', label: SCORE_LABELS_FULL.foundations, color: SCORE_COLORS.foundations },
+];
+
+function generateRandomResultsNoise(length = 4) {
+  let result = '';
+  for (let i = 0; i < length; i += 1) {
+    result += Math.floor(Math.random() * 10);
+  }
+  return result;
+}
+
+function ScoreLegendRow({ resultsDisplay }) {
+  const size = 80;
+  const radius = 23;
+  const arcRadius = 30;
+  const center = size / 2;
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 16,
+        marginBottom: 8,
+        flexWrap: 'wrap',
+        gap: 16,
+      }}
+    >
+      <div
+        style={{
+          minWidth: 0,
+          flex: '1 1 200px',
+          display: 'flex',
+          justifyContent: 'flex-start',
+        }}
+      >
+        <div
+          style={{
+            fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            fontStyle: 'normal',
+            fontWeight: 700,
+            fontSize: 40,
+            lineHeight: '120%',
+            letterSpacing: '0.08em',
+            color: '#000000',
+            textAlign: 'left',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {resultsDisplay}
+        </div>
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: 16,
+          flexWrap: 'wrap',
+        }}
+      >
+        {SCORE_LEGEND_ITEMS.map((item, index) => (
+          <svg
+            key={item.key}
+            width={size}
+            height={size}
+            viewBox={`0 0 ${size} ${size}`}
+          >
+            <defs>
+              <path
+                id={`score-legend-arc-${index}`}
+                d={`
+                M ${center - arcRadius}, ${center}
+                A ${arcRadius} ${arcRadius} 0 0 1 ${center + arcRadius} ${center}
+              `}
+              />
+            </defs>
+            <circle
+              cx={center}
+              cy={center}
+              r={radius}
+              fill={item.color}
+              opacity={0.9}
+            />
+            <text
+              fill="#000000"
+              fontSize="6"
+              fontFamily='"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+            >
+              <textPath
+                href={`#score-legend-arc-${index}`}
+                startOffset="50%"
+                textAnchor="middle"
+              >
+                {item.label.toUpperCase()}
+              </textPath>
+            </text>
+          </svg>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const selectFieldStyle = (disabled = false) => ({
   width: '100%',
@@ -241,12 +354,19 @@ function renderLevelTags(levels) {
             key={name}
             style={{
               background: color,
-              color: tagTextColor(color),
-              padding: '2px 8px',
-              borderRadius: 999,
-              fontSize: 10,
-              fontWeight: 600,
-              opacity: 0.85,
+              color: '#FFFFFF',
+              padding: '0 12px',
+              height: 20,
+              borderRadius: 50,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontStyle: 'normal',
+              fontWeight: 300,
+              fontSize: 13,
+              lineHeight: '145%',
+              letterSpacing: '-0.005em',
             }}
           >
             {name}
@@ -315,11 +435,19 @@ function renderProgramTags(programs, studyPlanTags = []) {
             key={name}
             style={{
               background: color,
-              color: tagTextColor(color),
-              padding: '2px 8px',
-              borderRadius: 999,
-              fontSize: 11,
-              fontWeight: 600,
+              color: '#FFFFFF',
+              padding: '0 12px',
+              height: 20,
+              borderRadius: 50,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontStyle: 'normal',
+              fontWeight: 300,
+              fontSize: 13,
+              lineHeight: '145%',
+              letterSpacing: '-0.005em',
             }}
           >
             {name}
@@ -351,13 +479,20 @@ function renderStudyPlanTags(course) {
             <span
               key={tag}
               style={{
-                display: 'inline-block',
                 background: color,
-                color: tagTextColor(color),
-                padding: '2px 12px',
-                borderRadius: 999,
-                fontSize: 11,
-                fontWeight: 600,
+                color: '#FFFFFF',
+                padding: '0 12px',
+                height: 20,
+                borderRadius: 50,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontStyle: 'normal',
+                fontWeight: 300,
+                fontSize: 13,
+                lineHeight: '145%',
+                letterSpacing: '-0.005em',
                 whiteSpace: 'nowrap',
               }}
             >
@@ -449,14 +584,19 @@ function renderTeachers(entries, fallbackNames) {
 
   const content = normalized.map((teacher, index) => {
     const anchor = teacher.url ? (
-      <a href={teacher.url} target="_blank" rel="noreferrer">
+      <a
+        href={teacher.url}
+        target="_blank"
+        rel="noreferrer"
+        style={{ color: '#000000', textDecoration: 'none' }}
+      >
         {teacher.name}
       </a>
     ) : (
-      teacher.name
+      <span style={{ color: '#000000' }}>{teacher.name}</span>
     );
     return (
-      <span key={`${teacher.name}-${teacher.url || index}`}>
+      <span key={`${teacher.name}-${teacher.url || index}`} style={{ color: '#000000' }}>
         {index > 0 ? ', ' : ''}
         {anchor}
       </span>
@@ -605,10 +745,10 @@ function formatMinutesToLabel(totalMinutes) {
 }
 
 const EVENT_COLORS = Object.freeze({
-  lecture: 'rgba(14, 165, 233, 0.85)',
-  exercise: 'rgba(34, 197, 94, 0.85)',
-  lab: 'rgba(249, 115, 22, 0.85)',
-  other: 'rgba(107, 114, 128, 0.8)',
+  lecture: '#FF0000',
+  exercise: '#0082FF',
+  lab: '#5AB7D4',
+  other: '#4b5563',
 });
 
 const EVENT_BLOCK_HORIZONTAL_INSET = 1; // px margin inside the day column so hover area matches the fill
@@ -680,8 +820,13 @@ function WeekScheduleCalendar({ events }) {
     return null;
   }
 
-  const minStart = events.reduce((min, event) => Math.min(min, event.startMinutes), Infinity);
-  const maxEnd = events.reduce((max, event) => Math.max(max, event.endMinutes), -Infinity);
+  const filtered = events.filter((event) => event.dayIndex >= 0 && event.dayIndex <= 4);
+  if (!filtered.length) {
+    return null;
+  }
+
+  const minStart = filtered.reduce((min, event) => Math.min(min, event.startMinutes), Infinity);
+  const maxEnd = filtered.reduce((max, event) => Math.max(max, event.endMinutes), -Infinity);
   if (!Number.isFinite(minStart) || !Number.isFinite(maxEnd)) {
     return null;
   }
@@ -689,15 +834,18 @@ function WeekScheduleCalendar({ events }) {
   const anchorStart = Math.min(minStart, 8 * 60);
   const anchorEnd = Math.max(maxEnd, 19 * 60);
   const totalMinutes = Math.max(anchorEnd - anchorStart, 60);
-  const heightPx = 180;
+  const SCHEDULE_SIZE = 171; // square container
+  const headerHeight = 20;
+  const heightPx = SCHEDULE_SIZE - headerHeight - 16; // inner column height
 
   return (
     <div
       style={{
-        border: `1px solid ${THEME_VARS.borderSubtle}`,
-        borderRadius: 8,
+        width: SCHEDULE_SIZE,
+        height: SCHEDULE_SIZE,
+        borderRadius: 10,
         padding: 8,
-        background: THEME_VARS.surfaceMuted,
+        background: '#D9D9D9',
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
@@ -707,14 +855,15 @@ function WeekScheduleCalendar({ events }) {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(${DAY_DEFINITIONS.length}, minmax(0, 1fr))`,
+          gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
           gap: 4,
           fontSize: 10,
           lineHeight: 1.2,
         }}
       >
-        {DAY_DEFINITIONS.map((day) => {
-          const dayEvents = events.filter((event) => event.dayIndex === day.index);
+        {DAY_DEFINITIONS.slice(0, 5).map((day, idx) => {
+          const labelChar = ['M', 'T', 'W', 'T', 'F'][idx];
+          const dayEvents = filtered.filter((event) => event.dayIndex === day.index);
           return (
             <div
               key={day.index}
@@ -724,19 +873,28 @@ function WeekScheduleCalendar({ events }) {
                 gap: 4,
               }}
             >
-              <div style={{ textAlign: 'center', fontWeight: 600, color: THEME_VARS.textMuted }}>
-                {day.label}
+              <div
+                style={{
+                  textAlign: 'center',
+                  fontWeight: 600,
+                  color: '#000000',
+                  letterSpacing: '0.3em',
+                  height: headerHeight,
+                  lineHeight: `${headerHeight}px`,
+                }}
+              >
+                {labelChar}
               </div>
               <div
                 style={{
                   position: 'relative',
                   height: heightPx,
-                  borderRadius: 6,
-                  background: 'rgba(148, 163, 184, 0.15)',
+                  borderRadius: 10,
+                  background: '#D9D9D9',
                   overflow: 'hidden',
                 }}
               >
-                {dayEvents.map((event, idx) => {
+                {dayEvents.map((event, idx2) => {
                   const top = ((event.startMinutes - anchorStart) / totalMinutes) * 100;
                   const height = ((event.endMinutes - event.startMinutes) / totalMinutes) * 100;
                   const fallbackDayLabel = day.fullLabel || day.label || '';
@@ -744,17 +902,17 @@ function WeekScheduleCalendar({ events }) {
                   const blockTitle = event.tooltip || event.raw || fallbackTooltip;
                   return (
                     <div
-                      key={`${event.raw}-${idx}`}
+                      key={`${event.raw}-${idx2}`}
                       title={blockTitle}
                       style={{
                         position: 'absolute',
-                        left: `${EVENT_BLOCK_HORIZONTAL_INSET}px`,
-                        right: `${EVENT_BLOCK_HORIZONTAL_INSET}px`,
+                        left: 4,
+                        right: 4,
                         top: `${Math.max(0, top)}%`,
                         height: `${Math.max(8, height)}%`,
-                        borderRadius: 4,
+                        borderRadius: 50,
                         background: EVENT_COLORS[event.category] || EVENT_COLORS.other,
-                        boxShadow: '0 1px 3px rgba(15, 23, 42, 0.25)',
+                        boxShadow: 'none',
                         cursor: 'default',
                         pointerEvents: 'auto',
                       }}
@@ -1043,8 +1201,6 @@ function parseFiltersFromSearch(search) {
   base.study_plan = sp.get('study_plan') || '';
   base.type = sp.get('type') || '';
   base.semester = sp.get('semester') || '';
-  if (base.semester.toLowerCase() === 'winter') base.semester = 'Fall';
-  if (base.semester.toLowerCase() === 'summer') base.semester = 'Spring';
   if (base.study_plan && !base.semester) {
     base.semester = inferSemesterFromLevel(base.study_plan) || '';
   }
@@ -1139,6 +1295,7 @@ function ScoreSummary({
   onSubmissionStateChange,
   savedValues,
   onValuesChange,
+  onOpenGraph,
 }) {
   const base = {
     relevance: normalizeScore(course?.score_relevance),
@@ -1243,6 +1400,14 @@ function ScoreSummary({
   const isDark = theme === 'dark';
   const labelColor = isDark ? 'rgba(255,255,255,0.85)' : THEME_VARS.textMuted;
 
+  const circleSizeForScore = (value) => {
+    const minSize = 20;
+    const maxSize = 50;
+    if (value == null || !Number.isFinite(value)) return minSize;
+    const clamped = Math.max(0, Math.min(100, Math.round(value)));
+    return minSize + ((maxSize - minSize) * clamped) / 100;
+  };
+
   const broadcastState = (state) => {
     if (typeof onSubmissionStateChange === 'function') {
       onSubmissionStateChange(state);
@@ -1318,79 +1483,144 @@ function ScoreSummary({
   }
 
   return (
-    <div style={{
-      marginTop: 10,
-      display: 'flex',
-      alignItems: 'flex-start',
-      gap: 12,
-      flexWrap: 'wrap',
-    }}>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: `repeat(${rows.length}, minmax(0, 1fr))`,
-        gap: 8,
-        flex: 1,
-        minWidth: 0,
-        overflowX: 'auto',
-      }}>
-        {rows.map((r) => (
-          <div
-            key={r.key}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 4,
-              padding: '8px 10px',
-              borderRadius: 8,
-              minWidth: 120,
-              background: THEME_VARS.surface,
-            }}
-          >
-            <div style={{ fontSize: 11, color: labelColor, fontWeight: 700, textTransform: 'uppercase' }}>{r.label}</div>
+    <div
+      style={{
+        marginTop: 16,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 16,
+        flexWrap: 'wrap',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          flexWrap: 'wrap',
+        }}
+      >
+        {rows.map((r) => {
+          const size = circleSizeForScore(r.base);
+          return (
             <div
-              title={r.base != null ? `${formatScoreDisplay(r.base)}/100` : 'No data'}
+              key={r.key}
               style={{
-                position: 'relative',
-                height: 6,
-                borderRadius: 999,
-                background: THEME_VARS.surfaceMuted,
-                overflow: 'hidden',
+                display: 'flex',
+                alignItems: 'center',
+                minWidth: 40,
               }}
             >
               <div
+                title={r.base != null ? `${formatScoreDisplay(r.base)}/100` : 'No data'}
                 style={{
-                  position: 'absolute',
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: r.base != null ? `${Math.max(0, Math.min(100, Math.round(r.base)))}%` : '0%',
+                  width: size,
+                  height: size,
+                  borderRadius: '50%',
                   background: r.color,
+                  opacity: r.base != null ? 0.9 : 0.3,
                 }}
               />
             </div>
-            <div style={{ fontSize: 11, color: THEME_VARS.textMuted }}>
-              {r.base != null ? `${formatScoreDisplay(r.base)}/100` : 'No score yet'}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
-      <button
-        type="button"
-        onClick={() => { setShowRatingModal(true); setSubmitError(''); }}
-        disabled={submitting}
-        aria-label="Open rating window"
-        title="Open rating window"
+      <div
         style={{
-          padding: '8px 12px',
-          borderRadius: 8,
-          background: statusStyles.bg,
-          border: `1px solid ${statusStyles.border}`,
-          color: THEME_VARS.text,
-          cursor: submitting ? 'not-allowed' : 'pointer',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 6,
+          alignItems: 'flex-end',
+          minWidth: 112,
+          marginRight: 16,
         }}
       >
-        {submitted ? 'Rated' : 'Rate'}
-      </button>
+        <button
+          type="button"
+          style={{
+            boxSizing: 'border-box',
+            minWidth: 112,
+            padding: '0 12px',
+            height: 20,
+            background: '#FFFFFF',
+            border: '1px solid #000000',
+            borderRadius: 50,
+            fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            fontStyle: 'normal',
+            fontWeight: 300,
+            fontSize: 13,
+            lineHeight: '145%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            letterSpacing: '-0.005em',
+            color: '#000000',
+            whiteSpace: 'nowrap',
+            cursor: 'pointer',
+          }}
+        >
+          Course Detail
+        </button>
+        <button
+          type="button"
+          onClick={() => { if (typeof onOpenGraph === 'function') onOpenGraph(); }}
+          style={{
+            boxSizing: 'border-box',
+            minWidth: 112,
+            padding: '0 12px',
+            height: 20,
+            background: '#FFFFFF',
+            border: '1px solid #000000',
+            borderRadius: 50,
+            fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            fontStyle: 'normal',
+            fontWeight: 300,
+            fontSize: 13,
+            lineHeight: '145%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            letterSpacing: '-0.005em',
+            color: '#000000',
+            whiteSpace: 'nowrap',
+            cursor: 'pointer',
+          }}
+        >
+          Course Graph
+        </button>
+        <button
+          type="button"
+          onClick={() => { setShowRatingModal(true); setSubmitError(''); }}
+          disabled={submitting}
+          aria-label="Open rating window"
+          title="Open rating window"
+          style={{
+            boxSizing: 'border-box',
+            minWidth: 112,
+            padding: '0 12px',
+            height: 20,
+            background: '#FFFFFF',
+            border: '1px solid #000000',
+            borderRadius: 50,
+            fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            fontStyle: 'normal',
+            fontWeight: 300,
+            fontSize: 13,
+            lineHeight: '145%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            letterSpacing: '-0.005em',
+            color: '#000000',
+            whiteSpace: 'nowrap',
+            cursor: submitting ? 'not-allowed' : 'pointer',
+            opacity: submitting ? 0.7 : 1,
+          }}
+        >
+          {submitted ? 'Rated' : 'Rate'}
+        </button>
+      </div>
 
       {showRatingModal && (
         <div
@@ -1611,7 +1841,7 @@ function CoursesList() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(30);
   const [totalResults, setTotalResults] = useState(0);
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
   const [studyPlansTree, setStudyPlansTree] = useState(null);
   const [studyPlansMap, setStudyPlansMap] = useState({});
   const [appliedFilters, setAppliedFilters] = useState(() => parseFiltersFromSearch(location.search));
@@ -1626,6 +1856,60 @@ function CoursesList() {
   const [graphCourse, setGraphCourse] = useState(null);
   const [graphProfiles, setGraphProfiles] = useState([]);
   const [graphCoursesList, setGraphCoursesList] = useState([]);
+  const [resultsDisplay, setResultsDisplay] = useState('');
+  const resultsTickerRef = useRef(null);
+  const filterBarRef = useRef(null);
+  const [filtersOverlayTop, setFiltersOverlayTop] = useState(0);
+
+  const updateFiltersOverlayTop = useCallback(() => {
+    if (!filterBarRef.current) {
+      setFiltersOverlayTop(0);
+      return;
+    }
+    const rect = filterBarRef.current.getBoundingClientRect();
+    const nextTop = Math.max(0, rect.bottom);
+    setFiltersOverlayTop(nextTop);
+  }, []);
+
+  useEffect(() => {
+    updateFiltersOverlayTop();
+  }, [updateFiltersOverlayTop]);
+
+  useEffect(() => {
+    if (!showFilters) return undefined;
+    const handleReposition = () => updateFiltersOverlayTop();
+    handleReposition();
+    window.addEventListener('resize', handleReposition);
+    window.addEventListener('scroll', handleReposition, { passive: true });
+    return () => {
+      window.removeEventListener('resize', handleReposition);
+      window.removeEventListener('scroll', handleReposition);
+    };
+  }, [showFilters, updateFiltersOverlayTop]);
+
+  useEffect(() => {
+    if (resultsTickerRef.current) {
+      clearInterval(resultsTickerRef.current);
+      resultsTickerRef.current = null;
+    }
+
+    if (loading) {
+      setResultsDisplay(`${generateRandomResultsNoise()} Results`);
+      resultsTickerRef.current = setInterval(() => {
+        setResultsDisplay(`${generateRandomResultsNoise()} Results`);
+      }, 30);
+    } else {
+      const safeTotal = Number.isFinite(totalResults) && totalResults >= 0 ? totalResults : 0;
+      setResultsDisplay(`${safeTotal} Results`);
+    }
+
+    return () => {
+      if (resultsTickerRef.current) {
+        clearInterval(resultsTickerRef.current);
+        resultsTickerRef.current = null;
+      }
+    };
+  }, [loading, totalResults]);
 
   const openRelationGraph = useCallback(async (course) => {
     try {
@@ -1994,262 +2278,282 @@ useEffect(() => {
   }, [appliedFilters, sortField, sortOrder]);
 
   return (
-    <div style={{ display: "flex", gap: "1rem" }}>
-      {/* Left Filter Bar */}
-      <aside
-        style={{
-          width: showFilters ? 'clamp(220px, 26vw, 320px)' : 0,
-          flex: showFilters ? '0 0 clamp(220px, 26vw, 320px)' : '0 0 0',
-          boxSizing: 'border-box',
-          transition: "width 0.2s ease",
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-          alignSelf: "flex-start",
-          overflowY: showFilters ? "auto" : "hidden",
-          overflowX: "hidden",
-          borderRight: `1px solid ${THEME_VARS.borderSubtle}`,
-          paddingRight: showFilters ? "1rem" : 0,
-          marginRight: showFilters ? "1rem" : 0,
-        }}
-      >
-        <div style={filterPanelStyle}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-            <h3 style={{ margin: 0 }}>Filters</h3>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <button
-                type="button"
-                onClick={handleClearFilters}
-                style={{
-                  background: THEME_VARS.surfaceMuted,
-                  border: `1px solid ${THEME_VARS.border}`,
-                  color: THEME_VARS.text,
-                  padding: '4px 8px',
-                  borderRadius: 4,
-                }}
-              >
-                Clear filters
-              </button>
-              <button onClick={() => setShowFilters(false)}>Hide</button>
-            </div>
-          </div>
-          <div style={{ display: "grid", gap: "0.75rem" }}>
-            <input
-              type="text"
-              placeholder="Search name/code/prof"
-              value={draftFilters.query}
-              onChange={(e) => setDraftFilters((f) => ({ ...f, query: e.target.value }))}
-              style={{ width: '100%' }}
-            />
-            <button
-              type="button"
-              onClick={handleApplyFilters}
-              disabled={!filtersDirty}
-              style={primaryActionStyle(filtersDirty)}
-            >
-              Search
-            </button>
-            <div>
-              <div style={fieldLabelStyle}>Study program</div>
-              <select
-                value={draftFilters.study_program}
-                onChange={(e) => {
-                  const nextProgram = e.target.value;
-                  setDraftFilters((prev) => ({
-                    ...prev,
-                    study_program: nextProgram,
-                    study_plan: '',
-                  }));
-                  setAppliedFilters((prev) => ({
-                    ...prev,
-                    study_program: nextProgram,
-                    study_plan: '',
-                  }));
-                }}
-                style={selectFieldStyle(false)}
-              >
-                <option value="">Any study program</option>
-                {studyProgramOptions.map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <div style={fieldLabelStyle}>Study Plan</div>
-              <select
-                value={draftFilters.study_plan}
-                onChange={(e) => {
-                  const nextPlan = e.target.value;
-                  const inferredSemester = inferSemesterFromLevel(nextPlan);
-                  setDraftFilters((prev) => ({
-                    ...prev,
-                    study_plan: nextPlan,
-                    semester: inferredSemester || prev.semester,
-                  }));
-                  setAppliedFilters((prev) => ({
-                    ...prev,
-                    study_plan: nextPlan,
-                    semester: inferredSemester || prev.semester,
-                  }));
-                }}
-                disabled={studyPlanDisabled}
-                style={selectFieldStyle(studyPlanDisabled)}
-              >
-                <option value="">Any study plan</option>
-                {studyPlanOptions.map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <div style={fieldLabelStyle}>Type</div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDraftFilters((prev) => {
-                      const nextType = prev.type === "optional" ? "" : "optional";
-                      const next = { ...prev, type: nextType };
-                      setAppliedFilters((applied) => ({ ...applied, type: nextType }));
-                      return next;
-                    });
-                  }}
-                  style={chipButtonStyle(draftFilters.type === "optional")}
-                >
-                  Optional
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDraftFilters((prev) => {
-                      const nextType = prev.type === "mandatory" ? "" : "mandatory";
-                      const next = { ...prev, type: nextType };
-                      setAppliedFilters((applied) => ({ ...applied, type: nextType }));
-                      return next;
-                    });
-                  }}
-                  style={chipButtonStyle(draftFilters.type === "mandatory")}
-                >
-                  Mandatory
-                </button>
-              </div>
-            </div>
-            <AvailabilityGrid
-              selectedSlots={availabilitySelectedSlots}
-              onToggleSlot={handleToggleAvailabilitySlot}
-              onSetSlot={handleSetAvailabilitySlot}
-              onClear={handleClearAvailabilitySlots}
-            />
-            <div>
-            <div style={fieldLabelStyle}>Semester</div>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setDraftFilters((prev) => {
-                    const nextSemester = prev.semester === "Fall" ? "" : "Fall";
-                    const next = { ...prev, semester: nextSemester };
-                    setAppliedFilters((applied) => ({ ...applied, semester: nextSemester }));
-                    return next;
-                  });
-                }}
-                style={chipButtonStyle(draftFilters.semester === "Fall")}
-              >
-                Fall
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setDraftFilters((prev) => {
-                    const nextSemester = prev.semester === "Spring" ? "" : "Spring";
-                    const next = { ...prev, semester: nextSemester };
-                    setAppliedFilters((applied) => ({ ...applied, semester: nextSemester }));
-                    return next;
-                  });
-                }}
-                style={chipButtonStyle(draftFilters.semester === "Spring")}
-              >
-                Spring
-              </button>
-            </div>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "1rem" }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <label style={{ fontSize: 11, color: THEME_VARS.textMuted }}>Min credits</label>
-              <input
-                type="number"
-                placeholder="Min"
-                value={draftFilters.creditsMin}
-                onChange={(e) => {
-                  const { value } = e.target;
-                  setDraftFilters((prev) => ({ ...prev, creditsMin: value }));
-                  setAppliedFilters((prev) => ({ ...prev, creditsMin: value }));
-                }}
-                style={{ width: '100%' }}
-              />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <label style={{ fontSize: 11, color: THEME_VARS.textMuted }}>Max credits</label>
-              <input
-                type="number"
-                placeholder="Max"
-                value={draftFilters.creditsMax}
-                onChange={(e) => {
-                  const { value } = e.target;
-                  setDraftFilters((prev) => ({ ...prev, creditsMax: value }));
-                  setAppliedFilters((prev) => ({ ...prev, creditsMax: value }));
-                }}
-                style={{ width: '100%' }}
-              />
-            </div>
-          </div>
-          <div style={{ display: 'grid', gap: 10 }}>
-            {MIN_SCORE_SLIDERS.map(({ key, label }) => {
-              const levelIndex = getScoreStepIndex(draftFilters[key]);
-              return (
-                <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-                    <span>{label}</span>
-                    <span style={{ color: THEME_VARS.textMuted }}>
-                      ≥ {formatScoreLevelLabel(draftFilters[key])}
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min={0}
-                    max={SCORE_STEP_VALUES.length - 1}
-                    step={1}
-                    value={levelIndex}
-                    onChange={(e) => {
-                      const idx = Number(e.target.value);
-                      const snapped = SCORE_STEP_VALUES[idx] ?? SCORE_STEP_VALUES[0];
-                      setDraftFilters((prev) => ({ ...prev, [key]: snapped }));
-                      setAppliedFilters((prev) => ({ ...prev, [key]: snapped }));
+    <div style={{ display: "flex", gap: "1rem", position: 'relative' }}>
+      {/* Left Filter Bar (overlay) */}
+      {showFilters && (
+        <div
+          style={{
+            position: 'fixed',
+            top: `${filtersOverlayTop}px`,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1500,
+            display: 'flex',
+            alignItems: 'stretch',
+            justifyContent: 'flex-start',
+            pointerEvents: 'auto',
+            background: 'linear-gradient(90deg, #FFFFFF 0%, rgba(255, 255, 255, 0.7) 100%)',
+          }}
+        >
+          <div
+            style={{
+              flex: '0 0 clamp(260px, 32vw, 380px)',
+              maxWidth: '90vw',
+              padding: '16px 12px',
+              boxSizing: 'border-box',
+              overflowY: 'auto',
+            }}
+          >
+            <div style={filterPanelStyle}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                <h3 style={{ margin: 0 }}>Filters</h3>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button
+                    type="button"
+                    onClick={handleClearFilters}
+                    style={{
+                      background: THEME_VARS.surfaceMuted,
+                      border: `1px solid ${THEME_VARS.border}`,
+                      color: THEME_VARS.text,
+                      padding: '4px 8px',
+                      borderRadius: 4,
                     }}
+                  >
+                    Clear filters
+                  </button>
+                  <button onClick={() => setShowFilters(false)}>Hide</button>
+                </div>
+              </div>
+              <div style={{ display: "grid", gap: "0.75rem" }}>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!filtersDirty) return;
+                    handleApplyFilters();
+                  }}
+                  style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
+                >
+                  <input
+                    type="text"
+                    placeholder="Search name/code/prof"
+                    value={draftFilters.query}
+                    onChange={(e) => setDraftFilters((f) => ({ ...f, query: e.target.value }))}
+                    style={{ width: '100%' }}
                   />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: THEME_VARS.textMuted }}>
-                    {SCORE_STEP_VALUES.map((_, idx) => (
-                      <span key={idx} style={{ flex: 1, textAlign: idx === 0 ? 'left' : idx === SCORE_STEP_VALUES.length - 1 ? 'right' : 'center' }}>
-                        {idx + 1}
-                      </span>
+                  <button
+                    type="submit"
+                    disabled={!filtersDirty}
+                    style={primaryActionStyle(filtersDirty)}
+                  >
+                    Search
+                  </button>
+                </form>
+                <div>
+                  <div style={fieldLabelStyle}>Study program</div>
+                  <select
+                    value={draftFilters.study_program}
+                    onChange={(e) => {
+                      const nextProgram = e.target.value;
+                      setDraftFilters((prev) => ({
+                        ...prev,
+                        study_program: nextProgram,
+                        study_plan: '',
+                      }));
+                      setAppliedFilters((prev) => ({
+                        ...prev,
+                        study_program: nextProgram,
+                        study_plan: '',
+                      }));
+                    }}
+                    style={selectFieldStyle(false)}
+                  >
+                    <option value="">Any study program</option>
+                    {studyProgramOptions.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
                     ))}
+                  </select>
+                </div>
+                <div>
+                  <div style={fieldLabelStyle}>Study Plan</div>
+                  <select
+                    value={draftFilters.study_plan}
+                    onChange={(e) => {
+                      const nextPlan = e.target.value;
+                      const inferredSemester = inferSemesterFromLevel(nextPlan);
+                      setDraftFilters((prev) => ({
+                        ...prev,
+                        study_plan: nextPlan,
+                        semester: inferredSemester || prev.semester,
+                      }));
+                      setAppliedFilters((prev) => ({
+                        ...prev,
+                        study_plan: nextPlan,
+                        semester: inferredSemester || prev.semester,
+                      }));
+                    }}
+                    disabled={studyPlanDisabled}
+                    style={selectFieldStyle(studyPlanDisabled)}
+                  >
+                    <option value="">Any study plan</option>
+                    {studyPlanOptions.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <div style={fieldLabelStyle}>Type</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDraftFilters((prev) => {
+                          const nextType = prev.type === "optional" ? "" : "optional";
+                          const next = { ...prev, type: nextType };
+                          setAppliedFilters((applied) => ({ ...applied, type: nextType }));
+                          return next;
+                        });
+                      }}
+                      style={chipButtonStyle(draftFilters.type === "optional")}
+                    >
+                      Optional
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDraftFilters((prev) => {
+                          const nextType = prev.type === "mandatory" ? "" : "mandatory";
+                          const next = { ...prev, type: nextType };
+                          setAppliedFilters((applied) => ({ ...applied, type: nextType }));
+                          return next;
+                        });
+                      }}
+                      style={chipButtonStyle(draftFilters.type === "mandatory")}
+                    >
+                      Mandatory
+                    </button>
                   </div>
                 </div>
-              );
-            })}
+                <AvailabilityGrid
+                  selectedSlots={availabilitySelectedSlots}
+                  onToggleSlot={handleToggleAvailabilitySlot}
+                  onSetSlot={handleSetAvailabilitySlot}
+                  onClear={handleClearAvailabilitySlots}
+                />
+                <div>
+                  <div style={fieldLabelStyle}>Semester</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDraftFilters((prev) => {
+                          const nextSemester = prev.semester === "Fall" ? "" : "Fall";
+                          const next = { ...prev, semester: nextSemester };
+                          setAppliedFilters((applied) => ({ ...applied, semester: nextSemester }));
+                          return next;
+                        });
+                      }}
+                      style={chipButtonStyle(draftFilters.semester === "Fall")}
+                    >
+                      Fall
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDraftFilters((prev) => {
+                          const nextSemester = prev.semester === "Spring" ? "" : "Spring";
+                          const next = { ...prev, semester: nextSemester };
+                          setAppliedFilters((applied) => ({ ...applied, semester: nextSemester }));
+                          return next;
+                        });
+                      }}
+                      style={chipButtonStyle(draftFilters.semester === "Spring")}
+                    >
+                      Spring
+                    </button>
+                  </div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "1rem" }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <label style={{ fontSize: 11, color: THEME_VARS.textMuted }}>Min credits</label>
+                    <input
+                      type="number"
+                      placeholder="Min"
+                      value={draftFilters.creditsMin}
+                      onChange={(e) => {
+                        const { value } = e.target;
+                        setDraftFilters((prev) => ({ ...prev, creditsMin: value }));
+                        setAppliedFilters((prev) => ({ ...prev, creditsMin: value }));
+                      }}
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <label style={{ fontSize: 11, color: THEME_VARS.textMuted }}>Max credits</label>
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      value={draftFilters.creditsMax}
+                      onChange={(e) => {
+                        const { value } = e.target;
+                        setDraftFilters((prev) => ({ ...prev, creditsMax: value }));
+                        setAppliedFilters((prev) => ({ ...prev, creditsMax: value }));
+                      }}
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gap: 10 }}>
+                  {MIN_SCORE_SLIDERS.map(({ key, label }) => {
+                    const levelIndex = getScoreStepIndex(draftFilters[key]);
+                    return (
+                      <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                          <span>{label}</span>
+                          <span style={{ color: THEME_VARS.textMuted }}>
+                            ≥ {formatScoreLevelLabel(draftFilters[key])}
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min={0}
+                          max={SCORE_STEP_VALUES.length - 1}
+                          step={1}
+                          value={levelIndex}
+                          onChange={(e) => {
+                            const idx = Number(e.target.value);
+                            const snapped = SCORE_STEP_VALUES[idx] ?? SCORE_STEP_VALUES[0];
+                            setDraftFilters((prev) => ({ ...prev, [key]: snapped }));
+                            setAppliedFilters((prev) => ({ ...prev, [key]: snapped }));
+                          }}
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: THEME_VARS.textMuted }}>
+                          {SCORE_STEP_VALUES.map((_, idx) => (
+                            <span key={idx} style={{ flex: 1, textAlign: idx === 0 ? 'left' : idx === SCORE_STEP_VALUES.length - 1 ? 'right' : 'center' }}>
+                              {idx + 1}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
+          <div
+            onClick={() => setShowFilters(false)}
+            style={{
+              flex: 1,
+              cursor: 'pointer',
+            }}
+          />
         </div>
-        </div>
-      </aside>
+      )}
 
       {/* Main Content */}
       <div style={{ flex: 1 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2 style={{ margin: 0 }}>Courses</h2>
-          {!showFilters && (
-            <button onClick={() => setShowFilters(true)}>Show filters</button>
-          )}
-        </div>
+        <ScoreLegendRow resultsDisplay={resultsDisplay} />
         {error && (
           <div
             style={{
@@ -2264,84 +2568,310 @@ useEffect(() => {
             {error}
           </div>
         )}
-        {loading && (
-          <div style={{ margin: '8px 0', fontSize: 12, color: THEME_VARS.textMuted }}>Loading courses…</div>
-        )}
-        <div style={{ display: "flex", gap: 8, alignItems: "center", margin: "8px 0", flexWrap: 'wrap' }}>
-          {viewMode === 'list' ? (
-            <>
-              <span style={{ fontSize: 12, color: THEME_VARS.textMuted }}>Sort by</span>
-              <div style={{ display: "flex", gap: 4, flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  onClick={() => toggleSortField("credits")}
-                  style={chipButtonStyle(sortField === "credits")}
-                  title="Toggle credits ascending/descending"
+        <div
+          ref={filterBarRef}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 24,
+            margin: "16px 0",
+            flexWrap: "wrap",
+          }}
+        >
+          {/* FILTER pill */}
+          <button
+            type="button"
+            onClick={() => setShowFilters(prev => !prev)}
+            style={{
+              boxSizing: "border-box",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              width: 83,
+              height: 30,
+              padding: "0 16px",
+              background: "#FFFFFF",
+              border: "1px solid #000000",
+              borderRadius: 50,
+              fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontStyle: "normal",
+              fontWeight: 300,
+              fontSize: 16,
+              lineHeight: "145%",
+              letterSpacing: "-0.005em",
+              color: "#000000",
+              cursor: "pointer",
+            }}
+          >
+            <img
+              src="/navigation_menu.svg"
+              alt="Filters"
+              style={{ width: 14, height: 14 }}
+            />
+            <span>FILTER</span>
+          </button>
+
+          {/* Sort controls */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+            {viewMode === "list" ? (
+              <>
+                <span
+                  style={{
+                    fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                    fontStyle: "normal",
+                    fontWeight: 300,
+                    fontSize: 14,
+                    lineHeight: "145%",
+                    letterSpacing: "-0.005em",
+                    color: "#000000",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
                 >
-                  Credits {sortField === "credits" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => toggleSortField("workload")}
-                  style={chipButtonStyle(sortField === "workload")}
-                  title="Toggle workload ascending/descending"
-                >
-                  Workload {sortField === "workload" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
-                </button>
-                {[
-                  { key: 'score_relevance', label: 'Entrepreneurship Relevance' },
-                  { key: 'score_skills', label: 'Personal Development' },
-                  { key: 'score_product', label: 'Product Innovation' },
-                  { key: 'score_venture', label: 'Venture Ops' },
-                  { key: 'score_foundations', label: 'Startup Basics' },
-                ].map(({ key, label }) => (
+                  sort by
+                </span>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   <button
                     type="button"
-                    key={key}
-                    onClick={() => toggleSortField(key)}
-                    style={chipButtonStyle(sortField === key)}
-                    title={`Toggle ${label} ascending/descending`}
+                    onClick={() => toggleSortField("credits")}
+                    style={{
+                      boxSizing: "border-box",
+                      height: 20,
+                      padding: "0 6px",
+                      borderRadius: 50,
+                      background: sortField === "credits" ? "#000000" : "#FFFFFF",
+                      border: "1px solid #000000",
+                      fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontStyle: "normal",
+                      fontWeight: 300,
+                      fontSize: 13,
+                      lineHeight: "145%",
+                      letterSpacing: "-0.005em",
+                      color: sortField === "credits" ? "#FFFFFF" : "#000000",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                    }}
+                    title="Toggle credits ascending/descending"
                   >
-                    {label} {sortField === key ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                    credits {sortField === "credits" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
                   </button>
-                ))}
-                <button
-                  onClick={() => { setSortField(""); setSortOrder("desc"); }}
-                  style={chipButtonStyle(false)}
-                >
-                  Clear sort
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <span style={{ fontSize: 12, color: THEME_VARS.textMuted }}>Pareto sort</span>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <button
-                  onClick={() => setParetoPref(p => ({ ...p, credits: p.credits === 'max' ? 'min' : 'max' }))}
-                  style={chipButtonStyle(paretoPref.credits === 'max')}
-                  title="Toggle credits preference (max/min)"
-                >
-                  Credits {paretoPref.credits === 'max' ? '↓' : '↑'}
-                </button>
-                <button
-                  onClick={() => setParetoPref(p => ({ ...p, workload: p.workload === 'min' ? 'max' : 'min' }))}
-                  style={chipButtonStyle(paretoPref.workload === 'min')}
-                  title="Toggle workload preference (min/max)"
-                >
-                  Workload {paretoPref.workload === 'min' ? '↑' : '↓'}
-                </button>
-                <button
-                  onClick={() => setParetoPref({ credits: 'max', workload: 'min' })}
-                  style={chipButtonStyle(false)}
-                  title="Reset to default (credits max, workload min)"
-                >
-                  Default
-                </button>
-              </div>
-            </>
-          )}
+                  <button
+                    type="button"
+                    onClick={() => toggleSortField("workload")}
+                    style={{
+                      boxSizing: "border-box",
+                      height: 20,
+                      padding: "0 6px",
+                      borderRadius: 50,
+                      background: sortField === "workload" ? "#000000" : "#FFFFFF",
+                      border: "1px solid #000000",
+                      fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontStyle: "normal",
+                      fontWeight: 300,
+                      fontSize: 13,
+                      lineHeight: "145%",
+                      letterSpacing: "-0.005em",
+                      color: sortField === "workload" ? "#FFFFFF" : "#000000",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                    }}
+                    title="Toggle workload ascending/descending"
+                  >
+                    workload {sortField === "workload" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleSortField("score_relevance")}
+                    style={{
+                      boxSizing: "border-box",
+                      height: 20,
+                      padding: "0 6px",
+                      borderRadius: 50,
+                      background: sortField === "score_relevance" ? "#000000" : "#FFFFFF",
+                      border: "1px solid #000000",
+                      fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontStyle: "normal",
+                      fontWeight: 300,
+                      fontSize: 13,
+                      lineHeight: "145%",
+                      letterSpacing: "-0.005em",
+                      color: sortField === "score_relevance" ? "#FFFFFF" : "#000000",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                    }}
+                    title="Toggle Entrepreneurship Relevance ascending/descending"
+                  >
+                    entrepreneurship relevance {sortField === "score_relevance" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleSortField("score_skills")}
+                    style={{
+                      boxSizing: "border-box",
+                      height: 20,
+                      padding: "0 6px",
+                      borderRadius: 50,
+                      background: sortField === "score_skills" ? "#000000" : "#FFFFFF",
+                      border: "1px solid #000000",
+                      fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontStyle: "normal",
+                      fontWeight: 300,
+                      fontSize: 13,
+                      lineHeight: "145%",
+                      letterSpacing: "-0.005em",
+                      color: sortField === "score_skills" ? "#FFFFFF" : "#000000",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                    }}
+                    title="Toggle Personal Development ascending/descending"
+                  >
+                    personal development {sortField === "score_skills" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleSortField("score_product")}
+                    style={{
+                      boxSizing: "border-box",
+                      height: 20,
+                      padding: "0 6px",
+                      borderRadius: 50,
+                      background: sortField === "score_product" ? "#000000" : "#FFFFFF",
+                      border: "1px solid #000000",
+                      fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontStyle: "normal",
+                      fontWeight: 300,
+                      fontSize: 13,
+                      lineHeight: "145%",
+                      letterSpacing: "-0.005em",
+                      color: sortField === "score_product" ? "#FFFFFF" : "#000000",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                    }}
+                    title="Toggle Product Innovation ascending/descending"
+                  >
+                    product innovation {sortField === "score_product" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleSortField("score_venture")}
+                    style={{
+                      boxSizing: "border-box",
+                      height: 20,
+                      padding: "0 6px",
+                      borderRadius: 50,
+                      background: sortField === "score_venture" ? "#000000" : "#FFFFFF",
+                      border: "1px solid #000000",
+                      fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontStyle: "normal",
+                      fontWeight: 300,
+                      fontSize: 13,
+                      lineHeight: "145%",
+                      letterSpacing: "-0.005em",
+                      color: sortField === "score_venture" ? "#FFFFFF" : "#000000",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                    }}
+                    title="Toggle Venture Ops ascending/descending"
+                  >
+                    venture ops {sortField === "score_venture" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleSortField("score_foundations")}
+                    style={{
+                      boxSizing: "border-box",
+                      height: 20,
+                      padding: "0 6px",
+                      borderRadius: 50,
+                      background: sortField === "score_foundations" ? "#000000" : "#FFFFFF",
+                      border: "1px solid #000000",
+                      fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontStyle: "normal",
+                      fontWeight: 300,
+                      fontSize: 13,
+                      lineHeight: "145%",
+                      letterSpacing: "-0.005em",
+                      color: sortField === "score_foundations" ? "#FFFFFF" : "#000000",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                    }}
+                    title="Toggle Startup Basics ascending/descending"
+                  >
+                    startup basics {sortField === "score_foundations" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setSortField(""); setSortOrder("desc"); }}
+                    style={{
+                      boxSizing: "border-box",
+                      height: 20,
+                      padding: "0 6px",
+                      borderRadius: 50,
+                      background: "#FFFFFF",
+                      border: "1px solid #000000",
+                      fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontStyle: "normal",
+                      fontWeight: 300,
+                      fontSize: 13,
+                      lineHeight: "145%",
+                      letterSpacing: "-0.005em",
+                      color: "#000000",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Clear sort
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <span style={{ fontSize: 12, color: THEME_VARS.textMuted }}>Pareto sort</span>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button
+                    onClick={() => setParetoPref(p => ({ ...p, credits: p.credits === 'max' ? 'min' : 'max' }))}
+                    style={chipButtonStyle(paretoPref.credits === 'max')}
+                    title="Toggle credits preference (max/min)"
+                  >
+                    Credits {paretoPref.credits === 'max' ? '↓' : '↑'}
+                  </button>
+                  <button
+                    onClick={() => setParetoPref(p => ({ ...p, workload: p.workload === 'min' ? 'max' : 'min' }))}
+                    style={chipButtonStyle(paretoPref.workload === 'min')}
+                    title="Toggle workload preference (min/max)"
+                  >
+                    Workload {paretoPref.workload === 'min' ? '↑' : '↓'}
+                  </button>
+                  <button
+                    onClick={() => setParetoPref({ credits: 'max', workload: 'min' })}
+                    style={chipButtonStyle(false)}
+                    title="Reset to default (credits max, workload min)"
+                  >
+                    Default
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
 
+          {/* View mode chips */}
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
             <span style={{ fontSize: 12, color: THEME_VARS.textMuted }}>View</span>
             <button
@@ -2371,127 +2901,300 @@ useEffect(() => {
         })()}
 
         {viewMode === 'list' ? (
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
-            {sortedCourses.map((c, idx) => {
-              const courseKey = courseKeyOf(c, idx);
-              const scheduleLines = splitScheduleLines(c.schedule);
-              const courseUrl = c.course_url || c.url || '';
-              const scheduleEvents = buildScheduleEvents(scheduleLines);
-              const hasSchedule = scheduleEvents.length > 0;
-              return (
-                <li key={courseKey}>
-                  <article
+          <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+            <ul
+              style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0,
+                flex: 1,
+              }}
+            >
+              {sortedCourses.map((c, idx) => {
+                if (idx % 2 !== 0) return null; // 奇数序号（1-based）在左列
+                const courseKey = courseKeyOf(c, idx);
+                const scheduleLines = splitScheduleLines(c.schedule);
+                const courseUrl = c.course_url || c.url || '';
+                const scheduleEvents = buildScheduleEvents(scheduleLines);
+                const hasSchedule = scheduleEvents.length > 0;
+                return (
+                  <li
+                    key={courseKey}
                     style={{
-                      border: `1px solid ${THEME_VARS.border}`,
-                      borderRadius: 8,
-                      padding: '12px',
-                      boxShadow: 'var(--shadow-elevation)',
-                      background: THEME_VARS.surface,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 12,
+                      marginBottom: 16,
                     }}
                   >
-                    <div
+                    <article
                       style={{
+                        border: 'none',
+                        borderRadius: 15,
+                        padding: '16px 20px',
+                        boxShadow: 'var(--shadow-elevation)',
+                        background: '#F6F6F6',
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: 8,
-                        minWidth: 0,
+                        gap: 12,
                       }}
                     >
-                      <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <a
-                          href={courseUrl || '#'}
-                          target={courseUrl ? '_blank' : '_self'}
-                          rel={courseUrl ? 'noreferrer' : undefined}
-                          style={{
-                            color: 'inherit',
-                            textDecoration: 'none',
-                            pointerEvents: courseUrl ? 'auto' : 'none',
-                            fontWeight: 600,
-                          }}
-                        >
-                          {c.course_name}
-                        </a>
-                        {c.course_code && (
-                          <small style={{ marginLeft: 8 }}>({c.course_code})</small>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => openRelationGraph(c)}
-                          title="Show relation graph"
-                          style={{
-                            marginLeft: 8,
-                            padding: '2px 6px',
-                            fontSize: 12,
-                            lineHeight: '16px',
-                            border: `1px solid ${THEME_VARS.border}`,
-                            borderRadius: 4,
-                            background: THEME_VARS.surface,
-                            color: THEME_VARS.text,
-                            cursor: 'pointer',
-                          }}
-                        >
-                          Graph
-                        </button>
-                      </h3>
-                      {renderStudyPlanTags(c)}
-                      {renderProgramTags(c.available_programs, c.study_plan_tags)}
-                      {renderLevelTags(c.available_levels)}
-                      {renderDescription(c)}
                       <div
                         style={{
                           display: 'flex',
-                          flexWrap: 'wrap',
-                          gap: 16,
-                          marginTop: 4,
+                          flexDirection: 'column',
+                          gap: 8,
+                          minWidth: 0,
                         }}
                       >
-                        <div
+                        <h3
                           style={{
-                            flex: '1 1 320px',
+                            margin: 0,
                             display: 'flex',
-                            flexDirection: 'column',
-                            gap: 6,
-                            minWidth: 0,
+                            alignItems: 'center',
+                            gap: 8,
+                            justifyContent: 'space-between',
+                            fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                            fontStyle: 'normal',
+                            fontWeight: 300,
+                            fontSize: 20,
+                            lineHeight: '145%',
+                            letterSpacing: '-0.005em',
+                            color: '#000000',
                           }}
                         >
-                          <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                            {buildCourseDetailRows(c, scheduleLines)}
-                          </ul>
-                        </div>
-                        {hasSchedule && (
-                          <aside
+                          <a
+                            href={courseUrl || '#'}
+                            target={courseUrl ? '_blank' : '_self'}
+                            rel={courseUrl ? 'noreferrer' : undefined}
                             style={{
-                              flex: '0 0 240px',
-                              minWidth: 220,
+                              color: 'inherit',
+                              textDecoration: 'none',
+                              pointerEvents: courseUrl ? 'auto' : 'none',
+                              fontWeight: 'inherit',
+                            }}
+                          >
+                            {c.course_name}
+                          </a>
+                          {c.course_code && (
+                            <span
+                              style={{
+                                fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                                fontStyle: 'italic',
+                                fontWeight: 300,
+                                fontSize: 12,
+                                lineHeight: '145%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                textAlign: 'center',
+                                letterSpacing: '-0.005em',
+                                textDecorationLine: 'underline',
+                                color: '#000000',
+                                marginLeft: 'auto',
+                              }}
+                            >
+                              {c.course_code}
+                            </span>
+                          )}
+                        </h3>
+                        {renderStudyPlanTags(c)}
+                        {renderProgramTags(c.available_programs, c.study_plan_tags)}
+                        {renderLevelTags(c.available_levels)}
+                        {renderDescription(c)}
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: 16,
+                            marginTop: 4,
+                          }}
+                        >
+                          <div
+                            style={{
+                              flex: '1 1 320px',
                               display: 'flex',
                               flexDirection: 'column',
                               gap: 6,
+                              minWidth: 0,
                             }}
                           >
-                            <div style={{ fontSize: 12, fontWeight: 600, color: THEME_VARS.textMuted, textTransform: 'uppercase' }}>
-                              Weekly Schedule
-                            </div>
-                            <WeekScheduleCalendar events={scheduleEvents} />
-                          </aside>
-                        )}
+                            <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                              {buildCourseDetailRows(c, scheduleLines)}
+                            </ul>
+                          </div>
+                          {hasSchedule && (
+                            <aside
+                              style={{
+                                flex: '0 0 186px',
+                                minWidth: 186,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 6,
+                              }}
+                            >
+                              <WeekScheduleCalendar events={scheduleEvents} />
+                            </aside>
+                          )}
+                        </div>
+                        <ScoreSummary
+                          course={c}
+                          layout="list"
+                          submissionState={submissionStates[courseKey]}
+                          onSubmissionStateChange={(state) => updateSubmissionState(courseKey, state)}
+                          savedValues={ratingValues[courseKey]}
+                          onValuesChange={(vals) => updateRatingValues(courseKey, vals)}
+                          onOpenGraph={() => openRelationGraph(c)}
+                        />
                       </div>
-                      <ScoreSummary
-                        course={c}
-                        layout="list"
-                        submissionState={submissionStates[courseKey]}
-                        onSubmissionStateChange={(state) => updateSubmissionState(courseKey, state)}
-                        savedValues={ratingValues[courseKey]}
-                        onValuesChange={(vals) => updateRatingValues(courseKey, vals)}
-                      />
-                    </div>
-                  </article>
-                </li>
-              );
-            })}
-          </ul>
+                    </article>
+                  </li>
+                );
+              })}
+            </ul>
+            <ul
+              style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0,
+                flex: 1,
+              }}
+            >
+              {sortedCourses.map((c, idx) => {
+                if (idx % 2 !== 1) return null; // 偶数序号（1-based）在右列
+                const courseKey = courseKeyOf(c, idx);
+                const scheduleLines = splitScheduleLines(c.schedule);
+                const courseUrl = c.course_url || c.url || '';
+                const scheduleEvents = buildScheduleEvents(scheduleLines);
+                const hasSchedule = scheduleEvents.length > 0;
+                return (
+                  <li
+                    key={courseKey}
+                    style={{
+                      marginBottom: 16,
+                    }}
+                  >
+                    <article
+                      style={{
+                        border: 'none',
+                        borderRadius: 15,
+                        padding: '16px 20px',
+                        boxShadow: 'var(--shadow-elevation)',
+                        background: '#F6F6F6',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 12,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 8,
+                          minWidth: 0,
+                        }}
+                      >
+                        <h3
+                          style={{
+                            margin: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            justifyContent: 'space-between',
+                            fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                            fontStyle: 'normal',
+                            fontWeight: 300,
+                            fontSize: 20,
+                            lineHeight: '145%',
+                            letterSpacing: '-0.005em',
+                            color: '#000000',
+                          }}
+                        >
+                          <a
+                            href={courseUrl || '#'}
+                            target={courseUrl ? '_blank' : '_self'}
+                            rel={courseUrl ? 'noreferrer' : undefined}
+                            style={{
+                              color: 'inherit',
+                              textDecoration: 'none',
+                              pointerEvents: courseUrl ? 'auto' : 'none',
+                              fontWeight: 'inherit',
+                            }}
+                          >
+                            {c.course_name}
+                          </a>
+                          {c.course_code && (
+                            <span
+                              style={{
+                                fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                                fontStyle: 'italic',
+                                fontWeight: 300,
+                                fontSize: 12,
+                                lineHeight: '145%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                textAlign: 'center',
+                                letterSpacing: '-0.005em',
+                                textDecorationLine: 'underline',
+                                color: '#000000',
+                                marginLeft: 'auto',
+                              }}
+                            >
+                              {c.course_code}
+                            </span>
+                          )}
+                        </h3>
+                        {renderStudyPlanTags(c)}
+                        {renderProgramTags(c.available_programs, c.study_plan_tags)}
+                        {renderLevelTags(c.available_levels)}
+                        {renderDescription(c)}
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: 16,
+                            marginTop: 4,
+                          }}
+                        >
+                          <div
+                            style={{
+                              flex: '1 1 320px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: 6,
+                              minWidth: 0,
+                            }}
+                          >
+                            <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                              {buildCourseDetailRows(c, scheduleLines)}
+                            </ul>
+                          </div>
+                          {hasSchedule && (
+                            <aside
+                              style={{
+                                flex: '0 0 186px',
+                                minWidth: 186,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 6,
+                              }}
+                            >
+                              <WeekScheduleCalendar events={scheduleEvents} />
+                            </aside>
+                          )}
+                        </div>
+                        <ScoreSummary
+                          course={c}
+                          layout="list"
+                          submissionState={submissionStates[courseKey]}
+                          onSubmissionStateChange={(state) => updateSubmissionState(courseKey, state)}
+                          savedValues={ratingValues[courseKey]}
+                          onValuesChange={(vals) => updateRatingValues(courseKey, vals)}
+                          onOpenGraph={() => openRelationGraph(c)}
+                        />
+                      </div>
+                    </article>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         ) : (
           (() => {
             // Build annotated list with metrics
@@ -2556,7 +3259,21 @@ useEffect(() => {
                           minWidth: 0,
                         }}
                       >
-                        <h3 style={{ margin: 0, fontSize: 16, lineHeight: '20px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <h3
+                          style={{
+                            margin: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                            fontStyle: 'normal',
+                            fontWeight: 300,
+                            fontSize: 20,
+                            lineHeight: '145%',
+                            letterSpacing: '-0.005em',
+                            color: '#000000',
+                          }}
+                        >
                           <a
                             href={courseUrl || '#'}
                             target={courseUrl ? '_blank' : '_self'}
@@ -2565,29 +3282,11 @@ useEffect(() => {
                               color: 'inherit',
                               textDecoration: 'none',
                               pointerEvents: courseUrl ? 'auto' : 'none',
-                              fontWeight: 600,
+                              fontWeight: 'inherit',
                             }}
                           >
                             {c.course_name}
                           </a>
-                          <button
-                            type="button"
-                            onClick={() => openRelationGraph(c)}
-                            title="Show relation graph"
-                            style={{
-                              marginLeft: 8,
-                              padding: '2px 6px',
-                              fontSize: 11,
-                              lineHeight: '16px',
-                              border: `1px solid ${THEME_VARS.border}`,
-                              borderRadius: 4,
-                              background: THEME_VARS.surface,
-                              color: THEME_VARS.text,
-                              cursor: 'pointer',
-                            }}
-                          >
-                            Graph
-                          </button>
                         </h3>
                         {c.course_code && (
                           <div style={{ fontSize: 12, opacity: 0.85 }}>{c.course_code}</div>
@@ -2606,6 +3305,7 @@ useEffect(() => {
                           onSubmissionStateChange={(state) => updateSubmissionState(courseKey, state)}
                           savedValues={ratingValues[courseKey]}
                           onValuesChange={(vals) => updateRatingValues(courseKey, vals)}
+                          onOpenGraph={() => openRelationGraph(c)}
                         />
                       </div>
                     </article>
@@ -2639,14 +3339,15 @@ useEffect(() => {
           })()}
         </div>
       </div>
-    {graphOpen && (
-      <RelationGraphModal
-        course={graphCourse}
-        profiles={graphProfiles}
-        allCourses={graphCoursesList}
-        onClose={closeRelationGraph}
-      />
-    )}
+
+      {graphOpen && (
+        <RelationGraphModal
+          course={graphCourse}
+          profiles={graphProfiles}
+          allCourses={graphCoursesList}
+          onClose={closeRelationGraph}
+        />
+      )}
     </div>
   );
 }

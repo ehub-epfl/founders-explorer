@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-ro
 import GuidedSearch from './pages/GuidedSearch.jsx';
 import CoursesList from "./pages/CoursesList.jsx";
 import AuthPage from "./pages/Auth.jsx";
+import Compass from "./pages/Compass.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 
@@ -9,39 +10,105 @@ function NavBar() {
   const { user, signOut } = useAuth();
   const email = user?.email || '';
 
+  const navLinkStyle = {
+    fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    fontStyle: 'normal',
+    fontWeight: 500,
+    fontSize: '16px',
+    lineHeight: '145%',
+    display: 'flex',
+    alignItems: 'center',
+    textAlign: 'center',
+    letterSpacing: '-0.005em',
+    color: '#000000',
+    textDecoration: 'none',
+  };
+
   return (
     <nav
       style={{
-        display: 'flex',
+        display: 'grid',
+        gridTemplateColumns: 'auto 1fr auto',
         alignItems: 'center',
-        gap: '12px',
-        padding: '12px 0',
+        padding: '24px 64px',
+        columnGap: '16px',
+        width: '100%',
+        maxWidth: '1280px',
+        height: '135px',
         marginBottom: '1.5rem',
-        color: 'var(--color-text)',
-        borderBottom: '1px solid var(--color-border-subtle)',
-        justifyContent: 'space-between',
+        color: '#000000',
+        boxSizing: 'border-box',
+        marginInline: 'auto',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <img src="/logo.svg" alt="Site logo" style={{ height: '28px' }} />
-        <Link to="/courses">Courses</Link>
-        <span aria-hidden="true" style={{ color: 'var(--color-border)', fontSize: '0.9rem' }}>|</span>
-        <Link to="/guided">Guided Search</Link>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {email && <span style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>{email}</span>}
+      <div
+        style={{
+          width: '131px',
+          height: '74px',
+          backgroundImage: 'url(/logo-epfl.png)',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'contain',
+          backgroundPosition: 'left center',
+          flex: 'none',
+          order: 0,
+          flexGrow: 0,
+        }}
+        aria-label="EPFL logo"
+      />
+
+      <h1
+        style={{
+          margin: 0,
+          width: '532px',
+          height: '87px',
+          fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          fontStyle: 'normal',
+          fontWeight: 300,
+          fontSize: '48px',
+          lineHeight: '145%',
+          display: 'flex',
+          alignItems: 'center',
+          letterSpacing: '-0.005em',
+          color: '#000000',
+          textAlign: 'center',
+          justifySelf: 'center',
+        }}
+      >
+        Founders’ Explorer
+      </h1>
+
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: 0,
+          gap: '32px',
+          justifyContent: 'flex-end',
+          justifySelf: 'end',
+        }}
+      >
+        <Link to="/courses" style={navLinkStyle}>
+          Courses
+        </Link>
+        <Link to="/guided" style={navLinkStyle}>
+          Guided Search
+        </Link>
+        <Link to="/compass" style={navLinkStyle}>
+          Compass
+        </Link>
         <button
           type="button"
           onClick={() => signOut()}
           style={{
-            border: '1px solid var(--color-border)',
-            background: 'var(--color-surface)',
-            borderRadius: 6,
-            padding: '6px 10px',
+            ...navLinkStyle,
+            border: 'none',
+            background: 'transparent',
+            padding: 0,
             cursor: 'pointer',
           }}
         >
-          Sign out
+          Log out
         </button>
       </div>
     </nav>
@@ -69,6 +136,15 @@ function App() {
             <ProtectedRoute>
               <NavBar />
               <GuidedSearch />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/compass"
+          element={(
+            <ProtectedRoute>
+              <NavBar />
+              <Compass />
             </ProtectedRoute>
           )}
         />

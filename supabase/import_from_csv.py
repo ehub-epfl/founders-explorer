@@ -736,6 +736,55 @@ def upsert_studyplans(
         )
 
 
+def upsert_compass_entries_for_top_courses(
+    client: SupabaseClient,
+    course_rows: Sequence[dict],
+    top_n: int = 30,
+) -> None:
+    """Populate compass_entries with the top-N courses by entrepreneurship score."""
+    if not course_rows or top_n <= 0:
+        return
+
+    candidates = [
+        row
+        for row in course_rows
+        if row.get("entre_score") is not None
+        and (row.get("course_url") or "").strip()
+        and (row.get("course_name") or "").strip()
+    ]
+    if not candidates:
+        return
+
+    def sort_key(row: dict) -> tuple:
+        return (
+            int(row.get("entre_score") or 0),
+            int(row.get("PD") or 0),
+            int(row.get("PB") or 0),
+            str(row.get("course_key") or ""),
+        )
+
+    sorted_courses = sorted(candidates, key=sort_key, reverse=True)
+    top_courses = sorted_courses[:top_n]
+
+    payload: List[dict] = []
+    for idx, row in enumerate(top_courses):
+        payload.append(
+            {
+                "slot_index": idx,
+                "label": row.get("course_name") or "",
+                "url": row.get("course_url") or "",
+                "category": "course",
+            }
+        )
+
+    if payload:
+        client.upsert(
+            "compass_entries",
+            rows=payload,
+            on_conflict="slot_index",
+        )
+
+
 def main() -> int:
     load_env(ENV_PATH)
     # Bump CSV field limit globally to handle large text columns
@@ -834,6 +883,9 @@ def main() -> int:
 
     upsert_studyplans(client, studyplans, course_id_map)
     print("Study plans synced.")
+
+    upsert_compass_entries_for_top_courses(client, courses, top_n=30)
+    print("Compass entries (top 30 courses) synced.")
 
     return 0
 

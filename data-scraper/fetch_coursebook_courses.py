@@ -714,11 +714,6 @@ def normalize_semester_term(label: str) -> str:
         "automne": "Fall",
         "spring": "Spring",
         "printemps": "Spring",
-        "winter": "Winter",
-        "hiver": "Winter",
-        "summer": "Summer",
-        "été": "Summer",
-        "ete": "Summer",
     }
     for key, value in mapping.items():
         if lower == key:

@@ -119,6 +119,13 @@ export async function getCourses(options = {}) {
     query = query.lte('credits', maxCredits);
   }
 
+  if (semester) {
+    const normalizedSemester = normalizeSeasonValue(semester);
+    if (normalizedSemester) {
+      query = query.eq('semester', normalizedSemester);
+    }
+  }
+
   const normalizedType = normalizeProgramType(type);
   if (normalizedType) {
     query = query.eq('type', normalizedType);
@@ -201,6 +208,23 @@ export async function getCourses(options = {}) {
     page: resolvedPage,
     pageSize: resolvedPageSize,
   };
+}
+
+export async function getCompassEntries() {
+  const { supabaseUrl, supabaseAnonKey } = resolveSupabaseConfig();
+  const supabase = ensureSupabaseClient(supabaseUrl, supabaseAnonKey);
+
+  const { data, error } = await supabase
+    .from('compass_entries')
+    .select('slot_index,label,url,category')
+    .order('slot_index', { ascending: true });
+
+  if (error) {
+    console.warn('Supabase compass_entries fetch failed', error);
+    return [];
+  }
+
+  return Array.isArray(data) ? data : [];
 }
 
 export async function getStudyPlansByProgram() {
@@ -427,6 +451,7 @@ function normalizeCourseRecord(row) {
     score_product: scoreProduct,
     score_venture: scoreVenture,
     score_foundations: scoreFoundations,
+    keywords: typeof row?.keywords === 'string' ? row.keywords : '',
   };
 }
 
@@ -480,6 +505,7 @@ function buildSearchClause(rawValue) {
     `teacher_names_text.ilike.${pattern}`,
     `language.ilike.${pattern}`,
     `section.ilike.${pattern}`,
+    `keywords.ilike.${pattern}`,
   ];
 
   return parts.join(',');
@@ -603,9 +629,8 @@ function normalizeStudyPlanValue(value) {
 function normalizeProgramType(value) {
   if (typeof value !== 'string') return '';
   const candidate = value.trim().toLowerCase();
-  if (candidate === 'mandatory' || candidate === 'optional') {
-    return candidate;
-  }
+  if (candidate === 'mandatory') return 'Mandatory';
+  if (candidate === 'optional') return 'Optional';
   return '';
 }
 

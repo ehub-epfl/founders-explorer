@@ -30,7 +30,7 @@ begin
         select format('drop table if exists %I.%I cascade;', schemaname, tablename)
         from pg_catalog.pg_tables
         where schemaname = current_schema()
-          and tablename <> 'course_ratings'
+          and tablename not in ('course_ratings', 'profiles')
     loop
         execute stmt;
     end loop;
@@ -171,6 +171,39 @@ create index if not exists coursebook_studyplans_program_idx
 
 create index if not exists coursebook_studyplans_faculty_idx
     on coursebook_studyplans (study_faculty);
+
+-- Entries used to drive the Compass visualization
+create table if not exists compass_entries (
+    id          bigserial primary key,
+    slot_index  integer     not null unique check (slot_index >= 0),
+    label       text        not null,
+    url         text        not null default '',
+    category    text        not null
+);
+
+-- Seed initial compass entries with the top 30 courses by score, if slots are empty
+insert into compass_entries (slot_index, label, url, category)
+select
+    ranked.slot_index,
+    ranked.course_name,
+    ranked.course_url,
+    'course'::text as category
+from (
+    select
+        row_number() over (
+            order by
+                coalesce(entre_score, 0) desc,
+                coalesce("PD", 0) desc,
+                coalesce("PB", 0) desc,
+                id asc
+        ) - 1 as slot_index,
+        course_name,
+        course_url
+    from coursebook_courses
+    where coalesce(course_url, '') <> ''
+) as ranked
+where ranked.slot_index < 30
+on conflict (slot_index) do nothing;
 
 create table if not exists course_ratings (
     id                  bigserial primary key,
