@@ -178,16 +178,24 @@ create table if not exists compass_entries (
     slot_index  integer     not null unique check (slot_index >= 0),
     label       text        not null,
     url         text        not null default '',
-    category    text        not null
+    category    text        not null,
+    description text        not null default ''
 );
 
+alter table if exists compass_entries
+    drop column if exists course_key;
+
+alter table if exists compass_entries
+    add column if not exists description text not null default '';
+
 -- Seed initial compass entries with the top 30 courses by score, if slots are empty
-insert into compass_entries (slot_index, label, url, category)
+insert into compass_entries (slot_index, label, url, category, description)
 select
     ranked.slot_index,
-    ranked.course_name,
+    ranked.course_key,
     ranked.course_url,
-    'course'::text as category
+    'course'::text as category,
+    ranked.course_name
 from (
     select
         row_number() over (
@@ -198,7 +206,8 @@ from (
                 id asc
         ) - 1 as slot_index,
         course_name,
-        course_url
+        course_url,
+        course_key
     from coursebook_courses
     where coalesce(course_url, '') <> ''
 ) as ranked

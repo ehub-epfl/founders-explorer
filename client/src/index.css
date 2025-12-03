@@ -147,6 +147,12 @@ table {
   border-collapse: collapse;
 }
 
+.course-focus-highlight {
+  outline: 3px solid #000000;
+  outline-offset: 4px;
+  transition: outline 0.2s ease;
+}
+
 /* Interactive per-course sliders: hide native track and draw custom bars */
 .score-slider {
   -webkit-appearance: none;

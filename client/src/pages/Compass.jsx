@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getCompassEntries } from '../api/courses_api';
 import './Compass.css';
 
@@ -15,12 +16,30 @@ function angularDifference(a, b) {
   return diff > 180 ? 360 - diff : diff;
 }
 
+const POINTER_SMOOTHING = 0.18;
+const MAX_DISTANCE = 1.3;
+const MIN_ANGLE_DELTA = 0.8;
+const MIN_DISTANCE_DELTA = 0.01;
+const ANGLE_SNAP_DEGREES = 1.5;
+
+function shortestAngleDelta(target, current) {
+  let delta = target - current;
+  while (delta > 180) delta -= 360;
+  while (delta < -180) delta += 360;
+  return delta;
+}
+
 function Compass() {
   const containerRef = useRef(null);
+  const navigate = useNavigate();
   const [pointer, setPointer] = useState({ angle: 0, distance: 1.2, distancePx: 0, active: false });
   const [trace, setTrace] = useState([]);
   const [stageSize, setStageSize] = useState({ w: 0, h: 0 });
   const [entriesBySlot, setEntriesBySlot] = useState(() => Array(SEGMENT_COUNT).fill(null));
+  const pointerTargetRef = useRef({ angle: 0, distance: 1.2, distancePx: 0, active: false });
+  const pendingTraceRef = useRef(null);
+  const traceRef = useRef([]);
+  const rafRef = useRef(null);
 
   const segments = useMemo(() => (
     Array.from({ length: SEGMENT_COUNT }, (_, index) => ({
@@ -45,6 +64,7 @@ function Compass() {
               label: typeof row.label === 'string' ? row.label : '',
               url: typeof row.url === 'string' ? row.url : '',
               category: typeof row.category === 'string' ? row.category : '',
+              description: typeof row.description === 'string' ? row.description : '',
             };
           }
         }
@@ -64,6 +84,56 @@ function Compass() {
     };
   }, []);
 
+  useEffect(() => {
+    traceRef.current = trace;
+  }, [trace]);
+
+  useEffect(() => () => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  }, []);
+
+  const scheduleAnimationFrame = useCallback(() => {
+    if (rafRef.current !== null) {
+      return;
+    }
+    const tick = () => {
+      rafRef.current = null;
+      let pointerNeedsAnotherFrame = false;
+      setPointer((prev) => {
+        const target = pointerTargetRef.current || prev;
+        const angleDelta = shortestAngleDelta(target.angle, prev.angle);
+        const next = {
+          angle: prev.angle + angleDelta * POINTER_SMOOTHING,
+          distance: prev.distance + (target.distance - prev.distance) * POINTER_SMOOTHING,
+          distancePx: prev.distancePx + (target.distancePx - prev.distancePx) * POINTER_SMOOTHING,
+          active: target.active,
+        };
+        const angleClose = Math.abs(angleDelta) < 0.05;
+        const distanceClose = Math.abs(target.distance - next.distance) < 0.01;
+        const distancePxClose = Math.abs(target.distancePx - next.distancePx) < 1;
+        if (!angleClose || !distanceClose || !distancePxClose) {
+          pointerNeedsAnotherFrame = true;
+        } else {
+          next.angle = target.angle;
+          next.distance = target.distance;
+          next.distancePx = target.distancePx;
+        }
+        return next;
+      });
+      if (pendingTraceRef.current) {
+        setTrace(pendingTraceRef.current);
+        pendingTraceRef.current = null;
+      }
+      if (pointerNeedsAnotherFrame || pendingTraceRef.current) {
+        scheduleAnimationFrame();
+      }
+    };
+    rafRef.current = requestAnimationFrame(tick);
+  }, []);
+
   const handleMove = (event) => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -76,20 +146,39 @@ function Compass() {
     const angle = normalizeAngle(rawAngle + 90);
     const maxRadius = Math.min(rect.width, rect.height) / 2;
     const rawDistance = Math.hypot(dx, dy);
-    const distance = rawDistance / maxRadius;
+    const distance = Math.min(MAX_DISTANCE, rawDistance / maxRadius);
     setStageSize({ w: rect.width, h: rect.height });
-    setPointer({ angle, distance, distancePx: rawDistance, active: true });
+    const last = pointerTargetRef.current;
+    const angleDiff = Math.abs(shortestAngleDelta(angle, last.angle));
+    const distanceDiff = Math.abs(distance - last.distance);
+    if (angleDiff < MIN_ANGLE_DELTA && distanceDiff < MIN_DISTANCE_DELTA) {
+      return;
+    }
+    const snappedAngle = Math.round(angle / ANGLE_SNAP_DEGREES) * ANGLE_SNAP_DEGREES;
+    pointerTargetRef.current = {
+      angle: normalizeAngle(snappedAngle),
+      distance,
+      distancePx: rawDistance,
+      active: true,
+    };
     const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
-    setTrace((prev) => {
-      const next = [...prev, point];
-      const overflow = next.length - 140;
-      return overflow > 0 ? next.slice(overflow) : next;
-    });
+    const prevTrace = traceRef.current || [];
+    const nextTrace = [...prevTrace, point];
+    const overflow = nextTrace.length - 140;
+    pendingTraceRef.current = overflow > 0 ? nextTrace.slice(overflow) : nextTrace;
+    scheduleAnimationFrame();
   };
 
   const handleLeave = () => {
-    setPointer((prev) => ({ ...prev, distance: 1.3, distancePx: 0, active: false }));
-    setTrace([]);
+    const currentAngle = pointerTargetRef.current.angle;
+    pointerTargetRef.current = {
+      angle: currentAngle,
+      distance: MAX_DISTANCE,
+      distancePx: 0,
+      active: false,
+    };
+    pendingTraceRef.current = [];
+    scheduleAnimationFrame();
   };
 
   const computeOffset = (segment) => {
@@ -134,6 +223,29 @@ function Compass() {
         {segments.map((segment) => {
           const entry = entriesBySlot[segment.id] || null;
           const category = entry?.category || '';
+          const label = (entry?.label || '').trim();
+          const description = (entry?.description || '').trim();
+          const isCourse = category === 'course';
+          const entryTitle = isCourse && description && label
+            ? `${description} (${label})`
+            : (description || label || undefined);
+          const isInteractive = isCourse && label;
+          const navigateToCourse = (event) => {
+            if (!isInteractive) return;
+            event.preventDefault();
+            event.stopPropagation();
+            const slug = label;
+            if (!slug) return;
+            const params = new URLSearchParams();
+            params.set('focus', slug);
+            navigate(`/courses?${params.toString()}`);
+          };
+          const handleKeyDown = (event) => {
+            if (!isInteractive) return;
+            if (event.key === 'Enter' || event.key === ' ') {
+              navigateToCourse(event);
+            }
+          };
           // Bell function output: bar base radius, max = DISC_RADIUS
           const baseRadius = computeOffset(segment);
           // Bar center distance = base radius + half of bar length
@@ -147,12 +259,19 @@ function Compass() {
               <span
                 data-energized={isEnergized}
                 data-category={category || undefined}
-                title={entry?.label || undefined}
+                data-label={label || undefined}
+                title={entryTitle || undefined}
+                role={isInteractive ? 'button' : undefined}
+                tabIndex={isInteractive ? 0 : -1}
+                aria-label={entryTitle || label || undefined}
+                onClick={navigateToCourse}
+                onKeyDown={handleKeyDown}
                 style={{
                   // All bars have equal length
                   height: `${BAR_LENGTH}px`,
                   // Position bar so base sits at baseRadius and extends outward by BAR_LENGTH
                   transform: `translate(-50%, -${barCenterRadius}px)`,
+                  cursor: isInteractive ? 'pointer' : 'default',
                 }}
               />
             </div>
@@ -162,15 +281,6 @@ function Compass() {
           className="compass-core"
           style={{ background: '#ffffff' }}  // make central disc solid and render above bars
         />
-        <div
-          className="compass-pointer"
-          style={{
-            transform: `translate(-50%, -50%) rotate(${pointer.angle}deg)`,
-            opacity: pointer.active ? 1 : 0,
-          }}
-        >
-          <span style={{ height: `${lineLength}px` }} />
-        </div>
       </div>
       <div className="compass-hero">
         <h1>Compass</h1>

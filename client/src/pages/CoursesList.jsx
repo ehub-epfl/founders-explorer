@@ -353,12 +353,18 @@ const filterPanelStyle = {
 
 function courseKeyOf(course, fallbackIndex = 0) {
   return (
+    course?.course_key ??
     course?.id ??
     course?.course_code ??
     course?.url ??
     (course?.course_name ? `name:${course.course_name}` : null) ??
     `course-${fallbackIndex}`
   );
+}
+
+function normalizeFocusKey(value) {
+  if (typeof value !== 'string') return '';
+  return value.trim().toLowerCase();
 }
 
 function colorForTag(tag) {
@@ -446,16 +452,6 @@ function renderLevelTags(levels) {
           </span>
         );
       })}
-    </div>
-  );
-}
-
-function renderDescription(course) {
-  const text = typeof course?.description === 'string' ? course.description.trim() : '';
-  if (!text) return null;
-  return (
-    <div style={{ marginTop: 6, lineHeight: 1.5, color: THEME_VARS.text }}>
-      {text}
     </div>
   );
 }
@@ -967,9 +963,9 @@ function WeekScheduleCalendar({ events }) {
                   overflow: 'hidden',
                 }}
               >
-                {dayEvents.map((event, idx2) => {
-                  const top = ((event.startMinutes - anchorStart) / totalMinutes) * 100;
-                  const height = ((event.endMinutes - event.startMinutes) / totalMinutes) * 100;
+        {dayEvents.map((event, idx2) => {
+          const top = ((event.startMinutes - anchorStart) / totalMinutes) * 100;
+          const height = ((event.endMinutes - event.startMinutes) / totalMinutes) * 100;
                   const fallbackDayLabel = day.fullLabel || day.label || '';
                   const fallbackTooltip = `${fallbackDayLabel ? `${fallbackDayLabel} ` : ''}${formatMinutesToLabel(event.startMinutes)}\u2013${formatMinutesToLabel(event.endMinutes)}${event.label ? `: ${event.label}` : ''}`;
                   const blockTitle = event.tooltip || event.raw || fallbackTooltip;
@@ -989,13 +985,13 @@ function WeekScheduleCalendar({ events }) {
                         cursor: 'default',
                         pointerEvents: 'auto',
                       }}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
+                />
+              );
+            })}
+          </div>
+        </div>
+      );
+    })}
       </div>
     </div>
   );
@@ -1125,9 +1121,9 @@ function AvailabilityGrid({ selectedSlots, onToggleSlot, onSetSlot, onClear }) {
             >
               {formatMinutesToLabel(minuteStart)}
             </div>
-            {DAY_DEFINITIONS.map((day) => {
-              const slotId = buildAvailabilitySlotId(day.index, minuteStart);
-              const active = activeSlots.has(slotId);
+        {DAY_DEFINITIONS.map((day) => {
+          const slotId = buildAvailabilitySlotId(day.index, minuteStart);
+          const active = activeSlots.has(slotId);
               return (
                 <button
                   key={slotId}
@@ -1374,6 +1370,7 @@ function ScoreSummary({
     venture: normalizeScore(course?.score_venture),
   foundations: normalizeScore(course?.score_foundations),
 };
+  const courseDescription = typeof course?.description === 'string' ? course.description.trim() : '';
 
   const SCORE_FALLBACK = SCORE_STEP_VALUES[0] ?? 0;
 
@@ -1413,6 +1410,7 @@ function ScoreSummary({
   const [submitError, setSubmitError] = useState('');
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [commentNotes, setCommentNotes] = useState(createEmptyComments);
+  const [showCourseDetailModal, setShowCourseDetailModal] = useState(false);
 
   useEffect(() => {
     setSubmitted(Boolean(submissionState?.submitted));
@@ -1434,6 +1432,10 @@ function ScoreSummary({
     const nextValues = withSnappedValues(savedValues ?? defaultValues);
     setValues(nextValues);
   }, [savedValues, defaultValues]);
+
+  useEffect(() => {
+    setShowCourseDetailModal(false);
+  }, [course?.id, course?.course_code]);
 
   useEffect(() => {
     if (typeof onValuesChange !== 'function') {
@@ -1608,6 +1610,12 @@ function ScoreSummary({
       >
         <button
           type="button"
+          onClick={() => {
+            if (courseDescription) {
+              setShowCourseDetailModal(true);
+            }
+          }}
+          disabled={!courseDescription}
           style={{
             boxSizing: 'border-box',
             minWidth: 112,
@@ -1627,7 +1635,8 @@ function ScoreSummary({
             letterSpacing: '-0.005em',
             color: '#000000',
             whiteSpace: 'nowrap',
-            cursor: 'pointer',
+            cursor: courseDescription ? 'pointer' : 'not-allowed',
+            opacity: courseDescription ? 1 : 0.6,
           }}
         >
           Course Detail
@@ -1822,6 +1831,56 @@ function ScoreSummary({
           </div>
         </div>
       )}
+      {showCourseDetailModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.55)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 24,
+            zIndex: 2100,
+          }}
+          onClick={() => setShowCourseDetailModal(false)}
+        >
+          <div
+            onClick={(event) => event.stopPropagation()}
+            style={{
+              width: 'min(720px, 90vw)',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+              borderRadius: 16,
+              background: theme === 'dark' ? '#0f172a' : '#ffffff',
+              color: theme === 'dark' ? '#f8fafc' : '#0f172a',
+              border: '1px solid rgba(15,23,42,0.2)',
+              boxShadow: '0 18px 40px rgba(15, 23, 42, 0.35)',
+              padding: '24px 28px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+              <h3 style={{ margin: 0 }}>{course?.course_name || 'Course Detail'}</h3>
+              <button
+                type="button"
+                onClick={() => setShowCourseDetailModal(false)}
+                style={{ border: 'none', background: 'transparent', fontSize: 20, cursor: 'pointer', color: 'inherit' }}
+                aria-label="Close course detail"
+              >
+                ×
+              </button>
+            </div>
+            <div style={{ whiteSpace: 'pre-line', lineHeight: 1.6 }}>
+              {courseDescription || 'No description available.'}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1905,6 +1964,7 @@ function colorForRank(rank) {
 function CoursesList() {
   const location = useLocation();
   const navigate = useNavigate();
+  const courseRefs = useRef({});
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -1930,6 +1990,20 @@ function CoursesList() {
   const resultsTickerRef = useRef(null);
   const filterBarRef = useRef(null);
   const [filtersOverlayTop, setFiltersOverlayTop] = useState(0);
+  const focusCourseKey = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return normalizeFocusKey(params.get('focus') || '');
+  }, [location.search]);
+
+  const setCourseRef = useCallback((key, node) => {
+    const normalized = normalizeFocusKey(key ? String(key) : '');
+    if (!normalized) return;
+    if (node) {
+      courseRefs.current[normalized] = node;
+    } else {
+      delete courseRefs.current[normalized];
+    }
+  }, []);
 
   const updateFiltersOverlayTop = useCallback(() => {
     if (!filterBarRef.current) {
@@ -1980,6 +2054,23 @@ function CoursesList() {
       }
     };
   }, [loading, totalResults]);
+
+  useEffect(() => {
+    if (!focusCourseKey) return undefined;
+    const target = courseRefs.current[focusCourseKey];
+    if (!target) return undefined;
+    const scrollOptions = { behavior: 'smooth', block: 'center', inline: 'nearest' };
+    try {
+      target.scrollIntoView(scrollOptions);
+    } catch (_err) {
+      target.scrollIntoView(true);
+    }
+    target.classList.add('course-focus-highlight');
+    const timeout = setTimeout(() => {
+      target.classList.remove('course-focus-highlight');
+    }, 2500);
+    return () => clearTimeout(timeout);
+  }, [focusCourseKey, courses]);
 
   const openRelationGraph = useCallback(async (course) => {
     try {
@@ -2104,6 +2195,8 @@ useEffect(() => {
 
   useEffect(() => {
     const params = new URLSearchParams();
+    const existingParams = new URLSearchParams(location.search);
+    const focusRaw = existingParams.get('focus');
 
     if (appliedFilters.study_program) params.set('study_program', appliedFilters.study_program);
     if (appliedFilters.study_plan) params.set('study_plan', appliedFilters.study_plan);
@@ -2121,6 +2214,9 @@ useEffect(() => {
     setScoreParam('minFoundations', appliedFilters.minFoundations);
     if (appliedFilters.availabilitySlots) {
       params.set('freeSlots', appliedFilters.availabilitySlots);
+    }
+    if (focusRaw) {
+      params.set('focus', focusRaw);
     }
 
     const nextSearch = params.toString();
@@ -2998,6 +3094,7 @@ useEffect(() => {
                     }}
                   >
                     <article
+                      ref={(node) => setCourseRef(courseKey, node)}
                       style={{
                         border: 'none',
                         borderRadius: 15,
@@ -3070,7 +3167,6 @@ useEffect(() => {
                         {renderStudyPlanTags(c)}
                         {renderProgramTags(c.available_programs, c.study_plan_tags)}
                         {renderLevelTags(c.available_levels)}
-                        {renderDescription(c)}
                         <div
                           style={{
                             display: 'flex',
@@ -3144,6 +3240,7 @@ useEffect(() => {
                     }}
                   >
                     <article
+                      ref={(node) => setCourseRef(courseKey, node)}
                       style={{
                         border: 'none',
                         borderRadius: 15,
@@ -3216,7 +3313,6 @@ useEffect(() => {
                         {renderStudyPlanTags(c)}
                         {renderProgramTags(c.available_programs, c.study_plan_tags)}
                         {renderLevelTags(c.available_levels)}
-                        {renderDescription(c)}
                         <div
                           style={{
                             display: 'flex',
@@ -3310,6 +3406,7 @@ useEffect(() => {
                   const accent = colorForRank(rank === Infinity ? maxRank : rank);
                   return (
                     <article
+                      ref={(node) => setCourseRef(courseKey, node)}
                       key={courseKey}
                       style={{
                         border: `2px solid ${accent}`,
@@ -3367,7 +3464,6 @@ useEffect(() => {
                         {renderStudyPlanTags(c)}
                         {renderProgramTags(c.available_programs, c.study_plan_tags)}
                         {renderLevelTags(c.available_levels)}
-                        {renderDescription(c)}
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {buildCourseDetailRows(c, scheduleLines)}
                         </ul>
@@ -3656,13 +3752,13 @@ function RelationGraphModal({ course, profiles, onClose, allCourses }) {
               );
             })}
           </svg>
-          <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
-            <span style={{ marginRight: 12 }}>• Blue: course</span>
-            <span style={{ marginRight: 12 }}>• Green: teachers</span>
-            <span>• Orange: labs (from people profile)</span>
-          </div>
+        <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
+          <span style={{ marginRight: 12 }}>• Blue: course</span>
+          <span style={{ marginRight: 12 }}>• Green: teachers</span>
+          <span>• Orange: labs (from people profile)</span>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }

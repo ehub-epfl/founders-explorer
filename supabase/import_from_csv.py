@@ -749,8 +749,8 @@ def upsert_compass_entries_for_top_courses(
         row
         for row in course_rows
         if row.get("entre_score") is not None
-        and (row.get("course_url") or "").strip()
         and (row.get("course_name") or "").strip()
+        and (row.get("course_key") or "").strip()
     ]
     if not candidates:
         return
@@ -766,14 +766,18 @@ def upsert_compass_entries_for_top_courses(
     sorted_courses = sorted(candidates, key=sort_key, reverse=True)
     top_courses = sorted_courses[:top_n]
 
+    # Clear previous course entries so the table only reflects the latest top-N set.
+    client.delete_where("compass_entries", {"category": "eq.course"})
+
     payload: List[dict] = []
     for idx, row in enumerate(top_courses):
         payload.append(
             {
                 "slot_index": idx,
-                "label": row.get("course_name") or "",
+                "label": row.get("course_key") or "",
                 "url": row.get("course_url") or "",
                 "category": "course",
+                "description": row.get("course_name") or "",
             }
         )
 

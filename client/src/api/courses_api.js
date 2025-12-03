@@ -216,7 +216,7 @@ export async function getCompassEntries() {
 
   const { data, error } = await supabase
     .from('compass_entries')
-    .select('slot_index,label,url,category')
+    .select('slot_index,label,url,category,description')
     .order('slot_index', { ascending: true });
 
   if (error) {
@@ -368,6 +368,8 @@ function normalizeCourseRecord(row) {
   const scoreVenture = normalizeScoreValue(row?.VB);
   const scoreFoundations = normalizeScoreValue(row?.INTRO);
 
+  const description = typeof row?.description === 'string' ? row.description.trim() : '';
+
   const topStudyProgram = canonicalizeProgramName(row?.study_program);
   const topStudyFaculty = canonicalizeProgramName(row?.study_faculty);
   const topStudyBlock = typeof row?.study_block === 'string' ? row.study_block.trim() : '';
@@ -413,6 +415,7 @@ function normalizeCourseRecord(row) {
     course_code: row?.course_key ?? null,
     section: row?.section ?? '',
     course_url: row?.course_url ?? '',
+    description,
     language: row?.language ?? '',
     credits,
     workload,
