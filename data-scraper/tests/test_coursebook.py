@@ -8,7 +8,6 @@ import json
 import html
 import os
 import csv
-from openai import OpenAI
 
 # Mapping from full section names to abbreviations (case-insensitive)
 SECTION_ABBREV = {
