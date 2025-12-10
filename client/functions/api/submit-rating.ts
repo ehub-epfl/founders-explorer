@@ -76,6 +76,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       comment_product,
       comment_venture,
       comment_intro,
+      user_email,
       // turnstileToken,
     } = json as Record<string, unknown>;
 
@@ -107,6 +108,9 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       comment_venture: normalizeComment(comment_venture),
       comment_intro: normalizeComment(comment_intro),
     };
+
+    const normalizedEmail =
+      typeof user_email === 'string' ? user_email.trim().slice(0, 320) : '';
 
     // Optional Turnstile verification:
     // if (env.TURNSTILE_SECRET) { /* verify token here */ }
@@ -144,6 +148,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
         score_venture: roundScore(score_venture as number),
         score_intro: roundScore(score_intro as number),
         ...comments,
+        ...(normalizedEmail ? { user_email: normalizedEmail } : {}),
         ip_hash,
         ua,
       }),

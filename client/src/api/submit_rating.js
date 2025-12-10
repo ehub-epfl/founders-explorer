@@ -49,8 +49,9 @@ function roundScore(n) {
  * @param {number} params.score_product
  * @param {number} params.score_venture
  * @param {number} params.score_intro
+ * @param {string} [params.user_email]
  * @param {string} [params.turnstileToken]  // optional, if you enable Cloudflare Turnstile
- * @returns {{course_code:string, course_id:string, score_relevance:number, score_personal:number, score_product:number, score_venture:number, score_intro:number, turnstileToken?:string}}
+ * @returns {{course_code:string, course_id:string, score_relevance:number, score_personal:number, score_product:number, score_venture:number, score_intro:number, user_email?:string, turnstileToken?:string}}
  */
 function truncateText(value, limit = 2000) {
   if (typeof value !== 'string') return '';
@@ -72,6 +73,7 @@ function buildPayload({
   comment_product = '',
   comment_venture = '',
   comment_intro = '',
+  user_email = '',
   turnstileToken,
 }) {
   const normalizedCode = typeof course_code === 'string' ? course_code.trim() : String(course_code ?? '').trim()
@@ -87,6 +89,10 @@ function buildPayload({
   if (scores.some((s) => !inRange(s, 0, 100))) {
     throw new Error('score_relevance, score_personal, score_product, score_venture, and score_intro must be numbers between 0 and 100');
   }
+  const normalizedEmail = typeof user_email === 'string' ? user_email.trim() : '';
+  if (normalizedEmail && normalizedEmail.length > 320) {
+    throw new Error('user_email is too long');
+  }
   return {
     course_code: normalizedCode,
     course_id: normalizedId,
@@ -100,6 +106,7 @@ function buildPayload({
     comment_product: truncateText(comment_product),
     comment_venture: truncateText(comment_venture),
     comment_intro: truncateText(comment_intro),
+    ...(normalizedEmail ? { user_email: normalizedEmail } : {}),
     ...(turnstileToken ? { turnstileToken } : {}),
   };
 }

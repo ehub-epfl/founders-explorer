@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { getCourses, getPeopleProfilesByCardUrls, getStudyPlansByProgram } from "../api/courses_api";
 import submitCourseRating from "../api/submit_rating";
 import { inferSemesterFromLevel } from "../utils/levels";
+import { useAuth } from "../context/AuthContext.jsx";
 import "./CoursesList.css";
 import ForceGraph2D from "react-force-graph-2d";
 import * as d3Force from "d3-force";
@@ -1378,6 +1379,8 @@ function ScoreSummary({
   onValuesChange,
   onOpenGraph,
 }) {
+  const { user } = useAuth();
+  const userEmail = typeof user?.email === 'string' ? user.email.trim() : '';
   const base = {
     relevance: normalizeScore(course?.score_relevance),
     skills: normalizeScore(course?.score_skills),
@@ -1540,6 +1543,7 @@ function ScoreSummary({
         comment_product: commentNotes.product,
         comment_venture: commentNotes.venture,
         comment_intro: commentNotes.foundations,
+        user_email: userEmail,
       });
       setSubmitted(true);
       broadcastState({ submitted: true, timestamp: Date.now() });
@@ -2459,7 +2463,9 @@ function CourseGraphModal({ course, courses, profiles, onClose }) {
                   p.summary ||
                   p.description ||
                   "";
-                return intro || "Teacher intro";
+                const tag = "(AI summarized)";
+                if (intro) return `${intro}\n${tag}`;
+                return `Teacher intro ${tag}`;
               }
               if (node.type === "teacher") {
                 const p = node.rawProfile || {};

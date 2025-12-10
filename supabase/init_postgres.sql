@@ -219,6 +219,7 @@ create table if not exists course_ratings (
     created_at          timestamptz not null default now(),
     course_id           text        not null check (char_length(course_id) > 0),
     course_code         text        not null check (char_length(course_code) > 0),
+    user_email          text        check (char_length(user_email) <= 320),
     score_relevance     smallint    not null check (score_relevance between 0 and 100),
     score_personal      smallint    not null check (score_personal between 0 and 100),
     score_product       smallint    not null check (score_product between 0 and 100),
@@ -251,6 +252,9 @@ begin
     if not exists (select 1 from information_schema.columns where table_name = 'course_ratings' and column_name = 'comment_intro') then
         alter table course_ratings add column comment_intro text not null default '';
     end if;
+    if not exists (select 1 from information_schema.columns where table_name = 'course_ratings' and column_name = 'user_email') then
+        alter table course_ratings add column user_email text;
+    end if;
 
     if not exists (select 1 from pg_constraint where conname = 'course_ratings_comment_relevance_len_check') then
         alter table course_ratings add constraint course_ratings_comment_relevance_len_check check (char_length(comment_relevance) <= 2000);
@@ -266,6 +270,9 @@ begin
     end if;
     if not exists (select 1 from pg_constraint where conname = 'course_ratings_comment_intro_len_check') then
         alter table course_ratings add constraint course_ratings_comment_intro_len_check check (char_length(comment_intro) <= 2000);
+    end if;
+    if not exists (select 1 from pg_constraint where conname = 'course_ratings_user_email_len_check') then
+        alter table course_ratings add constraint course_ratings_user_email_len_check check (user_email is null or char_length(user_email) <= 320);
     end if;
 end $$;
 
