@@ -88,14 +88,14 @@ function NavBar() {
           justifySelf: 'end',
         }}
       >
-        <Link to="/courses" style={navLinkStyle}>
-          Courses
+        <Link to="/compass" style={navLinkStyle}>
+          Compass
         </Link>
         <Link to="/guided" style={navLinkStyle}>
           Guided Search
         </Link>
-        <Link to="/compass" style={navLinkStyle}>
-          Compass
+        <Link to="/courses" style={navLinkStyle}>
+          Courses
         </Link>
         <button
           type="button"
@@ -157,7 +157,7 @@ function App() {
             </ProtectedRoute>
           )}
         />
-        <Route path="*" element={<Navigate to="/courses" replace />} />
+        <Route path="*" element={<Navigate to="/compass" replace />} />
       </Routes>
     </Router>
   );

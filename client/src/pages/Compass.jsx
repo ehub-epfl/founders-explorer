@@ -4,16 +4,32 @@ import { getCompassEntries } from '../api/courses_api';
 import './Compass.css';
 
 const SEGMENT_COUNT = 64; // reduce number of bars
-const DISC_RADIUS = 120;
-const BAR_LENGTH = 140; // bar length increased (can be adjusted for visual effect)
+const LABEL_DISC_INSET_RATIO = 0.08;
+const DEFAULT_STAGE_DIAMETER = 640;
+const LABEL_EDGE_PADDING = 24;
+const LABEL_RIGHT_MARGIN = 10;
+const DEFAULT_LABEL_LENGTH = 60;
+const MASK_RADIUS = 160;
+const CURSOR_MOVE_PX_THRESHOLD = 3;
+
+const CATEGORY_COLORS = ['#FF006F', '#FFBCD9', '#6D4B9A', '#4A62FF', '#5AB7D4'];
+
+function getCategoryColor(category) {
+  const normalized = (category || '').trim();
+  if (!normalized) {
+    return CATEGORY_COLORS[0];
+  }
+  let hash = 0;
+  for (let i = 0; i < normalized.length; i += 1) {
+    // eslint-disable-next-line no-bitwise
+    hash = (hash * 31 + normalized.charCodeAt(i)) >>> 0;
+  }
+  const index = hash % CATEGORY_COLORS.length;
+  return CATEGORY_COLORS[index];
+}
 
 function normalizeAngle(angle) {
   return (angle + 360) % 360;
-}
-
-function angularDifference(a, b) {
-  const diff = Math.abs(normalizeAngle(a) - normalizeAngle(b));
-  return diff > 180 ? 360 - diff : diff;
 }
 
 const POINTER_SMOOTHING = 0.18;
@@ -33,19 +49,22 @@ function Compass() {
   const containerRef = useRef(null);
   const navigate = useNavigate();
   const [pointer, setPointer] = useState({ angle: 0, distance: 1.2, distancePx: 0, active: false });
-  const [trace, setTrace] = useState([]);
   const [stageSize, setStageSize] = useState({ w: 0, h: 0 });
   const [entriesBySlot, setEntriesBySlot] = useState(() => Array(SEGMENT_COUNT).fill(null));
+  const discRef = useRef(null);
+  const [discRadiusPx, setDiscRadiusPx] = useState(0);
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0, active: true });
+  const [cursorInitialized, setCursorInitialized] = useState(false);
+  const labelLengthsRef = useRef(Array(SEGMENT_COUNT).fill(DEFAULT_LABEL_LENGTH));
+  const labelNodesRef = useRef(Array(SEGMENT_COUNT).fill(null));
+  const [, bumpLabelMeasurements] = useState(0);
   const pointerTargetRef = useRef({ angle: 0, distance: 1.2, distancePx: 0, active: false });
-  const pendingTraceRef = useRef(null);
-  const traceRef = useRef([]);
   const rafRef = useRef(null);
 
   const segments = useMemo(() => (
-    Array.from({ length: SEGMENT_COUNT }, (_, index) => ({
-      id: index,
-      angle: (index / SEGMENT_COUNT) * 360,
-      wobble: Math.sin(index * 0.38) * 8 + Math.cos(index * 0.16) * 5,
+    Array.from({ length: SEGMENT_COUNT }, (_, slotIndex) => ({
+      slotIndex,
+      angle: (slotIndex / SEGMENT_COUNT) * 360,
     }))
   ), []);
 
@@ -84,9 +103,6 @@ function Compass() {
     };
   }, []);
 
-  useEffect(() => {
-    traceRef.current = trace;
-  }, [trace]);
 
   useEffect(() => () => {
     if (rafRef.current !== null) {
@@ -94,6 +110,82 @@ function Compass() {
       rafRef.current = null;
     }
   }, []);
+
+  useEffect(() => {
+    if (cursorInitialized) return;
+    if (!stageSize.w || !stageSize.h) return;
+    const stageMin = Math.min(stageSize.w, stageSize.h);
+    const stageRadiusPx = stageMin / 2;
+    const ringFactor = Math.max(0.2, 1 - LABEL_DISC_INSET_RATIO * 2);
+    const fallbackRadius = stageRadiusPx * ringFactor;
+    const radius = discRadiusPx || fallbackRadius;
+    const offset = Math.max(0, radius - LABEL_RIGHT_MARGIN);
+    setCursorPos({
+      x: stageSize.w / 2 + offset,
+      y: stageSize.h / 2,
+      active: true,
+    });
+  }, [stageSize.w, stageSize.h, discRadiusPx, cursorInitialized]);
+
+  useEffect(() => {
+    const node = containerRef.current;
+    if (!node) return undefined;
+
+    let rafId = null;
+    const updateSize = () => {
+      const rect = node.getBoundingClientRect();
+      if (rect.width && rect.height) {
+        setStageSize({ w: rect.width, h: rect.height });
+      }
+    };
+
+    const scheduleUpdate = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        updateSize();
+      });
+    };
+
+    updateSize();
+    if (typeof ResizeObserver === 'function') {
+      const observer = new ResizeObserver(scheduleUpdate);
+      observer.observe(node);
+      return () => {
+        observer.disconnect();
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+        }
+      };
+    }
+    window.addEventListener('resize', scheduleUpdate);
+    return () => {
+      window.removeEventListener('resize', scheduleUpdate);
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const node = discRef.current;
+    if (!node) return;
+    setDiscRadiusPx(node.offsetWidth / 2);
+  }, [stageSize.w, stageSize.h]);
+
+  const recordLabelLength = useCallback((index, node) => {
+    if (!node) return;
+    const rect = node.getBoundingClientRect();
+    const length = rect.height;
+    if (!Number.isFinite(length) || length <= 0) return;
+    const prev = labelLengthsRef.current[index] || 0;
+    if (Math.abs(prev - length) > 0.5) {
+      labelLengthsRef.current[index] = length;
+      bumpLabelMeasurements((v) => v + 1);
+    }
+  }, [bumpLabelMeasurements]);
 
   const scheduleAnimationFrame = useCallback(() => {
     if (rafRef.current !== null) {
@@ -123,11 +215,7 @@ function Compass() {
         }
         return next;
       });
-      if (pendingTraceRef.current) {
-        setTrace(pendingTraceRef.current);
-        pendingTraceRef.current = null;
-      }
-      if (pointerNeedsAnotherFrame || pendingTraceRef.current) {
+      if (pointerNeedsAnotherFrame) {
         scheduleAnimationFrame();
       }
     };
@@ -147,7 +235,6 @@ function Compass() {
     const maxRadius = Math.min(rect.width, rect.height) / 2;
     const rawDistance = Math.hypot(dx, dy);
     const distance = Math.min(MAX_DISTANCE, rawDistance / maxRadius);
-    setStageSize({ w: rect.width, h: rect.height });
     const last = pointerTargetRef.current;
     const angleDiff = Math.abs(shortestAngleDelta(angle, last.angle));
     const distanceDiff = Math.abs(distance - last.distance);
@@ -162,10 +249,19 @@ function Compass() {
       active: true,
     };
     const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
-    const prevTrace = traceRef.current || [];
-    const nextTrace = [...prevTrace, point];
-    const overflow = nextTrace.length - 140;
-    pendingTraceRef.current = overflow > 0 ? nextTrace.slice(overflow) : nextTrace;
+    const ringFactor = Math.max(0.2, 1 - LABEL_DISC_INSET_RATIO * 2);
+    const fallbackDiscRadius = (Math.min(rect.width, rect.height) / 2) * ringFactor;
+    const discRadiusLimit = discRadiusPx || fallbackDiscRadius;
+    const insideDisc = rawDistance <= discRadiusLimit;
+    const dxCursor = point.x - cursorPos.x;
+    const dyCursor = point.y - cursorPos.y;
+    const cursorMoveDistance = Math.hypot(dxCursor, dyCursor);
+    if (cursorMoveDistance > CURSOR_MOVE_PX_THRESHOLD || insideDisc !== cursorPos.active) {
+      setCursorPos({ x: point.x, y: point.y, active: insideDisc });
+    }
+    if (!cursorInitialized) {
+      setCursorInitialized(true);
+    }
     scheduleAnimationFrame();
   };
 
@@ -177,29 +273,28 @@ function Compass() {
       distancePx: 0,
       active: false,
     };
-    pendingTraceRef.current = [];
+    setCursorPos((prev) => (prev.active ? { ...prev, active: false } : prev));
     scheduleAnimationFrame();
-  };
-
-  const computeOffset = (segment) => {
-    // Bell-shaped function: symmetric around pointer.angle
-    const angleDiff = angularDifference(segment.angle, pointer.angle);
-
-    // Controls width of bell curve (degrees): smaller = sharper, larger = smoother
-    const sigma = 80; // widen bell curve so more bars are visible
-
-    // Standard Gaussian: baseRadius(0) = DISC_RADIUS
-    const t = angleDiff / sigma;
-    const baseRadius = DISC_RADIUS * Math.exp(-0.5 * t * t);
-
-    // baseRadius represents distance of bar base from center (excludes bar height), max = disc radius
-    return baseRadius;
   };
 
   const isEnergized = pointer.distance < 1.02;
 
-  const lineLength = pointer.active ? pointer.distancePx : 0;
-  const tracePoints = trace.map((p) => `${p.x},${p.y}`).join(' ');
+  const measuredDiameter = stageSize.w && stageSize.h
+    ? Math.min(stageSize.w, stageSize.h)
+    : DEFAULT_STAGE_DIAMETER;
+  const stageRadius = measuredDiameter / 2;
+  const ringFactor = Math.max(0.2, 1 - LABEL_DISC_INSET_RATIO * 2);
+  const fallbackDiscRadius = stageRadius * ringFactor;
+  const effectiveDiscRadius = discRadiusPx || fallbackDiscRadius;
+  const outerRadiusBase = Math.max(0, Math.min(stageRadius - LABEL_EDGE_PADDING, effectiveDiscRadius));
+  const usableOuterRadius = Math.max(0, outerRadiusBase - LABEL_RIGHT_MARGIN);
+  const stageMinDimension = stageSize.w && stageSize.h
+    ? Math.min(stageSize.w, stageSize.h)
+    : DEFAULT_STAGE_DIAMETER;
+  const discInsetPx = stageMinDimension * LABEL_DISC_INSET_RATIO;
+  const maskExtent = Math.max(0, stageMinDimension - 2 * discInsetPx);
+  const maskX = Math.max(0, Math.min(maskExtent, cursorPos.x - discInsetPx));
+  const maskY = Math.max(0, Math.min(maskExtent, cursorPos.y - discInsetPx));
 
   return (
     <div className="compass-page">
@@ -208,22 +303,22 @@ function Compass() {
         className="compass-stage"
         onMouseMove={handleMove}
         onMouseLeave={handleLeave}
+        style={{
+          '--mask-x': `${maskX}px`,
+          '--mask-y': `${maskY}px`,
+          '--mask-radius': `${MASK_RADIUS}px`,
+        }}
       >
-        {trace.length > 1 && (
-          <svg
-            className="compass-trace"
-            width={stageSize.w || undefined}
-            height={stageSize.h || undefined}
-            viewBox={stageSize.w && stageSize.h ? `0 0 ${stageSize.w} ${stageSize.h}` : undefined}
-          >
-            <polyline points={tracePoints} />
-          </svg>
-        )}
-        <div className="compass-grid" />
-        {segments.map((segment) => {
-          const entry = entriesBySlot[segment.id] || null;
-          const category = entry?.category || '';
-          const label = (entry?.label || '').trim();
+        <div className="compass-viewport">
+          <div className="compass-grid" />
+          <div ref={discRef} className="compass-disc" />
+          {segments.map(({ slotIndex, angle }) => {
+            const entry = entriesBySlot[slotIndex];
+            const category = entry?.category || '';
+            const label = (entry?.label || '').trim();
+            if (!label) {
+              return null;
+          }
           const description = (entry?.description || '').trim();
           const isCourse = category === 'course';
           const entryTitle = isCourse && description && label
@@ -246,49 +341,83 @@ function Compass() {
               navigateToCourse(event);
             }
           };
-          // Bell function output: bar base radius, max = DISC_RADIUS
-          const baseRadius = computeOffset(segment);
-          // Bar center distance = base radius + half of bar length
-          const barCenterRadius = baseRadius + BAR_LENGTH / 2;
-          return (
-            <div
-              key={segment.id}
-              className="compass-bar"
-              style={{ transform: `translate(-50%, -50%) rotate(${segment.angle}deg)` }}
-            >
-              <span
-                data-energized={isEnergized}
+          const transformStyle = {
+            transform: `translate(-50%, -50%) rotate(${angle}deg)`,
+          };
+          const labelLength = labelLengthsRef.current[slotIndex] || DEFAULT_LABEL_LENGTH;
+          const distanceFromCenter = Math.max(0, usableOuterRadius - labelLength);
+          const stackStyle = {
+            transform: `translate(-50%, -${distanceFromCenter}px)`,
+          };
+            return (
+              <div
+                key={slotIndex}
+                className="compass-label"
                 data-category={category || undefined}
-                data-label={label || undefined}
-                title={entryTitle || undefined}
-                role={isInteractive ? 'button' : undefined}
-                tabIndex={isInteractive ? 0 : -1}
-                aria-label={entryTitle || label || undefined}
-                onClick={navigateToCourse}
-                onKeyDown={handleKeyDown}
-                style={{
-                  // All bars have equal length
-                  height: `${BAR_LENGTH}px`,
-                  // Position bar so base sits at baseRadius and extends outward by BAR_LENGTH
-                  transform: `translate(-50%, -${barCenterRadius}px)`,
-                  cursor: isInteractive ? 'pointer' : 'default',
-                }}
-              />
+                data-energized={isEnergized}
+                style={transformStyle}
+              >
+                <div
+                  className="compass-label-stack"
+                  style={stackStyle}
+                  data-category={category || undefined}
+                >
+                  <span
+                    className="compass-label-chip"
+                    data-energized={isEnergized}
+                    data-category={category || undefined}
+                    title={entryTitle || undefined}
+                    role={isInteractive ? 'button' : undefined}
+                    tabIndex={isInteractive ? 0 : -1}
+                    aria-label={entryTitle || label || undefined}
+                    onClick={navigateToCourse}
+                    onKeyDown={handleKeyDown}
+                    style={{
+                      cursor: isInteractive ? 'pointer' : 'default',
+                      '--chip-bg': getCategoryColor(category),
+                    }}
+                  >
+                    {label}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+          <button
+            type="button"
+            className="compass-explore-button"
+            onClick={() => navigate('/guided')}
+          >
+            Explore All
+          </button>
+        </div>
+        <div className="compass-mask" />
+      </div>
+      <div className="compass-measurements" aria-hidden="true">
+        {entriesBySlot.map((entry, slotIndex) => {
+          const label = (entry?.label || '').trim();
+          if (!label) {
+            labelNodesRef.current[slotIndex] = null;
+            return null;
+          }
+          const category = entry?.category || '';
+          const setRef = (node) => {
+            labelNodesRef.current[slotIndex] = node;
+            if (node) {
+              recordLabelLength(slotIndex, node);
+            }
+          };
+          return (
+            <div key={`measure-${slotIndex}`} ref={setRef} className="compass-measure-stack">
+              <span
+                className="compass-label-chip"
+                data-category={category || undefined}
+              >
+                {label}
+              </span>
             </div>
           );
         })}
-        <div
-          className="compass-core"
-          style={{ background: '#ffffff' }}  // make central disc solid and render above bars
-        />
-      </div>
-      <div className="compass-hero">
-        <h1>Compass</h1>
-        <p>Move your cursor near the disc — the columns react and stretch outward from the rim.</p>
-      </div>
-      <div className="compass-legend">
-        <span className="pulse" />
-        <span>Columns stretch toward your cursor and settle back when you leave. The red ray follows your pointer.</span>
       </div>
     </div>
   );

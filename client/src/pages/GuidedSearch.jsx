@@ -1,9 +1,9 @@
 // NOTE: Place studyplans_tree.json under client/public/ so it is served at /studyplans_tree.json
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './GuidedSearch.css';
 function GuidedSearch() {
     const navigate = useNavigate();
-    const [showIntro, setShowIntro] = useState(true);
     const [programsTree, setProgramsTree] = useState(null);
     const [loadError, setLoadError] = useState(null);
     const [currentStep, setCurrentStep] = useState(0);
@@ -87,59 +87,6 @@ function GuidedSearch() {
         );
     }
 
-    if (showIntro) {
-        return (
-            <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '70vh',
-                padding: '48px 16px',
-                textAlign: 'center',
-                gap: '24px',
-            }}>
-                <div style={{ maxWidth: 560 }}>
-                    <h1 style={{ marginBottom: '0.75rem', fontSize: '2rem' }}>Guided Search</h1>
-                    <p style={{ margin: 0, fontSize: '1.05rem', color: 'var(--color-text-muted, #4b5563)' }}>
-                        Answer a few quick questions and we’ll prefill the course filters for you.
-                    </p>
-                </div>
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                    <button
-                        type="button"
-                        onClick={() => navigate('/courses')}
-                        style={{
-                            padding: '10px 18px',
-                            borderRadius: 6,
-                            border: '1px solid var(--color-border, #d1d5db)',
-                            background: 'var(--color-surface, #fff)',
-                            color: 'var(--color-text, #111827)',
-                            cursor: 'pointer',
-                        }}
-                    >
-                        Skip
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setShowIntro(false)}
-                        style={{
-                            padding: '10px 18px',
-                            borderRadius: 6,
-                            border: '1px solid var(--color-primary, #2563eb)',
-                            background: 'var(--color-primary, #2563eb)',
-                            color: 'var(--color-primary-contrast, #fff)',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                        }}
-                    >
-                        Continue
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
     const isCycleStep = currentStep === 0;
     const question = isCycleStep
         ? 'Which study cycle are you interested in?'
@@ -181,26 +128,29 @@ function GuidedSearch() {
                     {options.map((option) => (
                         <button
                             key={option}
+                            type="button"
+                            className="guided-search-button"
                             onClick={() => (isCycleStep ? handleCycleSelect(option) : handlePlanSelect(option))}
-                            style={{
-                                padding: '12px 16px',
-                                borderRadius: 10,
-                                border: '1px solid var(--color-border-subtle)',
-                                background: 'var(--color-surface)',
-                                color: 'var(--color-text)',
-                                cursor: 'pointer',
-                                boxShadow: 'var(--shadow-elevation)',
-                            }}
                         >
                             {option}
                         </button>
                     ))}
                 </div>
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', marginTop: 12 }}>
-                    <button onClick={handleBack}>
-                        {isCycleStep ? 'Skip' : 'Back'}
-                    </button>
-                    <button onClick={handleSkip}>
+                    {!isCycleStep && (
+                        <button
+                            type="button"
+                            className="guided-search-button"
+                            onClick={handleBack}
+                        >
+                            Back
+                        </button>
+                    )}
+                    <button
+                        type="button"
+                        className="guided-search-button"
+                        onClick={handleSkip}
+                    >
                         Skip guided search
                     </button>
                 </div>

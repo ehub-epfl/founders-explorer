@@ -4,6 +4,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { getCourses, getPeopleProfilesByCardUrls, getStudyPlansByProgram } from "../api/courses_api";
 import submitCourseRating from "../api/submit_rating";
 import { inferSemesterFromLevel } from "../utils/levels";
+import "./CoursesList.css";
+import ForceGraph2D from "react-force-graph-2d";
+import * as d3Force from "d3-force";
 
 const GRID_MIN_WIDTH = 220; // px
 
@@ -271,12 +274,24 @@ const selectFieldStyle = (disabled = false) => ({
 });
 
 const chipButtonStyle = (active = false) => ({
-  padding: '4px 8px',
-  border: `1px solid ${THEME_VARS.border}`,
-  borderRadius: 6,
-  background: active ? THEME_VARS.surfaceActive : THEME_VARS.surface,
-  color: THEME_VARS.text,
+  boxSizing: 'border-box',
+  height: 20,
+  padding: '0 6px',
+  borderRadius: 50,
+  background: active ? '#000000' : '#FFFFFF',
+  border: '1px solid #000000',
+  fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  fontStyle: 'normal',
+  fontWeight: 300,
+  fontSize: 13,
+  lineHeight: '145%',
+  letterSpacing: '-0.005em',
+  color: active ? '#FFFFFF' : '#000000',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   cursor: 'pointer',
+  transition: 'background 0.2s ease, color 0.2s ease, border-color 0.2s ease',
 });
 
 const filterCapsuleButtonStyle = ({ active = false, variant = 'outline', disabled = false } = {}) => {
@@ -1733,21 +1748,42 @@ function ScoreSummary({
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
               <div>
-                <div style={{ fontWeight: 700 }}>Rate this course</div>
+                <div
+                  style={{
+                    fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                    fontStyle: 'normal',
+                    fontWeight: 300,
+                    fontSize: 20,
+                    lineHeight: '145%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                    letterSpacing: '-0.005em',
+                    color: '#000000',
+                  }}
+                >
+                  Rate this course
+                </div>
                 <div style={{ fontSize: 12, color: THEME_VARS.textMuted }}>Select a score and share a short note for each area.</div>
               </div>
               <button
                 type="button"
+                aria-label="Close rating window"
                 onClick={() => setShowRatingModal(false)}
                 style={{
-                  border: `1px solid ${THEME_VARS.border}`,
-                  background: THEME_VARS.surfaceMuted,
-                  borderRadius: 6,
-                  padding: '4px 8px',
+                  border: 'none',
+                  background: 'transparent',
+                  fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                  fontStyle: 'normal',
+                  fontWeight: 300,
+                  fontSize: 20,
+                  lineHeight: '145%',
+                  letterSpacing: '-0.005em',
+                  color: '#000000',
                   cursor: 'pointer',
                 }}
               >
-                Close
+                ×
               </button>
             </div>
 
@@ -1760,13 +1796,27 @@ function ScoreSummary({
                     flexDirection: 'column',
                     gap: 6,
                     padding: 10,
-                    borderRadius: 10,
-                    border: `1px solid ${THEME_VARS.borderSubtle}`,
-                    background: THEME_VARS.surfaceMuted,
+                    borderRadius: 15,
+                    background: '#F6F6F6',
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                    <div style={{ fontWeight: 700, fontSize: 13 }}>{r.label}</div>
+                    <div
+                      style={{
+                        fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                        fontStyle: 'normal',
+                        fontWeight: 300,
+                        fontSize: 17,
+                        lineHeight: '145%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        textAlign: 'center',
+                        letterSpacing: '-0.005em',
+                        color: '#000000',
+                      }}
+                    >
+                      {r.label}
+                    </div>
                     <div style={{ fontSize: 11, color: THEME_VARS.textMuted }}>
                       Data {r.base != null ? `${formatScoreDisplay(r.base)}` : '–'}
                     </div>
@@ -1823,7 +1873,22 @@ function ScoreSummary({
                 type="button"
                 onClick={handleModalSubmit}
                 disabled={submitting}
-                style={primaryActionStyle(!submitting)}
+                style={{
+                  boxSizing: 'border-box',
+                  padding: '6px 18px',
+                  borderRadius: 50,
+                  border: '1px solid #000000',
+                  background: '#FFFFFF',
+                  color: '#000000',
+                  fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                  fontStyle: 'normal',
+                  fontWeight: 300,
+                  fontSize: 13,
+                  lineHeight: '145%',
+                  letterSpacing: '-0.005em',
+                  cursor: submitting ? 'not-allowed' : 'pointer',
+                  opacity: submitting ? 0.7 : 1,
+                }}
               >
                 {submitting ? 'Submitting…' : 'Submit rating'}
               </button>
@@ -1865,7 +1930,23 @@ function ScoreSummary({
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-              <h3 style={{ margin: 0 }}>{course?.course_name || 'Course Detail'}</h3>
+              <h3
+                style={{
+                  margin: 0,
+                  fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                  fontStyle: 'normal',
+                  fontWeight: 300,
+                  fontSize: 20,
+                  lineHeight: '145%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  letterSpacing: '-0.005em',
+                  color: '#000000',
+                }}
+              >
+                {course?.course_name || 'Course Detail'}
+              </h3>
               <button
                 type="button"
                 onClick={() => setShowCourseDetailModal(false)}
@@ -1877,6 +1958,17 @@ function ScoreSummary({
             </div>
             <div style={{ whiteSpace: 'pre-line', lineHeight: 1.6 }}>
               {courseDescription || 'No description available.'}
+            </div>
+            <div
+              style={{
+                marginTop: 8,
+                fontSize: 12,
+                color: '#6B7280',
+                fontStyle: 'italic',
+                textDecoration: 'underline',
+              }}
+            >
+              AI summarized
             </div>
           </div>
         </div>
@@ -1959,6 +2051,565 @@ function colorForRank(rank) {
   }
   const paletteIndex = Math.min(Math.floor(rank), PARETO_RANK_COLORS.length - 1);
   return PARETO_RANK_COLORS[paletteIndex];
+}
+
+const SUPABASE_URL = (import.meta?.env?.SUPABASE_URL || "").replace(/\/$/, "");
+
+function normalizePhotoUrl(rawValue) {
+  if (typeof rawValue !== "string") return "";
+  const trimmed = rawValue.trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith("//")) return `https:${trimmed}`;
+  if (SUPABASE_URL && trimmed.startsWith("/storage/")) {
+    return `${SUPABASE_URL}${trimmed}`;
+  }
+  if (SUPABASE_URL && trimmed.startsWith("storage/")) {
+    return `${SUPABASE_URL}/${trimmed}`;
+  }
+  if (typeof window !== "undefined" && window.location?.origin && trimmed.startsWith("/")) {
+    return `${window.location.origin}${trimmed}`;
+  }
+  return trimmed;
+}
+
+function derivePhotoFromCardUrl(cardUrlRaw) {
+  const cleaned = typeof cardUrlRaw === "string" ? cardUrlRaw.trim() : "";
+  if (!cleaned) return "";
+  const match = cleaned.match(/people\.epfl\.ch\/(\d{3,})/i);
+  if (match && match[1]) {
+    return `https://people.epfl.ch/private/common/photos/links/${match[1]}.jpg`;
+  }
+  return "";
+}
+
+function resolveProfilePhotoUrl(profile) {
+  if (!profile) return "";
+  const candidates = [
+    profile.photoUrl,
+    profile.photo_url,
+    profile.photo,
+    profile.image_url,
+    profile.avatar_url,
+    profile.image,
+    derivePhotoFromCardUrl(profile.card_url || profile.url || ""),
+  ];
+  for (const candidate of candidates) {
+    const normalized = normalizePhotoUrl(candidate);
+    if (normalized) return normalized;
+  }
+  return "";
+}
+
+function canonicalizeTeacherUrl(urlRaw) {
+  const trimmed = typeof urlRaw === "string" ? urlRaw.trim() : "";
+  if (!trimmed) return "";
+  const withoutQuery = trimmed.split("?")[0].replace(/\/+$/, "");
+  try {
+    const parsed = new URL(withoutQuery, withoutQuery.startsWith("http") ? undefined : "https://placeholder.invalid");
+    const origin = parsed.origin === "https://placeholder.invalid" ? "" : parsed.origin;
+    const path = parsed.pathname.replace(/\/+$/, "");
+    return `${origin}${path}`;
+  } catch {
+    return withoutQuery;
+  }
+}
+
+// Build graph data for the course relation graph: courses, teachers, and teacher intros as nodes.
+function buildCourseGraphData(focusCourse, allCourses, profiles) {
+  const nodes = [];
+  const links = [];
+  const nodeIds = new Set();
+
+  const addNode = (node) => {
+    if (!node || !node.id) return;
+    if (nodeIds.has(node.id)) return;
+    nodeIds.add(node.id);
+    nodes.push(node);
+  };
+
+  const addLink = (link) => {
+    if (!link || !link.source || !link.target) return;
+    links.push(link);
+  };
+
+  const allCoursesList = Array.isArray(allCourses) ? allCourses : [];
+  const profileList = Array.isArray(profiles) ? profiles : [];
+
+  // Normalize course identity so we can safely match focus course and related courses.
+  const sameCourse = (a, b) => {
+    if (!a || !b) return false;
+    if (a.id && b.id && a.id === b.id) return true;
+    if (a.course_code && b.course_code && a.course_code === b.course_code) {
+      return true;
+    }
+    if (a.url && b.url && a.url === b.url) return true;
+    if (a.course_name && b.course_name && a.course_name === b.course_name) {
+      return true;
+    }
+    return false;
+  };
+
+  // Prefer the instance from allCoursesList when possible so object identity aligns.
+  let focus = null;
+  if (focusCourse) {
+    focus =
+      allCoursesList.find((c) => sameCourse(c, focusCourse)) || focusCourse;
+  }
+
+  const courseIdCache = new Map();
+  const addCourseNode = (course, isFocus = false) => {
+    if (!course) return null;
+    if (courseIdCache.has(course)) return courseIdCache.get(course);
+    const baseKey =
+      course.id ||
+      course.course_code ||
+      course.url ||
+      (course.course_name ? `name:${course.course_name}` : null);
+    if (!baseKey) return;
+    const id = `course:${baseKey}`;
+    addNode({
+      id,
+      type: "course",
+      label: course.course_name || course.course_code || "Course",
+      rawCourse: course,
+      isFocus,
+    });
+    courseIdCache.set(course, id);
+    return id;
+  };
+
+  // Teacher + teacher intro nodes
+  const teacherByUrl = new Map();
+
+  const registerTeacherUrl = (urlKey, payload) => {
+    if (!urlKey) return;
+    teacherByUrl.set(urlKey, payload);
+    const canonical = canonicalizeTeacherUrl(urlKey);
+    if (canonical && canonical !== urlKey) {
+      teacherByUrl.set(canonical, payload);
+    }
+  };
+
+  profileList.forEach((p) => {
+    if (!p) return;
+    const teacherKey =
+      p.id || p.slug || p.card_url || p.url || p.name || p.person_name;
+    if (!teacherKey) return;
+    const teacherId = `teacher:${teacherKey}`;
+    const introId = `teacherIntro:${teacherKey}`;
+    const teacherName = p.name || p.person_name || p.title || "Teacher";
+
+    const photoUrl = resolveProfilePhotoUrl(p);
+
+    addNode({
+      id: teacherId,
+      type: "teacher",
+      label: teacherName,
+      rawProfile: p,
+      photoUrl,
+    });
+
+    // Intro as its own node – 这里就是“老师介绍”那个节点
+    addNode({
+      id: introId,
+      type: "teacherIntro",
+      label: "Intro",
+      rawProfile: p,
+    });
+
+    addLink({
+      source: teacherId,
+      target: introId,
+      kind: "teacher-intro",
+    });
+
+    const urlKey = (p.url || p.card_url || "").trim();
+    registerTeacherUrl(urlKey, { teacherId, profile: p });
+  });
+
+  // Center: focus course node
+  const focusCourseId = focus ? addCourseNode(focus, true) : null;
+
+  if (focus && focusCourseId) {
+    // Link focus course ↔ teachers using teacher URLs when possible
+    const teacherEntries = Array.isArray(focus.teachers) ? focus.teachers : [];
+    const teacherNamesFallback = Array.isArray(focus.teacher_names)
+      ? focus.teacher_names
+      : [];
+
+    teacherEntries.forEach((t) => {
+      const url = typeof t?.url === "string" ? t.url.trim() : "";
+      if (!url) return;
+      const info = teacherByUrl.get(url) || teacherByUrl.get(canonicalizeTeacherUrl(url));
+      if (!info) return;
+      addLink({
+        source: focusCourseId,
+        target: info.teacherId,
+        kind: "course-teacher",
+      });
+    });
+
+    // Fallback: if there are teachers only by name and no profile, still show a teacher node
+    if (!teacherEntries.length && teacherNamesFallback.length) {
+      teacherNamesFallback.forEach((nameRaw) => {
+        const name =
+          typeof nameRaw === "string" ? nameRaw.trim() : String(nameRaw);
+        if (!name) return;
+        const teacherId = `teacher:${name}`;
+        addNode({
+          id: teacherId,
+          type: "teacher",
+          label: name,
+          rawProfile: null,
+        });
+        addLink({
+          source: focusCourseId,
+          target: teacherId,
+          kind: "course-teacher",
+        });
+      });
+    }
+
+    // Related courses: any other course taught by the same profs (matched by URL)
+    allCoursesList.forEach((course) => {
+      if (!course || sameCourse(course, focus)) return;
+      const entries = Array.isArray(course.teachers) ? course.teachers : [];
+      const matchedUrls = [];
+      entries.forEach((t) => {
+        const urlKey = typeof t?.url === "string" ? t.url.trim() : "";
+        if (urlKey && teacherByUrl.has(urlKey)) {
+          matchedUrls.push(urlKey);
+        } else {
+          const canonical = canonicalizeTeacherUrl(urlKey);
+          if (canonical && teacherByUrl.has(canonical)) {
+            matchedUrls.push(canonical);
+          }
+        }
+      });
+      if (!matchedUrls.length) return;
+
+      const relatedId = addCourseNode(course, false);
+      matchedUrls.forEach((urlKey) => {
+        const info = teacherByUrl.get(urlKey);
+        if (!info) return;
+        addLink({
+          source: relatedId,
+          target: info.teacherId,
+          kind: "course-teacher",
+        });
+      });
+    });
+  }
+
+  return { nodes, links };
+}
+
+function CourseGraphModal({ course, courses, profiles, onClose }) {
+  const overlayRef = useRef(null);
+  const containerRef = useRef(null);
+  const fgRef = useRef(null);
+  const [canvasSize, setCanvasSize] = useState({ width: 600, height: 400 });
+
+  const graphData = useMemo(
+    () => buildCourseGraphData(course, courses, profiles),
+    [course, courses, profiles],
+  );
+
+  // 让 graph 自适应弹窗大小
+  useEffect(() => {
+    function updateSize() {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const width = Math.max(320, rect.width);
+      const height = Math.max(260, rect.height);
+      setCanvasSize({ width, height });
+    }
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
+
+  // 添加碰撞力，防止节点重叠
+  useEffect(() => {
+    if (!fgRef.current) return;
+    const collide = d3Force.forceCollide(28);
+    fgRef.current.d3Force("collide", collide);
+  }, [graphData]);
+
+  const handleOverlayClick = (event) => {
+    if (event.target === overlayRef.current) {
+      if (typeof onClose === "function") onClose();
+    }
+  };
+
+  const graphTitle =
+    course?.course_name ||
+    course?.course_code ||
+    "Course Relations";
+
+  return (
+    <div
+      ref={overlayRef}
+      role="dialog"
+      aria-modal="true"
+      onClick={handleOverlayClick}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(15, 23, 42, 0.55)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 16,
+        zIndex: 3000,
+      }}
+    >
+      <div
+        onClick={(event) => event.stopPropagation()}
+        style={{
+          width: "min(960px, 100%)",
+          height: "min(640px, 85vh)",
+          background: "#ffffff",
+          borderRadius: 16,
+          padding: 12,
+          boxShadow: "0 18px 40px rgba(15, 23, 42, 0.35)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 8,
+            padding: "2px 4px 6px",
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <div
+              style={{
+                fontFamily:
+                  '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontWeight: 300,
+                fontSize: 16,
+                letterSpacing: "-0.01em",
+                color: "#000000",
+              }}
+            >
+              Course Graph
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: "#6B7280",
+                maxWidth: 520,
+              }}
+            >
+              Drag nodes to rearrange. On Mac you can drag the background or use
+              trackpad gestures to explore the whole graph when it doesn&apos;t
+              fit in the window.
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close course graph"
+            style={{
+              border: "none",
+              background: "transparent",
+              fontSize: 20,
+              cursor: "pointer",
+              color: "#000000",
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        <div
+          style={{
+            flex: "1 1 auto",
+            borderRadius: 12,
+            border: "1px solid rgba(148, 163, 184, 0.5)",
+            overflow: "hidden",
+            position: "relative",
+          }}
+          ref={containerRef}
+        >
+          <ForceGraph2D
+            ref={fgRef}
+            width={canvasSize.width}
+            height={canvasSize.height}
+            graphData={graphData}
+            enableNodeDrag
+            enableZoomInteraction
+            enablePanInteraction
+            enablePointerInteraction
+            nodeRelSize={4}
+            nodeLabel={(node) => {
+              if (node.type === "teacherIntro") {
+                const p = node.rawProfile || {};
+                const intro =
+                  p.introduction_summary ||
+                  p.introduction ||
+                  p.bio ||
+                  p.summary ||
+                  p.description ||
+                  "";
+                return intro || "Teacher intro";
+              }
+              if (node.type === "teacher") {
+                const p = node.rawProfile || {};
+                const base = node.label || "Teacher";
+                const title = p.title || "";
+                return title ? `${base} – ${title}` : base;
+              }
+              if (node.type === "course") {
+                return node.label || "Course";
+              }
+              return node.label || "";
+            }}
+            linkColor={(link) =>
+              link.kind === "teacher-intro"
+                ? "rgba(148, 163, 184, 0.8)"
+                : "rgba(15, 23, 42, 0.7)"
+            }
+            linkWidth={(link) =>
+              link.kind === "teacher-intro" ? 0.8 : 1.2
+            }
+            nodeCanvasObject={(node, ctx, globalScale) => {
+              const label =
+                node.type === "teacherIntro" ? "Intro" : node.label || "";
+              const fontSize = 10 / globalScale;
+              const isCourse = node.type === "course";
+              const isTeacher = node.type === "teacher";
+              const isIntro = node.type === "teacherIntro";
+              const radius = isCourse ? 10 : isTeacher ? 7 : 5;
+              let color = "#4B5563";
+
+              if (isCourse) {
+                color = node.isFocus ? "#4A62FF" : "#111827";
+              } else if (isTeacher) {
+                color = "#FF006F";
+              } else if (isIntro) {
+                color = "#9CA3AF";
+              }
+
+              // Teacher nodes: try to draw professor photo in a circle if available
+              const profile = node.rawProfile || {};
+              const photoUrl =
+                node.photoUrl ||
+                resolveProfilePhotoUrl(profile);
+
+              if (isTeacher && photoUrl) {
+                const imgSize = radius * 2;
+                const triggerRefresh = () => {
+                  node.__imgLoaded = true;
+                  if (fgRef.current && typeof fgRef.current.refresh === "function") {
+                    try {
+                      fgRef.current.refresh();
+                    } catch (_err) {
+                      // ignore
+                    }
+                  }
+                };
+                const startLoad = (useCors = true) => {
+                  const img = new Image();
+                  if (useCors) {
+                    img.crossOrigin = "anonymous";
+                  }
+                  img.onload = triggerRefresh;
+                  img.onerror = () => {
+                    if (useCors && !node.__imgTriedNoCors) {
+                      node.__imgTriedNoCors = true;
+                      startLoad(false);
+                    }
+                  };
+                  img.src = photoUrl;
+                  node.__img = img;
+                  node.__imgSrc = photoUrl;
+                };
+                if (!node.__img || node.__imgSrc !== photoUrl) {
+                  node.__imgTriedNoCors = false;
+                  startLoad(true);
+                }
+                const img = node.__img;
+                if (img && img.complete && img.naturalWidth > 0) {
+                  ctx.save();
+                  ctx.beginPath();
+                  ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+                  ctx.closePath();
+                  ctx.clip();
+                  ctx.drawImage(
+                    img,
+                    node.x - radius,
+                    node.y - radius,
+                    imgSize,
+                    imgSize,
+                  );
+                  ctx.restore();
+                  ctx.beginPath();
+                  ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+                  ctx.strokeStyle = "#FF006F";
+                  ctx.lineWidth = 1.2 / globalScale;
+                  ctx.stroke();
+                } else {
+                  ctx.beginPath();
+                  ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+                  ctx.fillStyle = color;
+                  ctx.fill();
+                }
+              } else {
+                // Default node circle
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+                ctx.fillStyle = color;
+                ctx.fill();
+              }
+
+              // Highlight focus course with a ring
+              if (node.isFocus) {
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, radius + 3, 0, 2 * Math.PI, false);
+                ctx.strokeStyle = "#F97316";
+                ctx.lineWidth = 1.5 / globalScale;
+                ctx.stroke();
+              }
+
+              // Label
+              if (label) {
+                ctx.font = `${fontSize}px "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "top";
+                ctx.fillStyle = "#111827";
+                ctx.fillText(label, node.x, node.y + radius + 2 / globalScale);
+              }
+            }}
+          />
+        </div>
+
+        <div
+          style={{
+            paddingTop: 4,
+            fontSize: 11,
+            color: "#9CA3AF",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <span>{graphTitle}</span>
+          <span>
+            Nodes: {graphData.nodes.length} · Links: {graphData.links.length}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function CoursesList() {
@@ -3044,15 +3695,17 @@ useEffect(() => {
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
             <span style={{ fontSize: 12, color: THEME_VARS.textMuted }}>View</span>
             <button
+              type="button"
               onClick={() => setViewMode('list')}
-              style={chipButtonStyle(viewMode === 'list')}
+              className={`courses-view-toggle-button${viewMode === 'list' ? ' is-active' : ''}`}
               title="List view"
             >
               List
             </button>
             <button
+              type="button"
               onClick={() => setViewMode('grid')}
-              style={chipButtonStyle(viewMode === 'grid')}
+              className={`courses-view-toggle-button${viewMode === 'grid' ? ' is-active' : ''}`}
               title="Grid view"
             >
               Grid
@@ -3461,9 +4114,6 @@ useEffect(() => {
                         {c.course_code && (
                           <div style={{ fontSize: 12, opacity: 0.85 }}>{c.course_code}</div>
                         )}
-                        {renderStudyPlanTags(c)}
-                        {renderProgramTags(c.available_programs, c.study_plan_tags)}
-                        {renderLevelTags(c.available_levels)}
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {buildCourseDetailRows(c, scheduleLines)}
                         </ul>
@@ -3510,10 +4160,10 @@ useEffect(() => {
       </div>
 
       {graphOpen && (
-        <RelationGraphModal
+        <CourseGraphModal
           course={graphCourse}
+          courses={graphCoursesList}
           profiles={graphProfiles}
-          allCourses={graphCoursesList}
           onClose={closeRelationGraph}
         />
       )}
@@ -3522,243 +4172,3 @@ useEffect(() => {
 }
 
 export default CoursesList;
-
-function RelationGraphModal({ course, profiles, onClose, allCourses }) {
-  const width = 720;
-  const height = 520;
-  const cx = width / 2;
-  const cy = height / 2;
-  const r1 = 120; // teachers ring (reduced distance)
-  const r2 = 240; // labs ring
-  const TEACHER_R = 28; // professor node radius (larger)
-  const COURSE_NODE_R = 12;
-  const BOX_W = 260; // info panel width for wrapped text
-  const BOX_H = 220; // info panel height (scrolls if content overflows)
-  const BOX_MARGIN = 8;
-
-  const teachers = Array.isArray(course?.teachers) ? course.teachers : [];
-  const nTeachers = Math.max(teachers.length, 1);
-  const profileByUrl = new Map((profiles || []).filter(Boolean).map((p) => [p.card_url || '', p]));
-
-  const labSet = new Map();
-  for (const p of profiles || []) {
-    const url = (p?.lab_url || '').trim();
-    if (!url) continue;
-    if (!labSet.has(url)) {
-      let label = url;
-      try { label = new URL(url).hostname; } catch (e) {}
-      labSet.set(url, { id: url, label });
-    }
-  }
-  const labs = Array.from(labSet.values());
-
-  const teacherPositions = new Map();
-  teachers.forEach((t, i) => {
-    const angle = (2 * Math.PI * i) / nTeachers - Math.PI / 2;
-    teacherPositions.set(t, { x: cx + r1 * Math.cos(angle), y: cy + r1 * Math.sin(angle) });
-  });
-
-  const nLabs = Math.max(labs.length, 1);
-  const labPositions = new Map();
-  labs.forEach((lab, i) => {
-    const angle = (2 * Math.PI * i) / nLabs - Math.PI / 2;
-    labPositions.set(lab.id, { x: cx + r2 * Math.cos(angle), y: cy + r2 * Math.sin(angle) });
-  });
-
-  const teacherKey = (t) => {
-    if (t?.url) return `url:${t.url.trim().toLowerCase()}`;
-    if (t?.name) return `name:${t.name.trim().toLowerCase()}`;
-    return '';
-  };
-
-  const teacherCoursesMap = new Map();
-  const relatedCourses = Array.isArray(allCourses) ? allCourses : [];
-  for (const t of teachers) {
-    const key = teacherKey(t);
-    if (!key) continue;
-    const matches = [];
-    for (const c of relatedCourses) {
-      if (!Array.isArray(c?.teachers)) continue;
-      if (course?.id && c.id === course.id) continue;
-      const match = c.teachers.some((entry) => {
-        const entryKey = teacherKey(entry);
-        if (!entryKey) return false;
-        if (entry?.url && t?.url) {
-          return entry.url.trim().toLowerCase() === t.url.trim().toLowerCase();
-        }
-        return entryKey === key;
-      });
-      if (match) {
-        matches.push({
-          course_key: c.course_key || c.course_code || c.id || '',
-          course_name: c.course_name || '',
-        });
-      }
-    }
-    teacherCoursesMap.set(t, matches);
-  }
-
-  const edges = [];
-  const courseNodes = [];
-  for (const t of teachers) {
-    const tp = teacherPositions.get(t);
-    if (tp) edges.push({ x1: cx, y1: cy, x2: tp.x, y2: tp.y, kind: 'course-teacher' });
-    const profile = t?.url ? profileByUrl.get(t.url) : null;
-    if (profile && profile.lab_url && labPositions.has(profile.lab_url)) {
-      const lp = labPositions.get(profile.lab_url);
-      if (tp && lp) edges.push({ x1: tp.x, y1: tp.y, x2: lp.x, y2: lp.y, kind: 'teacher-lab' });
-    }
-  }
-
-  for (const t of teachers) {
-    const tp = teacherPositions.get(t);
-    if (!tp) continue;
-    const related = teacherCoursesMap.get(t) || [];
-    const nodesForTeacher = related.slice(0, 6);
-    nodesForTeacher.forEach((courseRef, idx2) => {
-      const offsetAngle = ((idx2 / Math.max(1, nodesForTeacher.length)) * Math.PI) - Math.PI / 2;
-      const dist = TEACHER_R + 50;
-      const nx = tp.x + dist * Math.cos(offsetAngle);
-      const ny = tp.y + dist * Math.sin(offsetAngle);
-      edges.push({ x1: tp.x, y1: tp.y, x2: nx, y2: ny, kind: 'teacher-course' });
-      courseNodes.push({
-        key: `${t?.name || 'teacher'}-${courseRef.course_key || idx2}`,
-        x: nx,
-        y: ny,
-        course_key: courseRef.course_key || courseRef.course_name || 'course',
-      });
-    });
-  }
-
-  const overlayStyle = {
-    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000,
-    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
-  };
-  const modalStyle = {
-    background: 'var(--color-surface)', color: 'var(--color-text)', borderRadius: 10,
-    boxShadow: '0 10px 30px rgba(0,0,0,0.35)', width, maxWidth: '95vw', maxHeight: '90vh', overflow: 'auto',
-  };
-  const headerStyle = {
-    padding: '10px 12px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-  };
-  const bodyStyle = { padding: 12 };
-
-  return (
-    <div style={overlayStyle} onClick={onClose}>
-      <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-        <div style={headerStyle}>
-          <div style={{ fontWeight: 600 }}>{course?.course_name || 'Course'}</div>
-          <button onClick={onClose} style={{ padding: '4px 8px', border: '1px solid var(--color-border)', borderRadius: 6, background: 'var(--color-surface)' }}>Close</button>
-        </div>
-        <div style={bodyStyle}>
-          <svg width={width} height={height} role="img" aria-label="Relation graph">
-            {/* edges */}
-            {edges.map((e, idx) => {
-              const stroke = e.kind === 'course-teacher'
-                ? '#94a3b8'
-                : e.kind === 'teacher-lab'
-                  ? '#cbd5e1'
-                  : '#0ea5e9';
-              return (
-                <line key={idx} x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} stroke={stroke} strokeWidth={1.5} />
-              );
-            })}
-            {/* center course node */}
-            <circle cx={cx} cy={cy} r={24} fill="#2563eb" />
-            <text x={cx} y={cy + 42} textAnchor="middle" fontSize={12} fill="#111">Course</text>
-            {/* teacher nodes */}
-            {teachers.map((t, i) => {
-              const p = teacherPositions.get(t);
-              const label = t?.name || 'Teacher';
-              const profile = t?.url ? profileByUrl.get(t.url) : null;
-              const photo = profile?.photo_url;
-              const title = profile?.title || '';
-              const email = profile?.email || '';
-              const intro = (profile?.introduction_summary || '');
-              const href = (typeof t?.url === 'string' && t.url.trim()) ? t.url.trim() : null;
-              const dirRight = p.x < cx; // place text on the side away from center
-              const linkOffset = TEACHER_R + 6;
-              // Compute wrapped panel placement, clamped to viewport
-              const panelX = dirRight
-                ? Math.min(p.x + TEACHER_R + 12, width - BOX_MARGIN - BOX_W)
-                : Math.max(p.x - TEACHER_R - 12 - BOX_W, BOX_MARGIN);
-              const panelY = Math.max(BOX_MARGIN, Math.min(p.y - 22, height - BOX_H - BOX_MARGIN));
-              const branchX = dirRight ? panelX : panelX + BOX_W;
-              const branchY = p.y;
-              const node = (
-                <g key={`t-${i}`} style={{ cursor: href ? 'pointer' : 'default' }}>
-                  {/* avatar (photo clipped to circle) or fallback circle */}
-                  {photo ? (
-                    <g>
-                      <defs>
-                        <clipPath id={`clip-t-${i}`}>
-                          <circle cx={p.x} cy={p.y} r={TEACHER_R} />
-                        </clipPath>
-                      </defs>
-                      <image
-                        href={photo}
-                        x={p.x - TEACHER_R}
-                        y={p.y - TEACHER_R}
-                        width={TEACHER_R * 2}
-                        height={TEACHER_R * 2}
-                        preserveAspectRatio="xMidYMid slice"
-                        clipPath={`url(#clip-t-${i})`}
-                      />
-                      <circle cx={p.x} cy={p.y} r={TEACHER_R} fill="none" stroke="#065f46" strokeWidth={2} />
-                    </g>
-                  ) : (
-                    <circle cx={p.x} cy={p.y} r={TEACHER_R} fill="#10b981" stroke="#065f46" strokeWidth={2} />
-                  )}
-                  {/* teacher name label */}
-                  <text x={p.x} y={p.y - (TEACHER_R + 6)} textAnchor="middle" fontSize={11} fill="#111" style={{ pointerEvents: 'none' }}>{label}</text>
-                  {/* branch with wrapped details: title, intro, email */}
-                  {(title || intro || email) && (
-                    <g>
-                      <line x1={p.x + (dirRight ? linkOffset : -linkOffset)} y1={p.y} x2={branchX} y2={branchY} stroke="#94a3b8" strokeWidth={1} />
-                      <foreignObject x={panelX} y={panelY} width={BOX_W} height={BOX_H} requiredExtensions="http://www.w3.org/1999/xhtml">
-                        <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontSize: 11, lineHeight: 1.25, color: '#111', background: 'rgba(255,255,255,0.92)', padding: 6, border: '1px solid #e5e7eb', borderRadius: 6, wordWrap: 'break-word', overflowY: 'auto', maxHeight: BOX_H }}>
-                          {title && <div style={{ fontWeight: 600, marginBottom: 2 }}>{title}</div>}
-                          {intro && <div style={{ color: '#334155', marginBottom: 2 }}>{intro}</div>}
-                          {email && <div style={{ color: '#2563eb' }}>{email}</div>}
-                        </div>
-                      </foreignObject>
-                    </g>
-                  )}
-                </g>
-              );
-              return href ? (
-                <a key={`a-${i}`} href={href} target="_blank" rel="noreferrer">
-                  {node}
-                </a>
-              ) : node;
-            })}
-            {/* related course nodes */}
-            {courseNodes.map((n) => (
-              <g key={n.key}>
-                <circle cx={n.x} cy={n.y} r={COURSE_NODE_R} fill="#e0f2fe" stroke="#0ea5e9" strokeWidth={1} />
-                <text x={n.x} y={n.y + 4} textAnchor="middle" fontSize={9} fill="#0f172a">
-                  {n.course_key || 'course'}
-                </text>
-              </g>
-            ))}
-            {/* lab nodes */}
-            {labs.map((lab, i) => {
-              const p = labPositions.get(lab.id);
-              return (
-                <g key={`l-${i}`}>
-                  <circle cx={p.x} cy={p.y} r={14} fill="#f59e0b" />
-                  <text x={p.x} y={p.y - 20} textAnchor="middle" fontSize={10} fill="#111" style={{ pointerEvents: 'none' }}>{lab.label}</text>
-                </g>
-              );
-            })}
-          </svg>
-        <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
-          <span style={{ marginRight: 12 }}>• Blue: course</span>
-          <span style={{ marginRight: 12 }}>• Green: teachers</span>
-          <span>• Orange: labs (from people profile)</span>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-}

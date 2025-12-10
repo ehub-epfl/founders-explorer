@@ -6,17 +6,30 @@ import {
   verifyEmailOtp,
   signInWithPassword,
   signUpWithPassword,
+  resendConfirmationEmail,
   requestPasswordReset,
   updatePassword,
 } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 import './Auth.css';
 
+const OTP_RESEND_SECONDS = 60;
+const SIGNUP_RESEND_SECONDS = 60;
+
+function parseRateLimitedSeconds(message) {
+  if (!message) return null;
+  const match = message.match(/(?:after|in)\s+(\d+)\s+seconds?/i);
+  if (!match) return null;
+  const seconds = Number(match[1]);
+  return Number.isFinite(seconds) ? seconds : null;
+}
+
+
 export default function AuthPage() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from || '/courses';
+  const from = location.state?.from || '/compass';
   const authIntent = useMemo(() => {
     const searchParams = new URLSearchParams(location.search || '');
     const hashParams = new URLSearchParams((location.hash || '').replace(/^#/, ''));
@@ -36,6 +49,10 @@ export default function AuthPage() {
   const [newPasswordConfirm, setNewPasswordConfirm] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [otpCooldown, setOtpCooldown] = useState(0); // seconds until user can resend OTP
+  const [signupEmailSent, setSignupEmailSent] = useState(false);
+  const [signupResendCooldown, setSignupResendCooldown] = useState(0);
+  const [resendingConfirmation, setResendingConfirmation] = useState(false);
 
   useEffect(() => {
     const holdForReset = authStack === 'resetConfirm' || isRecovery;
@@ -52,6 +69,10 @@ export default function AuthPage() {
     setOtp('');
     setStep('enterEmail');
     setAuthStack(mode === 'login' ? 'password' : 'password');
+    setOtpCooldown(0);
+    setSignupEmailSent(false);
+    setSignupResendCooldown(0);
+    setResendingConfirmation(false);
   }, [mode]);
 
   useEffect(() => {
@@ -62,7 +83,29 @@ export default function AuthPage() {
     setNewPassword('');
     setNewPasswordConfirm('');
     setSubmitting(false);
+    setOtpCooldown(0);
   }, [authStack]);
+
+  useEffect(() => {
+    if (signupResendCooldown <= 0) return;
+
+    const timerId = setInterval(() => {
+      setSignupResendCooldown((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+
+    return () => clearInterval(timerId);
+  }, [signupResendCooldown]);
+
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+
+    const timerId = setInterval(() => {
+      setOtpCooldown((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+
+    return () => clearInterval(timerId);
+  }, [otpCooldown]);
+
 
   useEffect(() => {
     if (isRecovery) {
@@ -77,9 +120,17 @@ export default function AuthPage() {
     const { error } = await signInWithEmailOtp(email);
     setSubmitting(false);
     if (error) {
-      setMessage(error.message);
+      const throttleSeconds = parseRateLimitedSeconds(error.message);
+      if (throttleSeconds) {
+        setOtpCooldown(throttleSeconds);
+        // Keep a generic message without seconds
+        setMessage('Too many attempts. Please wait before trying again.');
+      } else {
+        setMessage(error.message);
+      }
       return;
     }
+    setOtpCooldown(OTP_RESEND_SECONDS); // cooldown before resending
     setStep('enterOtp');
     setMessage('Verification code sent to your email.');
   }
@@ -94,6 +145,7 @@ export default function AuthPage() {
       return;
     }
     setMessage('Signed in successfully. Redirecting...');
+    setOtpRateLimitActive(false);
   }
 
   async function handleGoogle() {
@@ -119,21 +171,31 @@ export default function AuthPage() {
       setSubmitting(false);
       if (error) {
         setMessage(error.message);
+        setSignupEmailSent(false);
+        setSignupResendCooldown(0);
         return;
       }
       if (!data?.session) {
         setMessage('Sign up successful. Please check your email to confirm your account.');
+        setSignupEmailSent(true);
+        setSignupResendCooldown(SIGNUP_RESEND_SECONDS);
       } else {
         setMessage('Signed up successfully. Redirecting...');
+        setSignupEmailSent(false);
+        setSignupResendCooldown(0);
       }
     } else {
       const { error } = await signInWithPassword(email, password);
       setSubmitting(false);
       if (error) {
         setMessage(error.message);
+        setSignupEmailSent(false);
+        setSignupResendCooldown(0);
         return;
       }
       setMessage('Signed in successfully. Redirecting...');
+      setSignupEmailSent(false);
+      setSignupResendCooldown(0);
     }
   }
 
@@ -147,6 +209,20 @@ export default function AuthPage() {
       return;
     }
     setMessage('Password reset email sent. Check your inbox.');
+  }
+
+  async function handleResendConfirmation() {
+    if (!email || signupResendCooldown > 0) return;
+    setResendingConfirmation(true);
+    setMessage('');
+    const { error } = await resendConfirmationEmail(email);
+    setResendingConfirmation(false);
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+    setSignupResendCooldown(SIGNUP_RESEND_SECONDS);
+    setMessage('Confirmation email resent. Please check your inbox.');
   }
 
   async function handleUpdatePassword() {
@@ -269,9 +345,9 @@ export default function AuthPage() {
                     type="button"
                     className="auth-next"
                     onClick={handleSendOtp}
-                    disabled={submitting || !email}
+                    disabled={submitting || !email || otpCooldown > 0}
                   >
-                    Send code
+                    {otpCooldown > 0 ? `Send again in ${otpCooldown}s` : 'Send code'}
                   </button>
                 ) : (
                   <>
@@ -287,9 +363,9 @@ export default function AuthPage() {
                       type="button"
                       className="auth-secondary"
                       onClick={handleSendOtp}
-                      disabled={submitting || !email}
+                      disabled={submitting || !email || otpCooldown > 0}
                     >
-                      Resend code
+                      {otpCooldown > 0 ? `Resend in ${otpCooldown}s` : 'Resend code'}
                     </button>
                   </>
                 )}
@@ -416,6 +492,23 @@ export default function AuthPage() {
               >
                 Sign up
               </button>
+              {signupEmailSent && (
+                <div className="auth-resend-wrapper">
+                  <div className="auth-resend-counter">
+                    {signupResendCooldown > 0
+                      ? `You can resend the confirmation email in ${signupResendCooldown}s.`
+                      : 'Didn’t receive the confirmation email?'}
+                  </div>
+                  <button
+                    type="button"
+                    className="auth-secondary"
+                    onClick={handleResendConfirmation}
+                    disabled={resendingConfirmation || signupResendCooldown > 0 || !email}
+                  >
+                    {resendingConfirmation ? 'Sending…' : 'Resend confirmation email'}
+                  </button>
+                </div>
+              )}
             </>
           )}
 

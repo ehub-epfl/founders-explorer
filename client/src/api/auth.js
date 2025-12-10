@@ -35,6 +35,16 @@ export function signUpWithPassword(email, password) {
   return supabase.auth.signUp({ email, password });
 }
 
+export function resendConfirmationEmail(email) {
+  return supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: {
+      emailRedirectTo: `${window.location.origin}/auth/callback`,
+    },
+  });
+}
+
 export async function signOut() {
   try {
     await supabase.auth.signOut({ scope: 'global' });

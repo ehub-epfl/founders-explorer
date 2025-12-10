@@ -39,6 +39,20 @@ function canonicalizeProgramName(value) {
   return PROGRAM_NAME_CANONICALS.get(key) || trimmed;
 }
 
+function canonicalizeTeacherUrl(urlRaw) {
+  const trimmed = typeof urlRaw === 'string' ? urlRaw.trim() : '';
+  if (!trimmed) return '';
+  const withoutQuery = trimmed.split('?')[0].replace(/\/+$/, '');
+  try {
+    const parsed = new URL(withoutQuery, withoutQuery.startsWith('http') ? undefined : 'https://placeholder.invalid');
+    const origin = parsed.origin === 'https://placeholder.invalid' ? '' : parsed.origin;
+    const path = parsed.pathname.replace(/\/+$/, '');
+    return `${origin}${path}`;
+  } catch {
+    return withoutQuery;
+  }
+}
+
 export async function getCourses(options = {}) {
   const {
     page = 1,
@@ -268,7 +282,18 @@ export async function getStudyPlansByProgram() {
 }
 
 export async function getPeopleProfilesByCardUrls(cardUrls = []) {
-  const urls = Array.isArray(cardUrls) ? cardUrls.filter((u) => typeof u === 'string' && u.trim()) : [];
+  const urlSet = new Set();
+  if (Array.isArray(cardUrls)) {
+    cardUrls.forEach((u) => {
+      if (typeof u !== 'string') return;
+      const trimmed = u.trim();
+      if (!trimmed) return;
+      urlSet.add(trimmed);
+      const canonical = canonicalizeTeacherUrl(trimmed);
+      if (canonical) urlSet.add(canonical);
+    });
+  }
+  const urls = Array.from(urlSet);
   if (!urls.length) return [];
   const { supabaseUrl, supabaseAnonKey } = resolveSupabaseConfig();
   const supabase = ensureSupabaseClient(supabaseUrl, supabaseAnonKey);
