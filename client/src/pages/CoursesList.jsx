@@ -1388,7 +1388,37 @@ function ScoreSummary({
     venture: normalizeScore(course?.score_venture),
   foundations: normalizeScore(course?.score_foundations),
 };
-  const courseDescription = typeof course?.description === 'string' ? course.description.trim() : '';
+  const rawCourseDescription = typeof course?.description === 'string' ? course.description.trim() : '';
+  const courseNameForPrefix = typeof course?.course_name === 'string' ? course.course_name.trim() : '';
+  let courseDescription = rawCourseDescription;
+  if (courseNameForPrefix && courseDescription) {
+    const trimmedDesc = courseDescription.trim();
+    const lowerDesc = trimmedDesc.toLowerCase();
+    const lowerName = courseNameForPrefix.toLowerCase();
+
+    // If it already starts with the course name, keep as-is.
+    if (!lowerDesc.startsWith(lowerName)) {
+      // Replace leading "This/The ... course" with the course name:
+      // e.g. "This course explores..." -> "Social Innovation Lab explores..."
+      const replacedCoursePhrase = trimmedDesc.replace(
+        /^((this|the)\s+[^.]*?\bcourse)\b/i,
+        courseNameForPrefix
+      );
+
+      if (replacedCoursePhrase !== trimmedDesc) {
+        courseDescription = replacedCoursePhrase;
+      } else {
+        // Replace leading pronouns "It/This ..." with the course name.
+        const replacedPronoun = trimmedDesc.replace(
+          /^(it|this)\s+/i,
+          `${courseNameForPrefix} `
+        );
+        courseDescription = replacedPronoun;
+      }
+    } else {
+      courseDescription = trimmedDesc;
+    }
+  }
 
   const SCORE_FALLBACK = SCORE_STEP_VALUES[0] ?? 0;
 

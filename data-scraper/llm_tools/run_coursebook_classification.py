@@ -16,12 +16,17 @@ import time
 from pathlib import Path
 from typing import Dict, Iterable, Optional
 
+import hashlib
+import threading
+
 import ollama
 
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT.parent.joinpath("data")
 INPUT_CSV = DATA_DIR.joinpath("coursebook_courses.csv")
 OUTPUT_CSV = DATA_DIR.joinpath("coursebook_entre_scores.csv")
+CACHE_DIR = DATA_DIR.joinpath("cache")
+COURSEBOOK_CACHE = CACHE_DIR.joinpath("coursebook_entre.jsonl")
 
 MODEL = "gpt-oss:120b-cloud"
 SYSTEM_PROMPT = "You are a precise assistant. Return valid JSON and follow instructions strictly."
@@ -116,6 +121,71 @@ COURSE DESCRIPTION:
 <<<{course_description}>>>
 
 """
+
+
+_CACHE_LOCK = threading.Lock()
+
+
+def _norm_text(s: str) -> str:
+    return (s or "").strip()
+
+
+def _load_cache(path: Path) -> Dict[str, Dict[str, object]]:
+    if not path.exists():
+        return {}
+    cache: Dict[str, Dict[str, object]] = {}
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    obj = json.loads(line)
+                    k = obj.get("k")
+                    v = obj.get("v")
+                    if k and isinstance(v, dict):
+                        cache[k] = v
+                except Exception:
+                    continue
+    except Exception:
+        return {}
+    return cache
+
+
+def _append_cache(path: Path, key: str, val: Dict[str, object]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with _CACHE_LOCK:
+        with path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps({"k": key, "v": val}, ensure_ascii=False) + "\n")
+
+
+def _make_cache_key(
+    model: str,
+    system_prompt: str,
+    course_description: str,
+    course_title: str,
+    section: str,
+    keyword_matches: Iterable[str],
+) -> str:
+    """Hash the full prompt state so identical calls are reused.
+
+    This is sensitive to the course content, any metadata injected
+    into the prompt, the system prompt, and the model name.
+    """
+    # Build the exact user prompt that we pass into Ollama.
+    prompt = build_prompt(
+        course_description,
+        course_title,
+        section,
+        keyword_matches,
+    )
+    pieces = [
+        (model or "").strip(),
+        _norm_text(system_prompt),
+        _norm_text(prompt),
+    ]
+    return hashlib.sha256("\n".join(pieces).encode("utf-8")).hexdigest()
 
 
 def extract_title_keywords(title: str) -> Iterable[str]:
@@ -213,11 +283,27 @@ def format_evidence(evidence: Dict[str, Iterable[str]]) -> str:
     return json.dumps(evidence, ensure_ascii=False)
 
 
-def classify_course(course: Dict[str, str]) -> Dict[str, object]:
+def classify_course(
+    course: Dict[str, str],
+    cache: Optional[Dict[str, Dict[str, object]]] = None,
+    cache_path: Optional[Path] = None,
+) -> Dict[str, object]:
     description = course.get("description") or ""
     course_title = course.get("course_name") or ""
     section = course.get("section") or ""
     keyword_matches = list(extract_title_keywords(course_title))
+
+    # Reuse previous Ollama results when the content, prompt and model match.
+    cache_key = _make_cache_key(
+        MODEL,
+        SYSTEM_PROMPT,
+        description,
+        course_title,
+        section,
+        keyword_matches,
+    )
+    if cache is not None and cache_key in cache:
+        return dict(cache[cache_key])
 
     response_text = ask(
         MODEL,
@@ -256,6 +342,10 @@ def classify_course(course: Dict[str, str]) -> Dict[str, object]:
     if section == "MTE":
         entre_score = int(result.get("entre_score", 0) or 0)
         result["entre_score"] = min(100, entre_score + 5)
+
+    if cache is not None and cache_path is not None:
+        cache[cache_key] = result
+        _append_cache(cache_path, cache_key, result)
 
     return result
 
@@ -299,6 +389,8 @@ def main() -> None:
         OUTPUT_CSV.unlink()
 
     should_write_header = start_line == 1 or not OUTPUT_CSV.exists()
+    cache = _load_cache(COURSEBOOK_CACHE)
+
     with OUTPUT_CSV.open(output_mode, encoding="utf-8", newline="") as f_out:
         writer = csv.DictWriter(f_out, fieldnames=fieldnames)
         if should_write_header:
@@ -333,7 +425,7 @@ def main() -> None:
                 continue
 
             try:
-                result = classify_course(course)
+                result = classify_course(course, cache=cache, cache_path=COURSEBOOK_CACHE)
             except Exception as exc:  # pragma: no cover - defensive logging
                 print(f"[warn] Failed to classify {course_key}: {exc}", file=sys.stderr)
                 continue

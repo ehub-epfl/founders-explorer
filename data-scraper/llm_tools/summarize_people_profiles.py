@@ -22,13 +22,14 @@ import argparse
 import csv
 import sys
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional, Tuple
 
 import os
 import json
 import time
 import hashlib
 import threading
+import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 try:
@@ -40,6 +41,18 @@ except Exception:  # pragma: no cover
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 DEFAULT_INPUT = DATA_DIR / "people_profiles.csv"
 DEFAULT_OUTPUT = DATA_DIR / "people_profiles_with_summary.csv"
+
+# Keep the prompts as explicit constants so any change
+# automatically produces a different cache key.
+SUMMARY_SYSTEM_PROMPT = (
+    "You are a concise assistant that writes clear, neutral summaries."
+)
+SUMMARY_USER_PREFIX = (
+    "Summarize the following person introduction into a SINGLE short paragraph (2–3 sentences).\n"
+    "Focus on research areas, roles, labs, and notable themes.\n"
+    "Return plain text only (no bullets, no markdown).\n\n"
+    "INTRODUCTION:\n"
+)
 
 
 def _log(msg: str) -> None:
@@ -62,15 +75,8 @@ def summarize_text(text: str, model: str, keep_alive: str = "5m", stream: bool =
     if len(text) > max_chars:
         text = text[:max_chars]
 
-    system = (
-        "You are a concise assistant that writes clear, neutral summaries."
-    )
-    user = (
-        "Summarize the following person introduction into a SINGLE short paragraph (2–3 sentences).\n"
-        "Focus on research areas, roles, labs, and notable themes.\n"
-        "Return plain text only (no bullets, no markdown).\n\n"
-        f"INTRODUCTION:\n{text}"
-    )
+    system = SUMMARY_SYSTEM_PROMPT
+    user = SUMMARY_USER_PREFIX + text
 
     messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
 
@@ -128,8 +134,16 @@ _CACHE_LOCK = threading.Lock()
 def _norm_text(s: str) -> str:
     return (s or "").strip()
 
-def _hash_snippet(s: str) -> str:
-    return hashlib.sha256(_norm_text(s).encode("utf-8")).hexdigest()
+def _hash_call(model: str, text: str, name: str) -> str:
+    """Generate a cache key that is sensitive to content, prompt, model and teacher name."""
+    pieces = [
+        (model or "").strip(),
+        SUMMARY_SYSTEM_PROMPT.strip(),
+        SUMMARY_USER_PREFIX.strip(),
+        _norm_text(text),
+        _norm_text(name),
+    ]
+    return hashlib.sha256("\n".join(pieces).encode("utf-8")).hexdigest()
 
 def _load_cache(path: Path) -> Dict[str, str]:
     if not path.exists():
@@ -179,6 +193,7 @@ def add_summaries(
     tasks: List[Tuple[int, Dict[str, str], str, str]] = []  # (idx, row, cache_key, intro)
     for i, row in enumerate(rows[:total]):
         intro = _norm_text(row.get("introduction_snippet", ""))
+        name_for_prefix = _norm_text(row.get("name") or row.get("person_name") or "")
         existing = _norm_text(row.get("introduction_summary", ""))
         if existing and not overwrite:
             # keep as is (no work)
@@ -188,7 +203,7 @@ def add_summaries(
             row["introduction_summary"] = ""
             out.append(row)
             continue
-        key = _hash_snippet(intro)
+        key = _hash_call(model, intro, name_for_prefix)
         if use_cache and key in cache:
             row["introduction_summary"] = cache[key]
             out.append(row)
@@ -219,13 +234,33 @@ def add_summaries(
     # Run generation, possibly in parallel
     max_workers = max(1, int(workers or 1))
 
-    def _do_summary(intro_text: str) -> str:
-        return summarize_text(intro_text, model=model, stream=False)
+    def _do_summary(intro_text: str, display_name: str) -> str:
+        base = summarize_text(intro_text, model=model, stream=False)
+        base = _norm_text(base)
+        name = _norm_text(display_name)
+        if not base or not name:
+            return base
+
+        # Already starts with the name (e.g. "Davide Bavato is ...") -> keep as-is.
+        if base.lower().startswith(name.lower()):
+            return base
+
+        # Common pattern from the model: "He/She/They ..." → replace pronoun with the name.
+        m = re.match(r"^(they|he|she)\b(.*)", base, flags=re.IGNORECASE)
+        if m:
+            # Preserve the rest of the sentence exactly as the model wrote it.
+            replaced = f"{name}{m.group(2)}"
+            return _norm_text(replaced)
+
+        # Fallback: prepend the name as a short lead-in sentence.
+        # This avoids ungrammatical constructs like "Name is the purpose of..."
+        return f"{name}. {base}"
 
     completed = 0
     if max_workers == 1:
         for idx, row, key, intro in tasks:
-            summary = _do_summary(intro)
+            name_for_prefix = _norm_text(row.get("name") or row.get("person_name") or "")
+            summary = _do_summary(intro, name_for_prefix)
             row["introduction_summary"] = summary
             if use_cache:
                 _append_cache(cache_path, key, summary)
@@ -236,7 +271,14 @@ def add_summaries(
     else:
         lock = threading.Lock()
         with ThreadPoolExecutor(max_workers=max_workers) as ex:
-            future_map = {ex.submit(_do_summary, intro): (idx, row, key) for idx, row, key, intro in tasks}
+            future_map = {
+                ex.submit(
+                    _do_summary,
+                    intro,
+                    _norm_text(row.get("name") or row.get("person_name") or ""),
+                ): (idx, row, key)
+                for idx, row, key, intro in tasks
+            }
             for fut in as_completed(future_map):
                 idx, row, key = future_map[fut]
                 try:
