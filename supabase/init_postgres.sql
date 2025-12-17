@@ -234,6 +234,68 @@ create table if not exists course_ratings (
     ua                  text
 );
 
+-- Enable RLS for core tables (views like coursebook_course_summary are excluded)
+alter table if exists public.coursebook_courses      enable row level security;
+alter table if exists public.people_profiles        enable row level security;
+alter table if exists public.course_people_profiles enable row level security;
+alter table if exists public.coursebook_programs    enable row level security;
+alter table if exists public.coursebook_studyplans  enable row level security;
+alter table if exists public.compass_entries        enable row level security;
+alter table if exists public.course_ratings         enable row level security;
+
+-- Backfill-safe permissive policies so existing behavior is preserved
+do $$
+begin
+    if not exists (
+        select 1 from pg_policies
+        where schemaname = 'public' and tablename = 'coursebook_courses' and policyname = 'coursebook_courses_all'
+    ) then
+        execute 'create policy "coursebook_courses_all" on public.coursebook_courses for all using (true) with check (true);';
+    end if;
+
+    if not exists (
+        select 1 from pg_policies
+        where schemaname = 'public' and tablename = 'people_profiles' and policyname = 'people_profiles_all'
+    ) then
+        execute 'create policy "people_profiles_all" on public.people_profiles for all using (true) with check (true);';
+    end if;
+
+    if not exists (
+        select 1 from pg_policies
+        where schemaname = 'public' and tablename = 'course_people_profiles' and policyname = 'course_people_profiles_all'
+    ) then
+        execute 'create policy "course_people_profiles_all" on public.course_people_profiles for all using (true) with check (true);';
+    end if;
+
+    if not exists (
+        select 1 from pg_policies
+        where schemaname = 'public' and tablename = 'coursebook_programs' and policyname = 'coursebook_programs_all'
+    ) then
+        execute 'create policy "coursebook_programs_all" on public.coursebook_programs for all using (true) with check (true);';
+    end if;
+
+    if not exists (
+        select 1 from pg_policies
+        where schemaname = 'public' and tablename = 'coursebook_studyplans' and policyname = 'coursebook_studyplans_all'
+    ) then
+        execute 'create policy "coursebook_studyplans_all" on public.coursebook_studyplans for all using (true) with check (true);';
+    end if;
+
+    if not exists (
+        select 1 from pg_policies
+        where schemaname = 'public' and tablename = 'compass_entries' and policyname = 'compass_entries_all'
+    ) then
+        execute 'create policy "compass_entries_all" on public.compass_entries for all using (true) with check (true);';
+    end if;
+
+    if not exists (
+        select 1 from pg_policies
+        where schemaname = 'public' and tablename = 'course_ratings' and policyname = 'course_ratings_all'
+    ) then
+        execute 'create policy "course_ratings_all" on public.course_ratings for all using (true) with check (true);';
+    end if;
+end $$;
+
 -- Backfill-safe schema updates for course_ratings
 do $$
 begin
@@ -358,6 +420,10 @@ left join lateral (
     from coursebook_studyplans s
     where s.course_id = c.id
 ) as sp_data on true;
+
+
+-- Ensure the view runs with the querying user's privileges (avoid SECURITY DEFINER)
+alter view public.coursebook_course_summary set (security_invoker = true);
 
 
 drop trigger if exists set_coursebook_courses_updated_at on coursebook_courses;
