@@ -3144,6 +3144,17 @@ useEffect(() => {
     setPage(1);
   }, [appliedFilters, sortField, sortOrder]);
 
+  const [isNarrowLayout, setIsNarrowLayout] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const media = window.matchMedia('(max-width: 768px)');
+    const update = () => setIsNarrowLayout(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
   return (
     <div
       ref={pageTopRef}
@@ -3776,7 +3787,14 @@ useEffect(() => {
         })()}
 
         {viewMode === 'list' ? (
-          <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: 16,
+              alignItems: 'flex-start',
+              flexDirection: isNarrowLayout ? 'column' : 'row',
+            }}
+          >
             <ul
               style={{
                 listStyle: 'none',

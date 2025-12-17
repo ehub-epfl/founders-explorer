@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import GuidedSearch from './pages/GuidedSearch.jsx';
 import CoursesList from "./pages/CoursesList.jsx";
 import AuthPage from "./pages/Auth.jsx";
@@ -8,8 +9,19 @@ import DbFooter from "./components/DbFooter.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 
 function NavBar() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isGuest } = useAuth();
   const email = user?.email || '';
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const media = window.matchMedia('(max-width: 768px)');
+    const update = () => setIsMobile(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
 
   const navLinkStyle = {
     fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
@@ -25,9 +37,18 @@ function NavBar() {
     textDecoration: 'none',
   };
 
-  return (
-    <nav
-      style={{
+  const containerStyle = isMobile
+    ? {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '12px 12px 16px',
+        width: '100%',
+        boxSizing: 'border-box',
+        gap: '8px',
+        color: '#000000',
+      }
+    : {
         display: 'grid',
         gridTemplateColumns: 'auto 1fr auto',
         alignItems: 'center',
@@ -40,12 +61,14 @@ function NavBar() {
         color: '#000000',
         boxSizing: 'border-box',
         marginInline: 'auto',
-      }}
-    >
+      };
+
+  return (
+    <nav style={containerStyle}>
       <div
         style={{
-          width: '131px',
-          height: '74px',
+          width: isMobile ? '96px' : '131px',
+          height: isMobile ? '54px' : '74px',
           backgroundImage: 'url(/logo-epfl.png)',
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'contain',
@@ -60,12 +83,12 @@ function NavBar() {
       <h1
         style={{
           margin: 0,
-          width: '532px',
-          height: '87px',
+          width: isMobile ? '100%' : '532px',
+          minHeight: isMobile ? 'auto' : '87px',
           fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
           fontStyle: 'normal',
           fontWeight: 300,
-          fontSize: '48px',
+          fontSize: isMobile ? '28px' : '48px',
           lineHeight: '145%',
           display: 'flex',
           alignItems: 'center',
@@ -73,6 +96,7 @@ function NavBar() {
           color: '#000000',
           textAlign: 'center',
           justifySelf: 'center',
+          justifyContent: 'center',
         }}
       >
         Founders’ Explorer
@@ -81,12 +105,13 @@ function NavBar() {
       <div
         style={{
           display: 'flex',
-          flexDirection: 'row',
+          flexDirection: isMobile ? 'row' : 'row',
+          flexWrap: isMobile ? 'wrap' : 'nowrap',
           alignItems: 'center',
           padding: 0,
-          gap: '32px',
-          justifyContent: 'flex-end',
-          justifySelf: 'end',
+          gap: isMobile ? '16px' : '32px',
+          justifyContent: isMobile ? 'center' : 'flex-end',
+          justifySelf: isMobile ? 'center' : 'end',
         }}
       >
         <Link to="/compass" style={navLinkStyle}>
@@ -98,19 +123,25 @@ function NavBar() {
         <Link to="/courses" style={navLinkStyle}>
           Courses
         </Link>
-        <button
-          type="button"
-          onClick={() => signOut()}
-          style={{
-            ...navLinkStyle,
-            border: 'none',
-            background: 'transparent',
-            padding: 0,
-            cursor: 'pointer',
-          }}
-        >
-          Log out
-        </button>
+        {user && !isGuest ? (
+          <button
+            type="button"
+            onClick={() => signOut()}
+            style={{
+              ...navLinkStyle,
+              border: 'none',
+              background: 'transparent',
+              padding: 0,
+              cursor: 'pointer',
+            }}
+          >
+            Log out
+          </button>
+        ) : (
+          <Link to="/auth" style={navLinkStyle}>
+            Sign in
+          </Link>
+        )}
       </div>
     </nav>
   );
