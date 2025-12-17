@@ -1379,7 +1379,7 @@ function ScoreSummary({
   onValuesChange,
   onOpenGraph,
 }) {
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
   const userEmail = typeof user?.email === 'string' ? user.email.trim() : '';
   const base = {
     relevance: normalizeScore(course?.score_relevance),
@@ -1719,10 +1719,14 @@ function ScoreSummary({
         </button>
         <button
           type="button"
-          onClick={() => { setShowRatingModal(true); setSubmitError(''); }}
-          disabled={submitting}
-          aria-label="Open rating window"
-          title="Open rating window"
+          onClick={() => {
+            if (isGuest) return;
+            setShowRatingModal(true);
+            setSubmitError('');
+          }}
+          disabled={submitting || isGuest}
+          aria-label={isGuest ? 'Rating is unavailable in guest mode' : 'Open rating window'}
+          title={isGuest ? 'Sign in to rate courses' : 'Open rating window'}
           style={{
             boxSizing: 'border-box',
             minWidth: 112,
@@ -1742,11 +1746,11 @@ function ScoreSummary({
             letterSpacing: '-0.005em',
             color: '#000000',
             whiteSpace: 'nowrap',
-            cursor: submitting ? 'not-allowed' : 'pointer',
-            opacity: submitting ? 0.7 : 1,
+            cursor: submitting || isGuest ? 'not-allowed' : 'pointer',
+            opacity: submitting || isGuest ? 0.7 : 1,
           }}
         >
-          {submitted ? 'Rated' : 'Rate'}
+          {isGuest ? 'Sign in to rate' : (submitted ? 'Rated' : 'Rate')}
         </button>
       </div>
 

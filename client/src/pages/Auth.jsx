@@ -26,7 +26,7 @@ function parseRateLimitedSeconds(message) {
 
 
 export default function AuthPage() {
-  const { session, loading } = useAuth();
+  const { session, loading, enterGuestMode } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from || '/compass';
@@ -513,6 +513,19 @@ export default function AuthPage() {
           )}
 
           {message && <div className="auth-message">{message}</div>}
+
+          <button
+            type="button"
+            className="auth-secondary"
+            style={{ marginTop: '24px', width: '100%' }}
+            onClick={() => {
+              enterGuestMode();
+              navigate('/courses', { replace: true });
+            }}
+            disabled={submitting}
+          >
+            Enter without sign in
+          </button>
         </div>
       </div>
     </div>
