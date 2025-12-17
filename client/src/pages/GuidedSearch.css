@@ -15,3 +15,9 @@
   border-color: #000;
 }
 
+@media (max-width: 768px) {
+  .guided-search-button {
+    width: 100%;
+    max-width: 320px;
+  }
+}

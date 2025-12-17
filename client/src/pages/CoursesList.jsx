@@ -3804,7 +3804,7 @@ useEffect(() => {
               }}
             >
               {sortedCourses.map((c, idx) => {
-                if (idx % 2 !== 0) return null; // 奇数序号（1-based）在左列
+                if (!isNarrowLayout && idx % 2 !== 0) return null;
                 const courseKey = courseKeyOf(c, idx);
                 const scheduleLines = splitScheduleLines(c.schedule);
                 const courseUrl = c.course_url || c.url || '';
@@ -3941,49 +3941,50 @@ useEffect(() => {
                 );
               })}
             </ul>
-            <ul
-              style={{
-                listStyle: 'none',
-                padding: 0,
-                margin: 0,
-                flex: 1,
-              }}
-            >
-              {sortedCourses.map((c, idx) => {
-                if (idx % 2 !== 1) return null; // 偶数序号（1-based）在右列
+            {!isNarrowLayout && (
+              <ul
+                style={{
+                  listStyle: 'none',
+                  padding: 0,
+                  margin: 0,
+                  flex: 1,
+                }}
+              >
+                {sortedCourses.map((c, idx) => {
+                  if (idx % 2 !== 1) return null; // 偶数序号（1-based）在右列
                 const courseKey = courseKeyOf(c, idx);
                 const scheduleLines = splitScheduleLines(c.schedule);
                 const courseUrl = c.course_url || c.url || '';
                 const scheduleEvents = buildScheduleEvents(scheduleLines);
                 const hasSchedule = scheduleEvents.length > 0;
-                return (
-                  <li
-                    key={courseKey}
-                    style={{
-                      marginBottom: 16,
-                    }}
-                  >
-                    <article
-                      ref={(node) => setCourseRef(courseKey, node)}
+                  return (
+                    <li
+                      key={courseKey}
                       style={{
-                        border: 'none',
-                        borderRadius: 15,
-                        padding: '16px 20px',
-                        boxShadow: 'var(--shadow-elevation)',
-                        background: '#F6F6F6',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 12,
+                        marginBottom: 16,
                       }}
                     >
-                      <div
+                      <article
+                        ref={(node) => setCourseRef(courseKey, node)}
                         style={{
+                          border: 'none',
+                          borderRadius: 15,
+                          padding: '16px 20px',
+                          boxShadow: 'var(--shadow-elevation)',
+                          background: '#F6F6F6',
                           display: 'flex',
                           flexDirection: 'column',
-                          gap: 8,
-                          minWidth: 0,
+                          gap: 12,
                         }}
                       >
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 8,
+                            minWidth: 0,
+                          }}
+                        >
                         <h3
                           style={{
                             margin: 0,
@@ -4072,21 +4073,22 @@ useEffect(() => {
                             </aside>
                           )}
                         </div>
-                        <ScoreSummary
-                          course={c}
-                          layout="list"
-                          submissionState={submissionStates[courseKey]}
-                          onSubmissionStateChange={(state) => updateSubmissionState(courseKey, state)}
-                          savedValues={ratingValues[courseKey]}
-                          onValuesChange={(vals) => updateRatingValues(courseKey, vals)}
-                          onOpenGraph={() => openRelationGraph(c)}
-                        />
-                      </div>
-                    </article>
-                  </li>
-                );
-              })}
-            </ul>
+                          <ScoreSummary
+                            course={c}
+                            layout="list"
+                            submissionState={submissionStates[courseKey]}
+                            onSubmissionStateChange={(state) => updateSubmissionState(courseKey, state)}
+                            savedValues={ratingValues[courseKey]}
+                            onValuesChange={(vals) => updateRatingValues(courseKey, vals)}
+                            onOpenGraph={() => openRelationGraph(c)}
+                          />
+                        </div>
+                      </article>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         ) : (
           (() => {
