@@ -15,6 +15,7 @@ import json
 import os
 import re
 import sys
+import datetime
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
@@ -513,6 +514,55 @@ def read_people_profiles_rows(path: Path) -> List[dict]:
     return profiles
 
 
+def compute_csv_last_updated(
+    paths: Sequence[Path],
+) -> Optional[Tuple[float, str]]:
+    """Return (latest_mtime, source_name) across the given CSV paths."""
+    latest_mtime: float = 0.0
+    latest_name: Optional[str] = None
+    for path in paths:
+        try:
+            stat = path.stat()
+        except FileNotFoundError:
+            continue
+        if stat.st_mtime > latest_mtime:
+            latest_mtime = stat.st_mtime
+            latest_name = path.name
+    if latest_mtime <= 0 or latest_name is None:
+        return None
+    return latest_mtime, latest_name
+
+
+def upsert_db_metadata(
+    client: SupabaseClient,
+    *,
+    label: str,
+    courses_count: int,
+    teachers_count: int,
+    studyplans_count: int,
+    csv_last_updated_mtime: Optional[float],
+    csv_last_updated_source: Optional[str],
+) -> None:
+    """Upsert a single db_metadata row summarizing the current dataset."""
+    payload: dict = {
+        "label": label,
+        "courses_count": int(courses_count),
+        "teachers_count": int(teachers_count),
+        "studyplans_count": int(studyplans_count),
+    }
+    if csv_last_updated_mtime is not None and csv_last_updated_source:
+        payload["csv_last_updated_at"] = (
+            datetime.datetime.fromtimestamp(csv_last_updated_mtime).astimezone().isoformat()
+        )
+        payload["csv_last_updated_source"] = csv_last_updated_source
+
+    client.upsert(
+        "db_metadata",
+        rows=[payload],
+        on_conflict="label",
+    )
+
+
 # ---- Utilities ---------------------------------------------------------
 def chunked(sequence: Sequence, size: int) -> Iterable[Sequence]:
     for index in range(0, len(sequence), size):
@@ -845,6 +895,16 @@ def main() -> int:
     studyplans = read_studyplan_rows(studyplans_csv)
     people_profiles = read_people_profiles_rows(people_csv)
 
+    csv_last_updated = compute_csv_last_updated(
+        [
+            courses_csv,
+            programs_csv,
+            studyplans_csv,
+            entre_scores_csv,
+            people_csv,
+        ]
+    )
+
     print(
         f"Loaded {len(courses)} courses, {len(teachers)} teacher mentions, "
         f"{len(programs)} program rows, {len(studyplans)} study plan rows, "
@@ -887,6 +947,20 @@ def main() -> int:
 
     upsert_studyplans(client, studyplans, course_id_map)
     print("Study plans synced.")
+
+    # Record high-level metadata so the UI can display it without reading CSVs.
+    csv_mtime = csv_last_updated[0] if csv_last_updated else None
+    csv_source = csv_last_updated[1] if csv_last_updated else None
+    upsert_db_metadata(
+        client,
+        label="coursebook",
+        courses_count=len(courses),
+        teachers_count=len(teachers),
+        studyplans_count=len(studyplans),
+        csv_last_updated_mtime=csv_mtime,
+        csv_last_updated_source=csv_source,
+    )
+    print("Database metadata (db_metadata) updated.")
 
     upsert_compass_entries_for_top_courses(client, courses, top_n=30)
     print("Compass entries (top 30 courses) synced.")

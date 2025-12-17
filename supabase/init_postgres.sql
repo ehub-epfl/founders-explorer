@@ -345,6 +345,29 @@ create index if not exists course_ratings_course_code_idx
     on course_ratings (course_code);
 
 
+-- Lightweight table to expose database metadata (for UI)
+create table if not exists db_metadata (
+    id                       bigserial primary key,
+    label                    text        not null unique,
+    updated_at               timestamptz not null default now(),
+    courses_count            bigint      not null default 0,
+    teachers_count           bigint      not null default 0,
+    studyplans_count         bigint      not null default 0,
+    csv_last_updated_at      timestamptz,
+    csv_last_updated_source  text
+);
+
+alter table if exists db_metadata enable row level security;
+
+do $$
+begin
+    if not exists (
+        select 1 from pg_policies where schemaname = 'public' and tablename = 'db_metadata' and policyname = 'db_metadata_all'
+    ) then
+        execute 'create policy "db_metadata_all" on public.db_metadata for all using (true) with check (true);';
+    end if;
+end $$;
+
 create or replace view coursebook_course_summary as
 select
     c.id,

@@ -4,6 +4,7 @@ import CoursesList from "./pages/CoursesList.jsx";
 import AuthPage from "./pages/Auth.jsx";
 import Compass from "./pages/Compass.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import DbFooter from "./components/DbFooter.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 
 function NavBar() {
@@ -127,6 +128,7 @@ function App() {
             <ProtectedRoute>
               <NavBar />
               <CoursesList />
+              <DbFooter />
             </ProtectedRoute>
           )}
         />
@@ -136,6 +138,7 @@ function App() {
             <ProtectedRoute>
               <NavBar />
               <GuidedSearch />
+              <DbFooter />
             </ProtectedRoute>
           )}
         />
@@ -145,6 +148,7 @@ function App() {
             <ProtectedRoute>
               <NavBar />
               <Compass />
+              <DbFooter />
             </ProtectedRoute>
           )}
         />
@@ -154,6 +158,7 @@ function App() {
             <ProtectedRoute>
               <NavBar />
               <GuidedSearch />
+              <DbFooter />
             </ProtectedRoute>
           )}
         />

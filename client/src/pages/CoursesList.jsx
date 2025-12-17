@@ -2677,6 +2677,7 @@ function CoursesList() {
   const resultsTickerRef = useRef(null);
   const filterBarRef = useRef(null);
   const [filtersOverlayTop, setFiltersOverlayTop] = useState(0);
+  const pageTopRef = useRef(null);
   const focusCourseKey = useMemo(() => {
     const params = new URLSearchParams(location.search);
     return normalizeFocusKey(params.get('focus') || '');
@@ -2741,6 +2742,15 @@ function CoursesList() {
       }
     };
   }, [loading, totalResults]);
+
+  useEffect(() => {
+    if (!pageTopRef.current) return;
+    try {
+      pageTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [page]);
 
   useEffect(() => {
     if (!focusCourseKey) return undefined;
@@ -3131,7 +3141,10 @@ useEffect(() => {
   }, [appliedFilters, sortField, sortOrder]);
 
   return (
-    <div style={{ display: "flex", gap: "1rem", position: 'relative' }}>
+    <div
+      ref={pageTopRef}
+      style={{ display: "flex", gap: "1rem", position: 'relative' }}
+    >
       {/* Left Filter Bar (overlay) */}
       {showFilters && (
         <div
@@ -4171,22 +4184,67 @@ useEffect(() => {
           })()
         )}
 
-        <div style={{ marginTop: "1rem" }}>
+        <div
+          style={{
+            marginTop: '1.5rem',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '16px',
+          }}
+        >
           <button
+            type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            style={{ marginRight: "1rem" }}
+            style={{
+              padding: '8px 20px',
+              borderRadius: 999,
+              border: '1px solid #000000',
+              backgroundColor: page === 1 ? '#E5E5E5' : '#000000',
+              color: page === 1 ? '#777777' : '#FFFFFF',
+              cursor: page === 1 ? 'default' : 'pointer',
+              fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontStyle: 'normal',
+              fontWeight: 400,
+              fontSize: 14,
+              lineHeight: '145%',
+              minWidth: 96,
+            }}
           >
             Previous
           </button>
-          <span>Page {page}</span>
+          <span
+            style={{
+              fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontSize: 13,
+              color: THEME_VARS.textMuted,
+            }}
+          >
+            Page {page}
+          </span>
           {(() => {
             const totalPages = Math.max(1, Math.ceil(totalResults / pageSize));
+            const isLast = page >= totalPages;
             return (
               <button
+                type="button"
                 onClick={() => setPage((p) => p + 1)}
-                disabled={page >= totalPages}
-                style={{ marginLeft: "1rem" }}
+                disabled={isLast}
+                style={{
+                  padding: '8px 20px',
+                  borderRadius: 999,
+                  border: '1px solid #000000',
+                  backgroundColor: isLast ? '#E5E5E5' : '#000000',
+                  color: isLast ? '#777777' : '#FFFFFF',
+                  cursor: isLast ? 'default' : 'pointer',
+                  fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  fontSize: 14,
+                  lineHeight: '145%',
+                  minWidth: 96,
+                }}
               >
                 Next
               </button>
