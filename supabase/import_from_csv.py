@@ -32,6 +32,9 @@ DEFAULT_PROGRAMS_CSV = (
 DEFAULT_STUDYPLANS_CSV = (
     RepositoryPath / "data-scraper" / "data" / "coursebook_studyplans.csv"
 )
+DEFAULT_STUDYPLANS_TREE_JSON = (
+    RepositoryPath / "data-scraper" / "data" / "studyplans_tree.json"
+)
 DEFAULT_ENTRE_SCORES_CSV = (
     RepositoryPath / "data-scraper" / "data" / "coursebook_entre_scores.csv"
 )
@@ -164,6 +167,40 @@ class SupabaseClient:
         params = {"select": select, **filters}
         response = self.session.get(url, params=params, timeout=30)
         return self._handle(response)
+
+    def count(self, table: str, filters: Optional[Dict[str, str]] = None) -> int:
+        """Return the exact row count for a table (optionally filtered).
+
+        Uses PostgREST's `Prefer: count=exact` mechanism and parses the
+        `Content-Range` header. Falls back to counting the JSON rows if the
+        header is missing.
+        """
+        url = f"{self.base_url}/rest/v1/{table}"
+        params: Dict[str, str] = {"select": "id"}
+        if filters:
+            params.update(filters)
+        headers = {"Prefer": "count=exact"}
+        response = self.session.get(url, params=params, headers=headers, timeout=30)
+        if not (200 <= response.status_code < 300):
+            raise SupabaseError(
+                f"GET {response.url} failed with "
+                f"status {response.status_code}: {response.text}"
+            )
+
+        content_range = response.headers.get("Content-Range") or ""
+        if "/" in content_range:
+            try:
+                return int(content_range.split("/")[-1])
+            except (ValueError, TypeError):
+                pass
+
+        try:
+            body = response.json()
+        except ValueError:
+            return 0
+        if isinstance(body, list):
+            return len(body)
+        return 0
 
 
 # ---- CSV parsing -------------------------------------------------------
@@ -531,6 +568,30 @@ def compute_csv_last_updated(
     if latest_mtime <= 0 or latest_name is None:
         return None
     return latest_mtime, latest_name
+
+
+def read_studyplans_tree_count(path: Path) -> Optional[int]:
+    """Return the number of study plan leaf entries from studyplans_tree.json.
+
+    The tree is stored as {study_program: [study_plan_label, ...]}, so the
+    total number of study plans is the sum of the lengths of all value lists.
+    Falls back to None if the file is missing or malformed.
+    """
+    try:
+        raw = path.read_text(encoding="utf-8")
+        data = json.loads(raw)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return None
+
+    if isinstance(data, dict):
+        total = 0
+        for value in data.values():
+            if isinstance(value, list):
+                total += len(value)
+        return total
+    if isinstance(data, list):
+        return len(data)
+    return None
 
 
 def upsert_db_metadata(
@@ -911,6 +972,15 @@ def main() -> int:
         f"and {len(people_profiles)} people profiles."
     )
 
+    # Prefer the number of study plans derived from the studyplans_tree.json
+    # (built from the study plan URL list), so the UI count matches the number
+    # of distinct study plan URLs rather than the number of course/studyplan
+    # associations in the CSV.
+    tree_studyplans_count = read_studyplans_tree_count(DEFAULT_STUDYPLANS_TREE_JSON)
+    studyplans_count_for_metadata = (
+        tree_studyplans_count if tree_studyplans_count is not None else len(studyplans)
+    )
+
     client = SupabaseClient(supabase_url, service_role_key)
     upserted: List[dict] = []
     for chunk in chunked(courses, 500):
@@ -949,14 +1019,26 @@ def main() -> int:
     print("Study plans synced.")
 
     # Record high-level metadata so the UI can display it without reading CSVs.
+    # For teachers, prefer the number of rows in people_profiles so the count
+    # reflects distinct teachers rather than per-course mentions.
     csv_mtime = csv_last_updated[0] if csv_last_updated else None
     csv_source = csv_last_updated[1] if csv_last_updated else None
+    try:
+        teachers_db_count = client.count("people_profiles")
+    except SupabaseError as exc:
+        print(
+            f"warning: failed to count people_profiles via REST; "
+            f"falling back to teacher mentions: {exc}",
+            file=sys.stderr,
+        )
+        teachers_db_count = len(teachers)
+
     upsert_db_metadata(
         client,
         label="coursebook",
         courses_count=len(courses),
-        teachers_count=len(teachers),
-        studyplans_count=len(studyplans),
+        teachers_count=teachers_db_count,
+        studyplans_count=studyplans_count_for_metadata,
         csv_last_updated_mtime=csv_mtime,
         csv_last_updated_source=csv_source,
     )
