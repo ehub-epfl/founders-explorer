@@ -79,7 +79,6 @@ function DbFooter() {
   if (countsParts.length > 0) {
     pieces.push(`(${countsParts.join(', ')})`);
   }
-  pieces.push('developed by Jenny Yi-Chen Pai');
 
   const line = pieces.join(' ');
 
